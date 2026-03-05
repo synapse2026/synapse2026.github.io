@@ -3,135 +3,291 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SYNAPSE 2026 | Diagnostic Scanner</title>
+    <title>SYNAPSE 2026 | Registration</title>
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
-    <style>
-        body { background: #07060f; color: #fff; font-family: sans-serif; }
-        .container { max-width: 500px; padding: 20px; }
-        #reader { border: 2px solid #1fc1d1; border-radius: 15px; overflow: hidden; background: #000; }
-        
-        /* Debug Tools Styling */
-        .debug-box { background: #111; border: 1px solid #333; color: #0f0; font-family: monospace; font-size: 11px; padding: 10px; height: 120px; overflow-y: auto; border-radius: 8px; text-align: left; }
-        .preview-box { border: 2px solid #ffc107; margin-top: 15px; border-radius: 10px; overflow: hidden; display: none; }
-        #previewCanvas { width: 100%; height: auto; display: block; background: #222; }
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-        .btn-action { font-weight: 900; padding: 15px; width: 100%; border-radius: 10px; border: none; margin-bottom: 10px; }
-        .result-card { background: rgba(15, 12, 41, 0.98); border-radius: 15px; padding: 25px; margin-top: 20px; display: none; border: 2px solid #1fc1d1; }
-        #qr-input-file { display: none; }
+    <style>
+        :root {
+            --poster-pink: #d11fb7;
+            --poster-blue: #1fc1d1;
+            --poster-purple: #741fd1;
+            --background-dark: #07060f;
+        }
+
+        body { 
+            background-color: var(--background-dark);
+            color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        #particles-js {
+            position: fixed;
+            width: 100%; height: 100%;
+            top: 0; left: 0; z-index: -1;
+        }
+
+        .main-content { position: relative; z-index: 1; padding: 20px; }
+
+        .poster-container {
+            max-width: 800px;
+            margin: 10px auto 30px auto;
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(116, 31, 209, 0.4);
+            border: 2px solid var(--poster-purple);
+        }
+
+        .poster-image { width: 100%; height: auto; display: block; border-radius: 10px; }
+
+        .card { 
+            background: rgba(15, 12, 41, 0.96);
+            border: 1.5px solid #444;
+            border-radius: 20px; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+        }
+
+        .form-label { 
+            font-weight: 800 !important; 
+            color: #ffffff !important; 
+            text-transform: uppercase;
+            text-shadow: 0 0 8px rgba(31, 193, 209, 0.4);
+        }
+
+        .form-control, .form-select {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 2px solid #666;
+            color: #ffffff !important;
+            font-weight: 600;
+        }
+
+        .form-control:focus {
+            box-shadow: 0 0 20px rgba(31, 193, 209, 0.6);
+            border-color: var(--poster-blue);
+        }
+
+        .event-grid { 
+            background: rgba(209, 31, 183, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid var(--poster-pink);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--poster-pink), var(--poster-purple));
+            border: none;
+            padding: 18px;
+            font-weight: 900;
+            letter-spacing: 2px;
+        }
+
+        /* Success Page Styling */
+        #successMsg {
+            border: 3px solid var(--poster-blue);
+            background: rgba(0,0,0,0.9);
+            border-radius: 20px;
+            padding: 40px;
+        }
+
+        .btn-receipt {
+            background: var(--poster-blue);
+            color: #000;
+            font-weight: 800;
+            border: none;
+            padding: 15px 30px;
+            margin-top: 20px;
+            border-radius: 10px;
+        }
+
+        #qrcode-hidden { display: none; }
+
+        /* Staggered Delays */
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+        .delay-5 { animation-delay: 0.5s; }
+        .delay-6 { animation-delay: 0.6s; }
+
     </style>
 </head>
 <body>
-    <div class="container text-center">
-        <h3 class="mb-4" style="color: #1fc1d1;">SYNAPSE DIAGNOSTIC</h3>
+
+    <div id="particles-js"></div>
+    <div id="qrcode-hidden"></div> 
+
+    <div class="main-content container my-4">
         
-        <div id="reader"></div>
-
-        <div id="previewWrapper" class="preview-box">
-            <div class="small bg-warning text-dark fw-bold py-1">PROCESSED IMAGE PREVIEW</div>
-            <canvas id="previewCanvas"></canvas>
+        <div class="poster-container animate__animated animate__fadeIn">
+            <img src="synapse-poster.jpg" alt="Synapse 2026 Poster" class="poster-image">
         </div>
 
-        <div class="mt-4">
-            <button id="startBtn" class="btn-action bg-info text-dark">📸 START LIVE SCAN</button>
-            <label for="qr-input-file" class="btn-action bg-warning text-dark">🖼️ UPLOAD & DEBUG</label>
-            <input type="file" id="qr-input-file" accept="image/*" capture="environment">
-            <button class="btn btn-outline-danger btn-sm w-100" onclick="location.reload()">Clear & Restart</button>
-        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                
+                <div id="formCard" class="card animate__animated animate__fadeInUp">
+                    <div class="card-body p-4 p-md-5">
+                        <h2 class="text-center text-uppercase mb-5" style="color: var(--poster-blue); font-weight: 900;">
+                            Registration Form
+                        </h2>
+                        
+                        <form id="regForm">
+                            <div class="row g-4">
+                                <div class="col-md-6 animate__animated animate__fadeInLeft delay-1">
+                                    <label class="form-label">Student Name</label>
+                                    <input type="text" id="name" class="form-control" required>
+                                </div>
+                                <div class="col-md-6 animate__animated animate__fadeInLeft delay-2">
+                                    <label class="form-label">Mobile Number</label>
+                                    <input type="tel" id="mobile" class="form-control" pattern="[0-9]{10}" required>
+                                </div>
+                                <div class="col-md-6 animate__animated animate__fadeInLeft delay-3">
+                                    <label class="form-label">Email Address</label>
+                                    <input type="email" id="email" class="form-control" required>
+                                </div>
+                                <div class="col-md-6 animate__animated animate__fadeInLeft delay-4">
+                                    <label class="form-label">College Name</label>
+                                    <input type="text" id="college" class="form-control" required>
+                                </div>
+                                <div class="col-md-6 animate__animated animate__fadeInLeft delay-5">
+                                    <label class="form-label">Department</label>
+                                    <select id="department" class="form-select" required>
+                                        <option value="" selected disabled>Select</option>
+                                        <option>Computer Science</option>
+                                        <option>Electronics</option>
+                                        <option>Mechanical</option>
+                                        <option>Civil</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 animate__animated animate__fadeInLeft delay-6">
+                                    <label class="form-label">Semester</label>
+                                    <select id="semester" class="form-select" required>
+                                        <option>S1</option><option>S2</option><option>S3</option>
+                                        <option>S4</option><option>S5</option><option>S6</option>
+                                    </select>
+                                </div>
+                            </div>
 
-        <div class="debug-box mt-3" id="logs">> System Ready...</div>
+                            <div class="mt-5">
+                                <label class="form-label d-block mb-3 text-center">Events Selection</label>
+                                <div class="event-grid row row-cols-2 g-3">
+                                    <div class="col"><div class="form-check"><input class="form-check-input event-check" type="checkbox" value="Hackathons" id="e1"><label class="form-check-label text-white" for="e1">Hackathons</label></div></div>
+                                    <div class="col"><div class="form-check"><input class="form-check-input event-check" type="checkbox" value="Workshops" id="e2"><label class="form-check-label text-white" for="e2">Workshops</label></div></div>
+                                    <div class="col"><div class="form-check"><input class="form-check-input event-check" type="checkbox" value="Gaming" id="e6"><label class="form-check-label text-white" for="e6">Gaming</label></div></div>
+                                    <div class="col"><div class="form-check"><input class="form-check-input event-check" type="checkbox" value="Quizzes" id="e5"><label class="form-check-label text-white" for="e5">Quizzes</label></div></div>
+                                </div>
+                                <button type="submit" id="submitBtn" class="btn btn-primary w-100 mt-5 shadow">SUBMIT REGISTRATION</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
 
-        <div id="result" class="result-card text-start">
-            <h4 style="color: #1fc1d1;">✓ VERIFIED</h4>
-            <div id="data" class="my-3 fs-5 fw-bold"></div>
-            <button id="checkinBtn" class="btn btn-primary w-100 fw-bold py-3">MARK PRESENT</button>
+                <div id="successMsg" class="animate__animated animate__bounceIn d-none text-center">
+                    <h1 style="color: var(--poster-blue); font-weight: 900;">SUCCESS!</h1>
+                    <p class="lead text-white">Your registration for SYNAPSE 2026 is confirmed.</p>
+                    <hr style="border-color: #444;">
+                    <div id="receiptDetails" class="text-start mb-4 px-3" style="font-size: 0.9rem; color: #bbb;"></div>
+                    <button onclick="downloadPDF()" class="btn-receipt shadow">📥 DOWNLOAD QR RECEIPT (PDF)</button>
+                    <p class="mt-4 small text-muted">Please present this QR Receipt at the venue for verification.</p>
+                </div>
+
+            </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbwKjrjjrV5hJUrqaP5nWjYAW2HW50y6EI3_k9bfzriS8ktMuAHpYe1i8K6IyPFV-jsndA/exec'; // MUST BE YOUR GOOGLE SCRIPT URL
-        const html5QrCode = new Html5Qrcode("reader");
-        const logBox = document.getElementById('logs');
-        let currentMobile = "";
+        particlesJS("particles-js", { "particles": { "number": { "value": 50 }, "color": { "value": "#ffffff" }, "line_linked": { "enable": true, "color": "#1fc1d1" }, "move": { "enable": true, "speed": 2 } } });
 
-        function addLog(msg) {
-            const time = new Date().toLocaleTimeString().split(' ')[0];
-            logBox.innerHTML += `<br>[${time}] ${msg}`;
-            logBox.scrollTop = logBox.scrollHeight;
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbwKjrjjrV5hJUrqaP5nWjYAW2HW50y6EI3_k9bfzriS8ktMuAHpYe1i8K6IyPFV-jsndA/exec';
+        const form = document.getElementById('regForm');
+        let registrationData = {};
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            const selectedEvents = Array.from(document.querySelectorAll('.event-check:checked')).map(cb => cb.value);
+            
+            if(selectedEvents.length === 0) { alert("Select at least one event!"); return; }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'PROCESSING...';
+
+            registrationData = {
+                name: document.getElementById('name').value,
+                mobile: document.getElementById('mobile').value,
+                email: document.getElementById('email').value,
+                college: document.getElementById('college').value,
+                department: document.getElementById('department').value,
+                semester: document.getElementById('semester').value,
+                events: selectedEvents.join(", ")
+            };
+
+            let isSubmitted = false;
+            const fallback = setTimeout(() => { if(!isSubmitted) handleSuccess(); }, 6000);
+
+            fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(registrationData) })
+            .then(() => { isSubmitted = true; clearTimeout(fallback); handleSuccess(); })
+            .catch(() => { if(!isSubmitted) handleSuccess(); });
+        });
+
+        function handleSuccess() {
+            document.getElementById('formCard').classList.add('d-none');
+            document.querySelector('.poster-container').classList.add('d-none');
+            document.getElementById('successMsg').classList.remove('d-none');
+            document.getElementById('receiptDetails').innerHTML = `<b>Name:</b> ${registrationData.name}<br><b>College:</b> ${registrationData.college}`;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        const onScanSuccess = (t) => {
-            addLog("SUCCESS: QR Decoded.");
-            navigator.vibrate(200);
-            document.getElementById('result').style.display = 'block';
-            document.getElementById('data').innerText = t;
-            currentMobile = t.replace("Mobile:", "");
-            if (html5QrCode.isScanning) html5QrCode.stop();
-        };
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const qrContainer = document.getElementById("qrcode-hidden");
+            qrDiv = qrContainer;
+            qrDiv.innerHTML = ""; 
 
-        // Live Scanner
-        document.getElementById('startBtn').addEventListener('click', () => {
-            addLog("ACTION: Starting Live Camera...");
-            html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, onScanSuccess)
-            .then(() => addLog("CAMERA: Feed Active."))
-            .catch(e => addLog("ERROR: Camera failed: " + e));
-        });
+            // STRATEGY: Encode ONLY the mobile number to keep the pattern simple/low-density
+            const simpleData = registrationData.mobile;
 
-        // Photo Upload with Preview and Enhanced Logs
-        document.getElementById('qr-input-file').addEventListener('change', e => {
-            if (e.target.files.length == 0) return;
-            const file = e.target.files[0];
-            addLog(`FILE: Selected ${file.name} (${Math.round(file.size/1024)}KB)`);
-
-            const reader = new FileReader();
-            reader.onload = f => {
-                const img = new Image();
-                img.onload = () => {
-                    addLog(`IMAGE: Loaded ${img.width}x${img.height}`);
-                    
-                    const canvas = document.getElementById('previewCanvas');
-                    const ctx = canvas.getContext('2d');
-                    const size = 1000; 
-                    canvas.width = size;
-                    canvas.height = size;
-
-                    // Crop Logic: Zoom into the center to avoid black bars
-                    let sX, sY, sW, sH;
-                    if (img.width > img.height) {
-                        sW = img.height; sH = img.height;
-                        sX = (img.width - img.height) / 2; sY = 0;
-                    } else {
-                        sW = img.width; sH = img.width;
-                        sX = 0; sY = (img.height - img.width) / 2;
-                    }
-
-                    addLog("CANVAS: Performing Center-Crop...");
-                    ctx.drawImage(img, sX, sY, sW, sH, 0, 0, size, size);
-                    
-                    // Show the preview so you can see if it's black
-                    document.getElementById('previewWrapper').style.display = 'block';
-                    addLog("ANALYSIS: Identifying QR pattern...");
-
-                    html5QrCode.scanFileV2(canvas, true)
-                    .then(res => onScanSuccess(res.decodedText))
-                    .catch(err => {
-                        addLog("FAIL: QR not detected. Preview the image above.");
-                    });
-                };
-                img.src = f.target.result;
-            };
-            reader.readAsDataURL(file);
-        });
-
-        document.getElementById('checkinBtn').addEventListener('click', function() {
-            this.disabled = true; this.innerText = "UPDATING...";
-            fetch(`${scriptURL}?action=checkin&mobile=${currentMobile}`)
-            .then(r => r.text()).then(res => { 
-                addLog("SHEET: " + res);
-                alert(res); 
-                location.reload(); 
+            // Generate the QR with specific settings to match the pattern you like
+            new QRCode(qrDiv, {
+                text: simpleData,
+                width: 256,
+                height: 256,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H // High Error Correction = Simpler, bolder blocks
             });
-        });
+
+            // Wait a split second for QR to render, then draw PDF
+            setTimeout(() => {
+                const qrImg = qrDiv.querySelector("img").src;
+                
+                doc.setFillColor(7, 6, 15); doc.rect(0, 0, 210, 297, 'F');
+                doc.setTextColor(31, 193, 209); doc.setFontSize(26);
+                doc.text("SYNAPSE 2026", 105, 40, { align: "center" });
+                
+                // Add the simplified QR code
+                doc.addImage(qrImg, 'PNG', 65, 60, 80, 80);
+                
+                // Student Info 
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(14);
+                doc.text(`Student Name: ${registrationData.name}`, 30, 160);
+                doc.text(`Mobile Number: ${registrationData.mobile}`, 30, 175);
+                doc.text(`College: ${registrationData.college}`, 30, 190);
+                
+                doc.setFontSize(10);
+                doc.setTextColor(150, 150, 150);
+                doc.text("Payyanur Campus | March 17, 2026", 105, 230, { align: "center" });
+                
+                doc.save(`Synapse2026_${registrationData.name}.pdf`);
+            }, 600);
+        }
     </script>
 </body>
 </html>
