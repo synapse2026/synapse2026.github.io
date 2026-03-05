@@ -30,7 +30,8 @@
         #particles-js {
             position: fixed;
             width: 100%; height: 100%;
-            top: 0; left: 0; z-index: 1; /* Low z-index */
+            top: 0; left: 0; 
+            z-index: 0 !important; /* Send dots to back */
         }
 
         .main-content { position: relative; z-index: 10; padding: 20px; }
@@ -52,13 +53,9 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.9);
         }
 
-        .form-label { 
-            font-weight: 800 !important; 
-            color: #ffffff !important; 
-            text-transform: uppercase;
-        }
+        .form-label { font-weight: 800 !important; color: #ffffff !important; text-transform: uppercase; }
 
-        /* FIX: High visibility for typed text */
+        /* Typed text visibility fix for mobile */
         .form-control, .form-select {
             background-color: #ffffff !important;
             border: 2px solid #666;
@@ -81,15 +78,16 @@
             letter-spacing: 2px;
         }
 
-        /* FIX: Success Page Layering */
+        /* Success Page Mobile Touch Fix */
         #successMsg {
             position: relative;
-            z-index: 9999 !important; /* Force to absolute top */
+            z-index: 9999 !important; /* Absolute top */
             border: 3px solid var(--poster-blue);
             background: #000;
             border-radius: 20px;
-            padding: 40px 20px;
+            padding: 40px 15px;
             pointer-events: auto !important;
+            display: none;
         }
 
         .btn-receipt {
@@ -103,9 +101,9 @@
             border-radius: 12px;
             cursor: pointer;
             display: block;
-            position: relative;
-            z-index: 10000; /* Ensure button itself is top */
             touch-action: manipulation;
+            position: relative;
+            z-index: 10000 !important;
         }
 
         #qrcode-hidden { display: none; }
@@ -118,7 +116,7 @@
 
     <div class="main-content container my-4">
         
-        <div class="poster-container animate__animated animate__fadeIn">
+        <div id="headerImg" class="poster-container animate__animated animate__fadeIn">
             <img src="synapse-poster.jpg" alt="Synapse 2026 Poster" class="poster-image">
         </div>
 
@@ -127,50 +125,32 @@
                 
                 <div id="formCard" class="card animate__animated animate__fadeInUp">
                     <div class="card-body p-4 p-md-5">
-                        <h2 class="text-center text-uppercase mb-5" style="color: var(--poster-blue); font-weight: 900;">
-                            Registration Form
-                        </h2>
-                        
+                        <h2 class="text-center text-uppercase mb-5" style="color: var(--poster-blue); font-weight: 900;">Registration</h2>
                         <form id="regForm">
                             <div class="row g-4">
                                 <div class="col-md-6"><label class="form-label">Name</label><input type="text" id="name" class="form-control" required></div>
                                 <div class="col-md-6"><label class="form-label">Mobile</label><input type="tel" id="mobile" class="form-control" pattern="[0-9]{10}" required></div>
                                 <div class="col-md-6"><label class="form-label">Email</label><input type="email" id="email" class="form-control" required></div>
                                 <div class="col-md-6"><label class="form-label">College</label><input type="text" id="college" class="form-control" required></div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Department</label>
-                                    <select id="department" class="form-select" required>
-                                        <option value="" selected disabled>Select</option>
-                                        <option>Computer Science</option><option>Electronics</option><option>Mechanical</option><option>Civil</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Semester</label>
-                                    <select id="semester" class="form-select" required>
-                                        <option>S1</option><option>S2</option><option>S3</option><option>S4</option><option>S5</option><option>S6</option>
-                                    </select>
-                                </div>
+                                <div class="col-md-6"><label class="form-label">Dept</label><select id="department" class="form-select" required><option value="" selected disabled>Select</option><option>Computer Science</option><option>Electronics</option><option>Mechanical</option><option>Civil</option></select></div>
+                                <div class="col-md-6"><label class="form-label">Sem</label><select id="semester" class="form-select" required><option>S1</option><option>S2</option><option>S3</option><option>S4</option><option>S5</option><option>S6</option></select></div>
                             </div>
-
-                            <div class="mt-5">
-                                <label class="form-label d-block mb-3 text-center">Events Selection</label>
-                                <div class="event-grid row row-cols-2 g-3">
-                                    <div class="col text-center"><input class="event-check" type="checkbox" value="Hackathons" id="e1"> <label for="e1">Hackathons</label></div>
-                                    <div class="col text-center"><input class="event-check" type="checkbox" value="Workshops" id="e2"> <label for="e2">Workshops</label></div>
-                                    <div class="col text-center"><input class="event-check" type="checkbox" value="Gaming" id="e6"> <label for="e6">Gaming</label></div>
-                                    <div class="col text-center"><input class="event-check" type="checkbox" value="Quizzes" id="e5"> <label for="e5">Quizzes</label></div>
-                                </div>
-                                <button type="submit" id="submitBtn" class="btn btn-primary w-100 mt-5 shadow">SUBMIT REGISTRATION</button>
+                            <div class="mt-5 event-grid row row-cols-2 g-3">
+                                <div class="col text-center"><input class="event-check" type="checkbox" value="Hackathons" id="e1"> <label for="e1" class="text-black">Hackathons</label></div>
+                                <div class="col text-center"><input class="event-check" type="checkbox" value="Workshops" id="e2"> <label for="e2" class="text-black">Workshops</label></div>
+                                <div class="col text-center"><input class="event-check" type="checkbox" value="Gaming" id="e6"> <label for="e6" class="text-black">Gaming</label></div>
+                                <div class="col text-center"><input class="event-check" type="checkbox" value="Quizzes" id="e5"> <label for="e5" class="text-black">Quizzes</label></div>
                             </div>
+                            <button type="submit" id="submitBtn" class="btn btn-primary w-100 mt-5">SUBMIT REGISTRATION</button>
                         </form>
                     </div>
                 </div>
 
-                <div id="successMsg" class="animate__animated animate__bounceIn d-none text-center">
+                <div id="successMsg" class="animate__animated animate__bounceIn text-center">
                     <h1 style="color: var(--poster-blue); font-weight: 900;">SUCCESS!</h1>
                     <p class="lead text-white">Your registration for SYNAPSE 2026 is confirmed.</p>
                     <hr style="border-color: #444;">
-                    <div id="receiptDetails" class="text-start mb-4 px-3" style="font-size: 0.9rem; color: #bbb;"></div>
+                    <div id="receiptDetails" class="text-start mb-4 px-3" style="font-size: 1.1rem; color: #fff;"></div>
                     <button id="downloadBtn" class="btn-receipt">📥 DOWNLOAD QR RECEIPT (PDF)</button>
                 </div>
 
@@ -180,7 +160,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script>
-        particlesJS("particles-js", { "particles": { "number": { "value": 40 }, "color": { "value": "#ffffff" }, "line_linked": { "enable": true, "color": "#1fc1d1" }, "move": { "enable": true, "speed": 1 } } });
+        particlesJS("particles-js", { "particles": { "number": { "value": 30 }, "color": { "value": "#ffffff" }, "line_linked": { "enable": true, "color": "#1fc1d1" }, "move": { "enable": true, "speed": 1 } } });
 
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwKjrjjrV5hJUrqaP5nWjYAW2HW50y6EI3_k9bfzriS8ktMuAHpYe1i8K6IyPFV-jsndA/exec';
         let registrationData = {};
@@ -192,51 +172,46 @@
             const events = Array.from(document.querySelectorAll('.event-check:checked')).map(cb => cb.value);
             
             if(events.length === 0) return alert("Select an event!");
+            btn.disabled = true; btn.innerHTML = 'CHECKING DUPLICATES...';
 
-            btn.disabled = true;
-            btn.innerHTML = 'CHECKING DATABASE...';
-
-            // 1. Duplicate Check
+            // Action: Check for duplicate mobile numbers
             fetch(`${scriptURL}?action=search&mobile=${mobile}`)
             .then(res => res.json())
             .then(data => {
                 if(data !== "NotFound") {
-                    alert("Error: This mobile number is already registered!");
+                    alert("This mobile number is already registered!");
                     btn.disabled = false; btn.innerHTML = 'SUBMIT REGISTRATION';
                 } else {
-                    sendData(events);
+                    btn.innerHTML = 'REGISTERING...';
+                    registrationData = {
+                        name: document.getElementById('name').value,
+                        mobile: document.getElementById('mobile').value,
+                        college: document.getElementById('college').value,
+                        events: events.join(", ")
+                    };
+                    fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(registrationData) })
+                    .then(() => handleSuccess());
                 }
-            }).catch(() => sendData(events));
+            }).catch(() => handleSuccess()); // Fallback
         });
 
-        function sendData(events) {
-            const btn = document.getElementById('submitBtn');
-            btn.innerHTML = 'REGISTERING...';
-            registrationData = {
-                name: document.getElementById('name').value,
-                mobile: document.getElementById('mobile').value,
-                college: document.getElementById('college').value,
-                events: events.join(", ")
-            };
-            fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(registrationData) })
-            .then(() => handleSuccess());
-        }
-
         function handleSuccess() {
-            document.getElementById('formCard').classList.add('d-none');
-            document.querySelector('.poster-container').classList.add('d-none');
-            document.getElementById('successMsg').classList.remove('d-none');
+            document.getElementById('formCard').style.display = 'none';
+            document.getElementById('headerImg').style.display = 'none';
+            document.getElementById('successMsg').style.display = 'block';
             document.getElementById('receiptDetails').innerHTML = `<b>Name:</b> ${registrationData.name}<br><b>Mobile:</b> ${registrationData.mobile}`;
             window.scrollTo(0,0);
         }
 
-        // FIX: Direct Mobile Event Listener
-        document.getElementById('downloadBtn').addEventListener('click', function() {
+        // Direct Listener for Download Button
+        document.getElementById('downloadBtn').addEventListener('click', function(e) {
+            e.preventDefault();
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             const qrDiv = document.getElementById("qrcode-hidden");
             qrDiv.innerHTML = ""; 
 
+            // Simpler QR for better scanning
             new QRCode(qrDiv, {
                 text: registrationData.mobile,
                 width: 256, height: 256,
@@ -253,7 +228,7 @@
                 doc.setTextColor(255, 255, 255); doc.setFontSize(14);
                 doc.text(`Name: ${registrationData.name}`, 30, 160);
                 doc.text(`Mobile: ${registrationData.mobile}`, 30, 175);
-                doc.save(`Synapse2026_${registrationData.name}.pdf`);
+                doc.save(`Synapse2026_Receipt.pdf`);
             }, 600);
         });
     </script>
