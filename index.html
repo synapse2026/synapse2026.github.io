@@ -244,50 +244,58 @@
         }
 
         function downloadPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            const qrContainer = document.getElementById("qrcode-hidden");
-            qrDiv = qrContainer;
-            qrDiv.innerHTML = ""; 
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const qrDiv = document.getElementById("qrcode-hidden");
+    qrDiv.innerHTML = ""; 
 
-            // STRATEGY: Encode ONLY the mobile number to keep the pattern simple/low-density
-            const simpleData = registrationData.mobile;
+    // Encode ONLY the mobile number for maximum scan speed
+    const simpleData = registrationData.mobile;
 
-            // Generate the QR with specific settings to match the pattern you like
-            new QRCode(qrDiv, {
-                text: simpleData,
-                width: 256,
-                height: 256,
-                colorDark: "#000000",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H // High Error Correction = Simpler, bolder blocks
-            });
+    // Generate Standard Black-on-White QR
+    new QRCode(qrDiv, {
+        text: simpleData,
+        width: 256,
+        height: 256,
+        colorDark: "#000000", // Black squares
+        colorLight: "#ffffff", // White background
+        correctLevel: QRCode.CorrectLevel.H
+    });
 
-            // Wait a split second for QR to render, then draw PDF
-            setTimeout(() => {
-                const qrImg = qrDiv.querySelector("img").src;
-                
-                doc.setFillColor(7, 6, 15); doc.rect(0, 0, 210, 297, 'F');
-                doc.setTextColor(31, 193, 209); doc.setFontSize(26);
-                doc.text("SYNAPSE 2026", 105, 40, { align: "center" });
-                
-                // Add the simplified QR code
-                doc.addImage(qrImg, 'PNG', 65, 60, 80, 80);
-                
-                // Student Info 
-                doc.setTextColor(255, 255, 255);
-                doc.setFontSize(14);
-                doc.text(`Student Name: ${registrationData.name}`, 30, 160);
-                doc.text(`Mobile Number: ${registrationData.mobile}`, 30, 175);
-                doc.text(`College: ${registrationData.college}`, 30, 190);
-                
-                doc.setFontSize(10);
-                doc.setTextColor(150, 150, 150);
-                doc.text("Payyanur Campus | March 17, 2026", 105, 230, { align: "center" });
-                
-                doc.save(`Synapse2026_${registrationData.name}.pdf`);
-            }, 600);
-        }
+    setTimeout(() => {
+        const qrImg = qrDiv.querySelector("img").src;
+        
+        // PDF Background (Deep Theme)
+        doc.setFillColor(7, 6, 15);
+        doc.rect(0, 0, 210, 297, 'F');
+        
+        // Header
+        doc.setTextColor(31, 193, 209);
+        doc.setFontSize(26);
+        doc.text("SYNAPSE 2026", 105, 40, { align: "center" });
+        
+        // IMPORTANT: Add a white "Quiet Zone" box behind the QR code
+        // This ensures the scanner can see the edges clearly
+        doc.setFillColor(255, 255, 255);
+        doc.rect(60, 55, 90, 90, 'F');
+        
+        // Add the standard QR code on top of the white box
+        doc.addImage(qrImg, 'PNG', 65, 60, 80, 80);
+        
+        // Student Info
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(14);
+        doc.text(`Student Name: ${registrationData.name}`, 30, 165);
+        doc.text(`Mobile Number: ${registrationData.mobile}`, 30, 180);
+        doc.text(`College: ${registrationData.college}`, 30, 195);
+        
+        doc.setFontSize(10);
+        doc.setTextColor(150, 150, 150);
+        doc.text("Present this at Govt. Residential Women's Poly. College", 105, 240, { align: "center" });
+        
+        doc.save(`Synapse_Receipt_${registrationData.name}.pdf`);
+    }, 600);
+}
     </script>
 </body>
 </html>
