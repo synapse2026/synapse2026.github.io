@@ -3,144 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SYNAPSE 2026 | Debug Scanner</title>
-    
+    <title>SYNAPSE 2026 | Diagnostic Scanner</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
-
     <style>
-        body { background: #07060f; color: #fff; font-family: sans-serif; font-size: 14px; }
-        .scanner-container { max-width: 500px; margin: auto; padding: 20px; }
-        #reader { width: 100%; border-radius: 20px; overflow: hidden; border: 3px solid #1fc1d1 !important; background: #000; }
+        body { background: #07060f; color: #fff; font-family: sans-serif; }
+        .container { max-width: 500px; padding: 20px; }
+        #reader { border: 2px solid #1fc1d1; border-radius: 15px; overflow: hidden; background: #000; }
         
-        .btn-start { background: #1fc1d1; color: #000; font-weight: 900; border: none; padding: 15px; width: 100%; border-radius: 10px; margin-bottom: 10px; }
-        .btn-upload { background: #ffc107; color: #000; font-weight: 900; border: none; padding: 15px; width: 100%; border-radius: 10px; display: block; margin-bottom: 10px; text-align: center; }
-        
-        /* Debug Console Styling */
-        .debug-console { 
-            background: #111; 
-            border: 1px solid #333; 
-            color: #0f0; 
-            font-family: monospace; 
-            padding: 10px; 
-            height: 150px; 
-            overflow-y: auto; 
-            font-size: 11px; 
-            margin-top: 20px;
-            border-radius: 8px;
-            text-align: left;
-        }
+        /* Debug Tools Styling */
+        .debug-box { background: #111; border: 1px solid #333; color: #0f0; font-family: monospace; font-size: 11px; padding: 10px; height: 120px; overflow-y: auto; border-radius: 8px; text-align: left; }
+        .preview-box { border: 2px solid #ffc107; margin-top: 15px; border-radius: 10px; overflow: hidden; display: none; }
+        #previewCanvas { width: 100%; height: auto; display: block; background: #222; }
 
-        .result-card, .manual-card { background: rgba(15, 12, 41, 0.98); border-radius: 15px; padding: 25px; margin-top: 20px; display: none; border: 2px solid #1fc1d1; }
+        .btn-action { font-weight: 900; padding: 15px; width: 100%; border-radius: 10px; border: none; margin-bottom: 10px; }
+        .result-card { background: rgba(15, 12, 41, 0.98); border-radius: 15px; padding: 25px; margin-top: 20px; display: none; border: 2px solid #1fc1d1; }
         #qr-input-file { display: none; }
     </style>
 </head>
 <body>
-
-    <div class="scanner-container text-center">
-        <h2 class="my-4" style="color: #1fc1d1; font-weight: 900; letter-spacing: 2px;">SYNAPSE SCANNER</h2>
+    <div class="container text-center">
+        <h3 class="mb-4" style="color: #1fc1d1;">SYNAPSE DIAGNOSTIC</h3>
         
         <div id="reader"></div>
-        <div id="status" class="mt-2 text-info small">Status: Waiting</div>
 
-        <div class="controls mt-4">
-            <button id="startBtn" class="btn-start">📸 START LIVE CAMERA</button>
-            <label for="qr-input-file" class="btn-upload">🖼️ PHOTO VERIFY</label>
+        <div id="previewWrapper" class="preview-box">
+            <div class="small bg-warning text-dark fw-bold py-1">PROCESSED IMAGE PREVIEW</div>
+            <canvas id="previewCanvas"></canvas>
+        </div>
+
+        <div class="mt-4">
+            <button id="startBtn" class="btn-action bg-info text-dark">📸 START LIVE SCAN</button>
+            <label for="qr-input-file" class="btn-action bg-warning text-dark">🖼️ UPLOAD & DEBUG</label>
             <input type="file" id="qr-input-file" accept="image/*" capture="environment">
-            <button class="btn btn-outline-secondary w-100 text-white-50 btn-sm" onclick="location.reload()">Reload Page</button>
+            <button class="btn btn-outline-danger btn-sm w-100" onclick="location.reload()">Clear & Restart</button>
         </div>
 
-        <div class="debug-console" id="debugLog">
-            > Debug Console Initialized...<br>
-        </div>
+        <div class="debug-box mt-3" id="logs">> System Ready...</div>
 
         <div id="result" class="result-card text-start">
             <h4 style="color: #1fc1d1;">✓ VERIFIED</h4>
-            <div id="scannedData" class="my-3"></div>
-            <button id="checkinBtn" class="btn btn-primary w-100 fw-bold">MARK PRESENT</button>
+            <div id="data" class="my-3 fs-5 fw-bold"></div>
+            <button id="checkinBtn" class="btn btn-primary w-100 fw-bold py-3">MARK PRESENT</button>
         </div>
     </div>
 
     <script>
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwKjrjjrV5hJUrqaP5nWjYAW2HW50y6EI3_k9bfzriS8ktMuAHpYe1i8K6IyPFV-jsndA/exec'; // MUST BE YOUR GOOGLE SCRIPT URL
         const html5QrCode = new Html5Qrcode("reader");
-        const logBox = document.getElementById('debugLog');
-        const statusText = document.getElementById('status');
+        const logBox = document.getElementById('logs');
         let currentMobile = "";
 
-        function log(msg) {
+        function addLog(msg) {
             const time = new Date().toLocaleTimeString().split(' ')[0];
-            logBox.innerHTML += `[${time}] ${msg}<br>`;
+            logBox.innerHTML += `<br>[${time}] ${msg}`;
             logBox.scrollTop = logBox.scrollHeight;
-            console.log(msg);
         }
 
-        const onScanSuccess = (decodedText) => {
-            log("SUCCESS: QR decoded successfully.");
+        const onScanSuccess = (t) => {
+            addLog("SUCCESS: QR Decoded.");
             navigator.vibrate(200);
             document.getElementById('result').style.display = 'block';
-            document.getElementById('scannedData').innerHTML = decodedText.replaceAll('|', '<br>');
-            const match = decodedText.match(/Mobile:\s*(\d{10})/);
-            currentMobile = match ? match[1] : "";
+            document.getElementById('data').innerText = t;
+            currentMobile = t.replace("Mobile:", "");
             if (html5QrCode.isScanning) html5QrCode.stop();
         };
 
-        // 1. Live Mode
+        // Live Scanner
         document.getElementById('startBtn').addEventListener('click', () => {
-            log("ACTION: Starting live camera...");
-            html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 280 }, onScanSuccess)
-            .then(() => log("CAMERA: Live feed active."))
-            .catch(err => log("ERROR: Camera failed - " + err));
+            addLog("ACTION: Starting Live Camera...");
+            html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, onScanSuccess)
+            .then(() => addLog("CAMERA: Feed Active."))
+            .catch(e => addLog("ERROR: Camera failed: " + e));
         });
 
-        // 2. Photo Mode with Logs
+        // Photo Upload with Preview and Enhanced Logs
         document.getElementById('qr-input-file').addEventListener('change', e => {
             if (e.target.files.length == 0) return;
             const file = e.target.files[0];
-            log(`FILE: Received ${file.name} (${Math.round(file.size/1024)}KB)`);
-            
+            addLog(`FILE: Selected ${file.name} (${Math.round(file.size/1024)}KB)`);
+
             const reader = new FileReader();
-            reader.onload = function(f) {
-                log("FILE: Data read complete. Loading Image object...");
+            reader.onload = f => {
                 const img = new Image();
-                img.onload = function() {
-                    log(`IMG: Dimensions ${img.width}x${img.height}. Scaling...`);
-                    const canvas = document.createElement('canvas');
-                    const scale = 800 / img.width;
-                    canvas.width = 800;
-                    canvas.height = img.height * scale;
+                img.onload = () => {
+                    addLog(`IMAGE: Loaded ${img.width}x${img.height}`);
                     
+                    const canvas = document.getElementById('previewCanvas');
                     const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    log("IMG: Scaling complete. Starting QR Analysis...");
+                    const size = 1000; 
+                    canvas.width = size;
+                    canvas.height = size;
+
+                    // Crop Logic: Zoom into the center to avoid black bars
+                    let sX, sY, sW, sH;
+                    if (img.width > img.height) {
+                        sW = img.height; sH = img.height;
+                        sX = (img.width - img.height) / 2; sY = 0;
+                    } else {
+                        sW = img.width; sH = img.width;
+                        sX = 0; sY = (img.height - img.width) / 2;
+                    }
+
+                    addLog("CANVAS: Performing Center-Crop...");
+                    ctx.drawImage(img, sX, sY, sW, sH, 0, 0, size, size);
                     
+                    // Show the preview so you can see if it's black
+                    document.getElementById('previewWrapper').style.display = 'block';
+                    addLog("ANALYSIS: Identifying QR pattern...");
+
                     html5QrCode.scanFileV2(canvas, true)
-                    .then(res => {
-                        log("ANALYSIS: Data found in image.");
-                        onScanSuccess(res.decodedText);
-                    })
+                    .then(res => onScanSuccess(res.decodedText))
                     .catch(err => {
-                        log("ANALYSIS: No QR pattern detected in this image.");
+                        addLog("FAIL: QR not detected. Preview the image above.");
                     });
                 };
                 img.src = f.target.result;
             };
-            reader.onerror = () => log("ERROR: Failed to read file.");
             reader.readAsDataURL(file);
         });
 
         document.getElementById('checkinBtn').addEventListener('click', function() {
-            log("ACTION: Sending Check-in to Google Sheets...");
-            this.disabled = true;
+            this.disabled = true; this.innerText = "UPDATING...";
             fetch(`${scriptURL}?action=checkin&mobile=${currentMobile}`)
-            .then(res => res.text()).then(res => { 
-                log("SHEET: " + res);
+            .then(r => r.text()).then(res => { 
+                addLog("SHEET: " + res);
                 alert(res); 
                 location.reload(); 
-            })
-            .catch(err => {
-                log("SHEET ERROR: " + err);
-                this.disabled = false;
             });
         });
     </script>
