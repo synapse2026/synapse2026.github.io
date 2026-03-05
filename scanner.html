@@ -10,102 +10,85 @@
         body { background: #07060f; color: #fff; font-family: sans-serif; }
         .container { max-width: 500px; padding: 20px; }
         #reader { border: 3px solid #1fc1d1; border-radius: 20px; overflow: hidden; background: #000; }
-        .btn-main { background: #1fc1d1; color: #000; font-weight: 900; padding: 15px; width: 100%; border-radius: 10px; border: none; margin-bottom: 10px; }
         .detail-card { background: rgba(15, 12, 41, 0.98); border-radius: 15px; padding: 25px; margin-top: 20px; display: none; border: 2px solid #1fc1d1; }
-        .label { color: #1fc1d1; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; margin-top: 10px; }
-        .val { font-size: 1.1rem; border-bottom: 1px solid #333; padding-bottom: 5px; }
-        .payment-badge { padding: 5px 15px; border-radius: 20px; font-weight: bold; display: inline-block; margin-top: 10px; }
-        .status-not { background: #ff4757; color: #fff; }
-        .status-done { background: #2ed573; color: #000; }
-        #debug { font-size: 10px; color: #555; margin-top: 20px; text-align: left; }
+        .label { color: #1fc1d1; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; margin-top: 8px; }
+        .val { font-size: 1rem; border-bottom: 1px solid #333; padding-bottom: 4px; overflow-wrap: break-word; }
+        .badge-status { padding: 8px 20px; border-radius: 25px; font-weight: 800; display: inline-block; margin-top: 15px; width: 100%; }
+        .bg-red { background: #ff4757; color: #fff; }
+        .bg-green { background: #2ed573; color: #000; }
     </style>
 </head>
 <body>
     <div class="container text-center">
-        <h3 class="mb-4" style="color: #1fc1d1; font-weight: 800;">STAFF VERIFICATION</h3>
+        <h3 class="mb-4" style="color: #1fc1d1; font-weight: 800;">STAFF GATE CONTROL</h3>
         <div id="reader"></div>
         <div class="mt-4" id="controls">
-            <button id="startBtn" class="btn-main">📸 SCAN RECEIPT</button>
-            <label for="qr-input-file" class="btn btn-outline-warning w-100 py-3 fw-bold">🖼️ UPLOAD PHOTO</label>
-            <input type="file" id="qr-input-file" accept="image/*" capture="environment" style="display:none">
+            <button onclick="html5QrCode.start({ facingMode: 'environment' }, { fps: 20, qrbox: 250 }, onScanSuccess)" class="btn btn-info w-100 py-3 fw-bold">📸 SCAN QR CODE</button>
+            <label for="qr-input" class="btn btn-outline-warning w-100 mt-2 py-2 fw-bold">🖼️ UPLOAD PHOTO</label>
+            <input type="file" id="qr-input" accept="image/*" capture="environment" style="display:none">
         </div>
 
         <div id="result" class="detail-card text-start">
-            <h4 class="text-center" style="color: #d11fb7;">STUDENT DETAILS</h4>
+            <h5 class="text-center" style="color: #d11fb7; font-weight: 900;">STUDENT INFO</h5>
             <div class="label">Name</div><div id="d-name" class="val">-</div>
             <div class="label">Mobile</div><div id="d-mobile" class="val">-</div>
-            <div class="label">College</div><div id="d-college" class="val">-</div>
             <div class="label">Events</div><div id="d-events" class="val">-</div>
             
-            <div id="paymentArea" class="text-center mt-3">
-                <div id="p-status" class="payment-badge">Checking Payment...</div>
-                <button id="payBtn" class="btn btn-success w-100 mt-4 py-3 fw-bold">✅ CONFIRM PAYMENT & ENTRY</button>
+            <div id="statusArea" class="mt-3 text-center">
+                <div id="p-badge" class="badge-status">Checking...</div>
+                <button id="confirmBtn" class="btn btn-primary w-100 mt-3 py-3 fw-bold">MARK PAYMENT & ENTRY</button>
+                <div id="alreadyVerifiedMsg" class="mt-3 text-success fw-bold d-none">✓ ENTRY ALREADY VERIFIED</div>
             </div>
-            <button class="btn btn-link text-white-50 w-100 mt-2" onclick="location.reload()">Cancel</button>
+            <button class="btn btn-link text-white-50 w-100 mt-2" onclick="location.reload()">Back</button>
         </div>
-
-        <div id="debug"></div>
     </div>
 
     <script>
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwKjrjjrV5hJUrqaP5nWjYAW2HW50y6EI3_k9bfzriS8ktMuAHpYe1i8K6IyPFV-jsndA/exec';
         const html5QrCode = new Html5Qrcode("reader");
-        let currentMobile = "";
+        let currentMob = "";
 
-        const fetchDetails = (mobile) => {
-            currentMobile = mobile.trim();
+        const handleData = (mobile) => {
+            currentMob = mobile.trim();
             document.getElementById('controls').style.display = 'none';
             document.getElementById('result').style.display = 'block';
-            document.getElementById('p-status').innerText = "FETCHING...";
-
-            fetch(`${scriptURL}?action=search&mobile=${currentMobile}`)
+            
+            fetch(`${scriptURL}?action=search&mobile=${currentMob}`)
                 .then(res => res.json())
                 .then(data => {
-                    if (data === "NotFound") {
-                        alert("Student not found in database!");
-                        location.reload();
+                    if (data === "NotFound") { alert("Not Found!"); location.reload(); return; }
+                    
+                    document.getElementById('d-name').innerText = data.name;
+                    document.getElementById('d-mobile').innerText = data.mobile;
+                    document.getElementById('d-events').innerText = data.events;
+                    
+                    const badge = document.getElementById('p-badge');
+                    const btn = document.getElementById('confirmBtn');
+                    const msg = document.getElementById('alreadyVerifiedMsg');
+
+                    if (data.payment === "COMPLETED") {
+                        badge.innerText = "PAYMENT: COMPLETED";
+                        badge.className = "badge-status bg-green";
+                        btn.classList.add('d-none');
+                        msg.classList.remove('d-none');
                     } else {
-                        document.getElementById('d-name').innerText = data.name;
-                        document.getElementById('d-mobile').innerText = data.mobile;
-                        document.getElementById('d-college').innerText = data.college;
-                        document.getElementById('d-events').innerText = data.events;
-                        
-                        const p = document.getElementById('p-status');
-                        p.innerText = "PAYMENT: " + data.payment;
-                        p.className = "payment-badge " + (data.payment === "COMPLETED" ? "status-done" : "status-not");
-                        
-                        if(data.payment === "COMPLETED") {
-                            document.getElementById('payBtn').innerText = "ALREADY PAID - MARK ENTRY";
-                        }
+                        badge.innerText = "PAYMENT: PENDING";
+                        badge.className = "badge-status bg-red";
+                        btn.classList.remove('d-none');
+                        msg.classList.add('d-none');
                     }
-                })
-                .catch(err => { alert("Error fetching data. Check internet."); location.reload(); });
-        };
-
-        const onScanSuccess = (t) => {
-            navigator.vibrate(200);
-            if (html5QrCode.isScanning) html5QrCode.stop();
-            fetchDetails(t);
-        };
-
-        document.getElementById('startBtn').addEventListener('click', () => {
-            html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, onScanSuccess);
-        });
-
-        document.getElementById('qr-input-file').addEventListener('change', e => {
-            if (e.target.files.length == 0) return;
-            html5QrCode.scanFileV2(e.target.files[0], true).then(res => fetchDetails(res.decodedText));
-        });
-
-        document.getElementById('payBtn').addEventListener('click', function() {
-            this.disabled = true;
-            this.innerText = "UPDATING SHEET...";
-            fetch(`${scriptURL}?action=updatePayment&mobile=${currentMobile}`)
-                .then(r => r.text())
-                .then(res => {
-                    alert("Entry Confirmed for " + document.getElementById('d-name').innerText);
-                    location.reload();
                 });
+        };
+
+        const onScanSuccess = (t) => { navigator.vibrate(200); if(html5QrCode.isScanning) html5QrCode.stop(); handleData(t); };
+        document.getElementById('qr-input').addEventListener('change', e => {
+            html5QrCode.scanFileV2(e.target.files[0], true).then(res => handleData(res.decodedText));
+        });
+
+        document.getElementById('confirmBtn').addEventListener('click', function() {
+            this.disabled = true; this.innerText = "UPDATING...";
+            fetch(`${scriptURL}?action=updatePayment&mobile=${currentMob}`)
+                .then(r => r.text()).then(() => { alert("Entry Successful!"); location.reload(); });
         });
     </script>
 </body>
