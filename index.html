@@ -45,14 +45,14 @@
         }
         .poster-image { width: 100%; height: auto; display: block; border-radius: 10px; }
 
-        /* FORM FIELD VISIBILITY UPDATES */
+        /* HIGH VISIBILITY LABELS */
         .form-label { 
             color: #ffffff !important; 
-            font-weight: 700 !important; 
+            font-weight: 800 !important; 
             text-transform: uppercase;
             font-size: 0.85rem;
-            letter-spacing: 1px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            letter-spacing: 1.2px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,1);
             margin-bottom: 8px;
             display: block;
         }
@@ -60,14 +60,10 @@
         .form-control, .form-select { 
             background: #ffffff !important; 
             color: #000000 !important; 
-            font-weight: 600 !important;
+            font-weight: 700 !important;
             border: 2px solid var(--poster-blue);
             padding: 12px;
             border-radius: 10px;
-        }
-
-        .form-control::placeholder {
-            color: #888;
         }
 
         /* SUCCESS OVERLAY */
@@ -86,13 +82,12 @@
         }
 
         .success-card {
-            background: rgba(15, 12, 41, 0.95);
+            background: rgba(15, 12, 41, 0.98);
             border: 2px solid var(--poster-blue);
             padding: 30px;
             border-radius: 20px;
             width: 100%;
             max-width: 400px;
-            box-shadow: 0 0 40px rgba(31, 193, 209, 0.3);
         }
 
         .btn-download-final {
@@ -115,7 +110,7 @@
         }
 
         .event-grid { border: 2px solid var(--poster-pink); background: rgba(209, 31, 183, 0.1); border-radius: 15px; padding: 15px; }
-        .btn-primary { background: linear-gradient(135deg, var(--poster-pink), #741fd1); border: none; padding: 18px; font-weight: 800; letter-spacing: 1px; }
+        .btn-primary { background: linear-gradient(135deg, var(--poster-pink), #741fd1); border: none; padding: 18px; font-weight: 900; letter-spacing: 1px; }
         #qrcode-hidden { display: none; }
     </style>
 </head>
@@ -132,25 +127,25 @@
 
         <div class="row justify-content-center">
             <div class="col-lg-7">
-                <div class="card p-4 p-md-5" style="background: rgba(15,12,41,0.95); border-radius: 25px; border: 1px solid #444;">
+                <div class="card p-4 p-md-5" style="background: rgba(15,12,41,0.96); border-radius: 25px; border: 1px solid #444;">
                     <h2 class="text-center mb-5" style="color: var(--poster-blue); font-weight: 900; text-transform: uppercase; letter-spacing: 2px;">Registration Form</h2>
                     
                     <form id="regForm">
                         <div class="mb-4">
                             <label class="form-label">Full Name</label>
-                            <input type="text" id="name" class="form-control" placeholder="Enter your full name" required>
+                            <input type="text" id="name" class="form-control" placeholder="Type Name Here" required>
                         </div>
                         <div class="mb-4">
                             <label class="form-label">Mobile Number</label>
-                            <input type="tel" id="mobile" class="form-control" pattern="[0-9]{10}" placeholder="10-digit number" required>
+                            <input type="tel" id="mobile" class="form-control" pattern="[0-9]{10}" placeholder="10-Digit Mobile" required>
                         </div>
                         <div class="mb-4">
                             <label class="form-label">Email Address</label>
-                            <input type="email" id="email" class="form-control" placeholder="name@example.com" required>
+                            <input type="email" id="email" class="form-control" placeholder="Email ID" required>
                         </div>
                         <div class="mb-4">
                             <label class="form-label">College Name</label>
-                            <input type="text" id="college" class="form-control" placeholder="Your college name" required>
+                            <input type="text" id="college" class="form-control" placeholder="College Name" required>
                         </div>
                         
                         <div class="row">
@@ -176,30 +171,10 @@
                         <div class="event-grid mt-2">
                             <label class="d-block text-center mb-3 fw-bold text-white">SELECT EVENTS</label>
                             <div class="row g-2">
-                                <div class="col-6">
-                                    <div class="form-check">
-                                        <input type="checkbox" class="event-check form-check-input" value="Hackathons" id="c1">
-                                        <label class="form-check-label text-white small" for="c1">Hackathons</label>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="form-check">
-                                        <input type="checkbox" class="event-check form-check-input" value="Workshops" id="c2">
-                                        <label class="form-check-label text-white small" for="c2">Workshops</label>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="form-check">
-                                        <input type="checkbox" class="event-check form-check-input" value="Gaming" id="c3">
-                                        <label class="form-check-label text-white small" for="c3">Gaming</label>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="form-check">
-                                        <input type="checkbox" class="event-check form-check-input" value="Quizzes" id="c4">
-                                        <label class="form-check-label text-white small" for="c4">Quizzes</label>
-                                    </div>
-                                </div>
+                                <div class="col-6"><div class="form-check"><input type="checkbox" class="event-check form-check-input" value="Hackathons" id="c1"><label class="form-check-label text-white small" for="c1">Hackathons</label></div></div>
+                                <div class="col-6"><div class="form-check"><input type="checkbox" class="event-check form-check-input" value="Workshops" id="c2"><label class="form-check-label text-white small" for="c2">Workshops</label></div></div>
+                                <div class="col-6"><div class="form-check"><input type="checkbox" class="event-check form-check-input" value="Gaming" id="c3"><label class="form-check-label text-white small" for="c3">Gaming</label></div></div>
+                                <div class="col-6"><div class="form-check"><input type="checkbox" class="event-check form-check-input" value="Quizzes" id="c4"><label class="form-check-label text-white small" for="c4">Quizzes</label></div></div>
                             </div>
                         </div>
 
@@ -213,13 +188,12 @@
     <div id="successWrapper">
         <div class="success-card animate__animated animate__zoomIn">
             <h1 style="color: var(--poster-blue); font-weight: 900;">SUCCESS!</h1>
-            <p class="text-white">Registration confirmed for Synapse 2026.</p>
+            <p class="text-white">Registration confirmed. Downloading receipt...</p>
             <div id="details" class="text-start small border-top border-secondary pt-2 mt-2 text-light"></div>
             
             <button id="finalDownloadBtn" onclick="downloadPDF()" class="btn-download-final">
                 📥 DOWNLOAD RECEIPT (PDF)
             </button>
-            <p class="mt-3 x-small text-muted">Tap the button above to save your QR receipt.</p>
         </div>
     </div>
 
@@ -238,7 +212,7 @@
             if(selectedEvents.length === 0) { alert("Please select at least one event!"); return; }
 
             btn.disabled = true;
-            btn.innerHTML = "PROCESSING...";
+            btn.innerHTML = "VERIFYING DATA...";
 
             registrationData = {
                 name: document.getElementById('name').value,
@@ -250,9 +224,14 @@
                 events: selectedEvents.join(", ")
             };
 
-            fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(registrationData) })
-            .then(() => showSuccess())
-            .catch(() => showSuccess());
+            // STEP 1: Send the data
+            fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(registrationData) });
+
+            // STEP 2: Wait exactly 1.5 seconds (Safety Buffer) then show success
+            setTimeout(() => {
+                showSuccess();
+                downloadPDF();
+            }, 1500);
         });
 
         function showSuccess() {
@@ -263,7 +242,6 @@
                 <b>Mobile:</b> ${registrationData.mobile}<br>
                 <b>College:</b> ${registrationData.college}
             `;
-            setTimeout(downloadPDF, 1000);
         }
 
         function downloadPDF() {
@@ -284,27 +262,17 @@
                 doc.setFillColor(7, 6, 15); doc.rect(0, 0, 210, 297, 'F');
                 doc.setTextColor(31, 193, 209); doc.setFontSize(26);
                 doc.text("SYNAPSE 2026", 105, 40, { align: "center" });
-                
                 doc.setFillColor(255, 255, 255);
                 doc.rect(60, 55, 90, 90, 'F');
                 doc.addImage(qrImg, 'PNG', 65, 60, 80, 80);
-                
                 doc.setTextColor(255, 255, 255);
                 doc.setFontSize(14);
                 doc.text(`Name: ${registrationData.name}`, 30, 160);
                 doc.text(`Mobile: ${registrationData.mobile}`, 30, 175);
                 doc.text(`College: ${registrationData.college}`, 30, 190);
 
-                const pdfBlob = doc.output('blob');
-                const url = URL.createObjectURL(pdfBlob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `Synapse_Receipt_${registrationData.name}.pdf`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-            }, 500);
+                doc.save(`Synapse_${registrationData.name}.pdf`);
+            }, 400);
         }
     </script>
 </body>
