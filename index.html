@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SYNAPSE 2026 | Registration</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -24,15 +24,16 @@
             font-family: 'Segoe UI', sans-serif;
             margin: 0;
             overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
 
         #particles-js {
             position: fixed;
             width: 100%; height: 100%;
-            top: 0; left: 0; z-index: -1;
+            top: 0; left: 0; z-index: 1; /* Low z-index */
         }
 
-        .main-content { position: relative; z-index: 5; padding: 20px; }
+        .main-content { position: relative; z-index: 10; padding: 20px; }
 
         .poster-container {
             max-width: 800px;
@@ -55,20 +56,14 @@
             font-weight: 800 !important; 
             color: #ffffff !important; 
             text-transform: uppercase;
-            text-shadow: 0 0 8px rgba(31, 193, 209, 0.4);
         }
 
-        /* FIX: Ensure typed text is black/visible in mobile text boxes */
+        /* FIX: High visibility for typed text */
         .form-control, .form-select {
             background-color: #ffffff !important;
             border: 2px solid #666;
             color: #000000 !important;
             font-weight: 600;
-        }
-
-        .form-control:focus {
-            box-shadow: 0 0 20px rgba(31, 193, 209, 0.6);
-            border-color: var(--poster-blue);
         }
 
         .event-grid { 
@@ -86,39 +81,34 @@
             letter-spacing: 2px;
         }
 
-        /* Success Page Styling */
+        /* FIX: Success Page Layering */
         #successMsg {
-            border: 3px solid var(--poster-blue);
-            background: rgba(0,0,0,0.9);
-            border-radius: 20px;
-            padding: 40px;
             position: relative;
-            z-index: 100; /* FIX: Ensure button is above particles and clickable on mobile */
+            z-index: 9999 !important; /* Force to absolute top */
+            border: 3px solid var(--poster-blue);
+            background: #000;
+            border-radius: 20px;
+            padding: 40px 20px;
+            pointer-events: auto !important;
         }
 
         .btn-receipt {
             background: var(--poster-blue);
             color: #000;
-            font-weight: 800;
+            font-weight: 900;
             border: none;
-            padding: 15px 30px;
+            padding: 20px;
+            width: 100%;
             margin-top: 20px;
-            border-radius: 10px;
+            border-radius: 12px;
             cursor: pointer;
-            display: inline-block;
-            text-decoration: none;
+            display: block;
+            position: relative;
+            z-index: 10000; /* Ensure button itself is top */
+            touch-action: manipulation;
         }
 
         #qrcode-hidden { display: none; }
-
-        /* Staggered Delays */
-        .delay-1 { animation-delay: 0.1s; }
-        .delay-2 { animation-delay: 0.2s; }
-        .delay-3 { animation-delay: 0.3s; }
-        .delay-4 { animation-delay: 0.4s; }
-        .delay-5 { animation-delay: 0.5s; }
-        .delay-6 { animation-delay: 0.6s; }
-
     </style>
 </head>
 <body>
@@ -143,37 +133,21 @@
                         
                         <form id="regForm">
                             <div class="row g-4">
-                                <div class="col-md-6 animate__animated animate__fadeInLeft delay-1">
-                                    <label class="form-label">Student Name</label>
-                                    <input type="text" id="name" class="form-control" required>
-                                </div>
-                                <div class="col-md-6 animate__animated animate__fadeInLeft delay-2">
-                                    <label class="form-label">Mobile Number</label>
-                                    <input type="tel" id="mobile" class="form-control" pattern="[0-9]{10}" required>
-                                </div>
-                                <div class="col-md-6 animate__animated animate__fadeInLeft delay-3">
-                                    <label class="form-label">Email Address</label>
-                                    <input type="email" id="email" class="form-control" required>
-                                </div>
-                                <div class="col-md-6 animate__animated animate__fadeInLeft delay-4">
-                                    <label class="form-label">College Name</label>
-                                    <input type="text" id="college" class="form-control" required>
-                                </div>
-                                <div class="col-md-6 animate__animated animate__fadeInLeft delay-5">
+                                <div class="col-md-6"><label class="form-label">Name</label><input type="text" id="name" class="form-control" required></div>
+                                <div class="col-md-6"><label class="form-label">Mobile</label><input type="tel" id="mobile" class="form-control" pattern="[0-9]{10}" required></div>
+                                <div class="col-md-6"><label class="form-label">Email</label><input type="email" id="email" class="form-control" required></div>
+                                <div class="col-md-6"><label class="form-label">College</label><input type="text" id="college" class="form-control" required></div>
+                                <div class="col-md-6">
                                     <label class="form-label">Department</label>
                                     <select id="department" class="form-select" required>
                                         <option value="" selected disabled>Select</option>
-                                        <option>Computer Science</option>
-                                        <option>Electronics</option>
-                                        <option>Mechanical</option>
-                                        <option>Civil</option>
+                                        <option>Computer Science</option><option>Electronics</option><option>Mechanical</option><option>Civil</option>
                                     </select>
                                 </div>
-                                <div class="col-md-6 animate__animated animate__fadeInLeft delay-6">
+                                <div class="col-md-6">
                                     <label class="form-label">Semester</label>
                                     <select id="semester" class="form-select" required>
-                                        <option>S1</option><option>S2</option><option>S3</option>
-                                        <option>S4</option><option>S5</option><option>S6</option>
+                                        <option>S1</option><option>S2</option><option>S3</option><option>S4</option><option>S5</option><option>S6</option>
                                     </select>
                                 </div>
                             </div>
@@ -181,10 +155,10 @@
                             <div class="mt-5">
                                 <label class="form-label d-block mb-3 text-center">Events Selection</label>
                                 <div class="event-grid row row-cols-2 g-3">
-                                    <div class="col"><div class="form-check"><input class="form-check-input event-check" type="checkbox" value="Hackathons" id="e1"><label class="form-check-label text-black" for="e1">Hackathons</label></div></div>
-                                    <div class="col"><div class="form-check"><input class="form-check-input event-check" type="checkbox" value="Workshops" id="e2"><label class="form-check-label text-black" for="e2">Workshops</label></div></div>
-                                    <div class="col"><div class="form-check"><input class="form-check-input event-check" type="checkbox" value="Gaming" id="e6"><label class="form-check-label text-black" for="e6">Gaming</label></div></div>
-                                    <div class="col"><div class="form-check"><input class="form-check-input event-check" type="checkbox" value="Quizzes" id="e5"><label class="form-check-label text-black" for="e5">Quizzes</label></div></div>
+                                    <div class="col text-center"><input class="event-check" type="checkbox" value="Hackathons" id="e1"> <label for="e1">Hackathons</label></div>
+                                    <div class="col text-center"><input class="event-check" type="checkbox" value="Workshops" id="e2"> <label for="e2">Workshops</label></div>
+                                    <div class="col text-center"><input class="event-check" type="checkbox" value="Gaming" id="e6"> <label for="e6">Gaming</label></div>
+                                    <div class="col text-center"><input class="event-check" type="checkbox" value="Quizzes" id="e5"> <label for="e5">Quizzes</label></div>
                                 </div>
                                 <button type="submit" id="submitBtn" class="btn btn-primary w-100 mt-5 shadow">SUBMIT REGISTRATION</button>
                             </div>
@@ -197,8 +171,7 @@
                     <p class="lead text-white">Your registration for SYNAPSE 2026 is confirmed.</p>
                     <hr style="border-color: #444;">
                     <div id="receiptDetails" class="text-start mb-4 px-3" style="font-size: 0.9rem; color: #bbb;"></div>
-                    <button id="downloadBtn" onclick="downloadPDF()" class="btn-receipt shadow">📥 DOWNLOAD QR RECEIPT (PDF)</button>
-                    <p class="mt-4 small text-muted">Please present this QR Receipt at the venue for verification.</p>
+                    <button id="downloadBtn" class="btn-receipt">📥 DOWNLOAD QR RECEIPT (PDF)</button>
                 </div>
 
             </div>
@@ -207,123 +180,82 @@
 
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script>
-        particlesJS("particles-js", { "particles": { "number": { "value": 50 }, "color": { "value": "#ffffff" }, "line_linked": { "enable": true, "color": "#1fc1d1" }, "move": { "enable": true, "speed": 2 } } });
+        particlesJS("particles-js", { "particles": { "number": { "value": 40 }, "color": { "value": "#ffffff" }, "line_linked": { "enable": true, "color": "#1fc1d1" }, "move": { "enable": true, "speed": 1 } } });
 
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwKjrjjrV5hJUrqaP5nWjYAW2HW50y6EI3_k9bfzriS8ktMuAHpYe1i8K6IyPFV-jsndA/exec';
-        const form = document.getElementById('regForm');
         let registrationData = {};
 
-        form.addEventListener('submit', e => {
+        document.getElementById('regForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const submitBtn = document.getElementById('submitBtn');
-            const selectedEvents = Array.from(document.querySelectorAll('.event-check:checked')).map(cb => cb.value);
+            const btn = document.getElementById('submitBtn');
+            const mobile = document.getElementById('mobile').value;
+            const events = Array.from(document.querySelectorAll('.event-check:checked')).map(cb => cb.value);
             
-            if(selectedEvents.length === 0) { alert("Select at least one event!"); return; }
+            if(events.length === 0) return alert("Select an event!");
 
-            const mobileInput = document.getElementById('mobile').value;
+            btn.disabled = true;
+            btn.innerHTML = 'CHECKING DATABASE...';
 
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = 'CHECKING DUPLICATES...';
-
-            // Action: CHECK DUPLICATE BEFORE SUBMITTING
-            fetch(`${scriptURL}?action=search&mobile=${mobileInput}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data !== "NotFound") {
-                        alert("Error: This mobile number is already registered for Synapse 2026!");
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = 'SUBMIT REGISTRATION';
-                    } else {
-                        submitRegistration(selectedEvents);
-                    }
-                })
-                .catch(() => {
-                    // Fallback to submit if search fails for some reason
-                    submitRegistration(selectedEvents);
-                });
+            // 1. Duplicate Check
+            fetch(`${scriptURL}?action=search&mobile=${mobile}`)
+            .then(res => res.json())
+            .then(data => {
+                if(data !== "NotFound") {
+                    alert("Error: This mobile number is already registered!");
+                    btn.disabled = false; btn.innerHTML = 'SUBMIT REGISTRATION';
+                } else {
+                    sendData(events);
+                }
+            }).catch(() => sendData(events));
         });
 
-        function submitRegistration(selectedEvents) {
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.innerHTML = 'PROCESSING...';
-
+        function sendData(events) {
+            const btn = document.getElementById('submitBtn');
+            btn.innerHTML = 'REGISTERING...';
             registrationData = {
                 name: document.getElementById('name').value,
                 mobile: document.getElementById('mobile').value,
-                email: document.getElementById('email').value,
                 college: document.getElementById('college').value,
-                department: document.getElementById('department').value,
-                semester: document.getElementById('semester').value,
-                events: selectedEvents.join(", ")
+                events: events.join(", ")
             };
-
-            let isSubmitted = false;
-            const fallback = setTimeout(() => { if(!isSubmitted) handleSuccess(); }, 6000);
-
             fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(registrationData) })
-            .then(() => { isSubmitted = true; clearTimeout(fallback); handleSuccess(); })
-            .catch(() => { if(!isSubmitted) handleSuccess(); });
+            .then(() => handleSuccess());
         }
 
         function handleSuccess() {
             document.getElementById('formCard').classList.add('d-none');
             document.querySelector('.poster-container').classList.add('d-none');
             document.getElementById('successMsg').classList.remove('d-none');
-            document.getElementById('receiptDetails').innerHTML = `<b>Name:</b> ${registrationData.name}<br><b>College:</b> ${registrationData.college}`;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            document.getElementById('receiptDetails').innerHTML = `<b>Name:</b> ${registrationData.name}<br><b>Mobile:</b> ${registrationData.mobile}`;
+            window.scrollTo(0,0);
         }
 
-        function downloadPDF() {
+        // FIX: Direct Mobile Event Listener
+        document.getElementById('downloadBtn').addEventListener('click', function() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            const qrContainer = document.getElementById("qrcode-hidden");
-            qrDiv = qrContainer;
+            const qrDiv = document.getElementById("qrcode-hidden");
             qrDiv.innerHTML = ""; 
 
-            const simpleData = registrationData.mobile;
-
             new QRCode(qrDiv, {
-                text: simpleData,
-                width: 256,
-                height: 256,
-                colorDark: "#000000",
-                colorLight: "#ffffff",
+                text: registrationData.mobile,
+                width: 256, height: 256,
+                colorDark: "#000000", colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.H
             });
 
             setTimeout(() => {
-                const qrImg = qrDiv.querySelector("img").src;
-                
+                const imgData = qrDiv.querySelector("img").src;
                 doc.setFillColor(7, 6, 15); doc.rect(0, 0, 210, 297, 'F');
-                doc.setTextColor(31, 193, 209); doc.setFontSize(26);
-                doc.text("SYNAPSE 2026", 105, 40, { align: "center" });
-                
-                doc.setFillColor(255, 255, 255);
-                doc.rect(60, 55, 90, 90, 'F');
-                
-                doc.addImage(qrImg, 'PNG', 65, 60, 80, 80);
-                
-                doc.setTextColor(255, 255, 255);
-                doc.setFontSize(14);
-                doc.text(`Student Name: ${registrationData.name}`, 30, 160);
-                doc.text(`Mobile Number: ${registrationData.mobile}`, 30, 175);
-                doc.text(`College: ${registrationData.college}`, 30, 190);
-                
-                doc.setFontSize(10);
-                doc.setTextColor(150, 150, 150);
-                doc.text("Payyanur Campus | March 17, 2026", 105, 230, { align: "center" });
-                
-                // Using blob to trigger a more mobile-friendly download
-                const pdfOutput = doc.output('blob');
-                const url = URL.createObjectURL(pdfOutput);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `Synapse2026_${registrationData.name}.pdf`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                doc.setTextColor(31, 193, 209); doc.setFontSize(26); doc.text("SYNAPSE 2026", 105, 40, { align: "center" });
+                doc.setFillColor(255, 255, 255); doc.rect(60, 55, 90, 90, 'F');
+                doc.addImage(imgData, 'PNG', 65, 60, 80, 80);
+                doc.setTextColor(255, 255, 255); doc.setFontSize(14);
+                doc.text(`Name: ${registrationData.name}`, 30, 160);
+                doc.text(`Mobile: ${registrationData.mobile}`, 30, 175);
+                doc.save(`Synapse2026_${registrationData.name}.pdf`);
             }, 600);
-        }
+        });
     </script>
 </body>
 </html>
