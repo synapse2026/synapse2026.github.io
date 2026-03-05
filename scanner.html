@@ -20,9 +20,9 @@
             background: #000;
         }
 
-        /* High-Visibility Manual Controls */
         .controls { margin-top: 20px; }
-        .btn-start { background: #1fc1d1; color: #000; font-weight: 900; border: none; padding: 15px; width: 100%; border-radius: 10px; margin-bottom: 10px; }
+        .btn-start { background: #1fc1d1; color: #000; font-weight: 900; border: none; padding: 15px; width: 100%; border-radius: 10px; margin-bottom: 15px; }
+        .btn-capture { background: #ffc107; color: #000; font-weight: 900; border: none; padding: 12px; width: 100%; border-radius: 10px; display: none; margin-bottom: 10px; }
         .btn-checkin { background: #d11fb7; color: #fff; font-weight: 900; border: none; padding: 15px; width: 100%; border-radius: 10px; }
         
         .result-card { 
@@ -32,10 +32,9 @@
             margin-top: 20px; 
             display: none; 
             border: 2px solid #1fc1d1;
-            animation: fadeIn 0.5s;
         }
 
-        .scan-status { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #1fc1d1; margin-top: 10px; }
+        .scan-status { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #1fc1d1; margin: 10px 0; }
     </style>
 </head>
 <body>
@@ -47,74 +46,84 @@
         <div id="status" class="scan-status">Camera: Offline</div>
 
         <div class="controls">
-            <button id="startBtn" class="btn-start">📸 OPEN CAMERA & START SCAN</button>
+            <button id="startBtn" class="btn-start">📸 START CAMERA</button>
+            <button id="captureBtn" class="btn-capture">🔍 CAPTURE & VERIFY MANUALLY</button>
         </div>
 
         <div id="result" class="result-card text-start">
-            <h4 style="color: #1fc1d1;">✓ STUDENT VERIFIED</h4>
+            <h4 style="color: #1fc1d1;">✓ VERIFIED</h4>
             <hr style="border-color: #444;">
             <div id="scannedData" class="mb-4" style="line-height: 1.8; font-size: 1.1rem;"></div>
-            
             <button id="checkinBtn" class="btn-checkin mb-3">✅ MARK AS PRESENT</button>
             <button class="btn btn-outline-secondary w-100 text-white" onclick="location.reload()">Reset Scanner</button>
         </div>
-
-        <p class="mt-5 small opacity-50">Authorized Staff Only - Payyanur Campus</p>
     </div>
 
     <script>
-        // Replace this with your actual Google Script URL
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwKjrjjrV5hJUrqaP5nWjYAW2HW50y6EI3_k9bfzriS8ktMuAHpYe1i8K6IyPFV-jsndA/exec'; // MUST BE YOUR GOOGLE SCRIPT URL
-        
         const html5QrCode = new Html5Qrcode("reader");
         const startBtn = document.getElementById('startBtn');
+        const captureBtn = document.getElementById('captureBtn');
         const statusText = document.getElementById('status');
         let currentMobile = "";
 
         const onScanSuccess = (decodedText) => {
-            // Stop scanning and vibrate
             navigator.vibrate(200);
             html5QrCode.stop().then(() => {
-                statusText.innerText = "Camera: Stopped (Success)";
+                captureBtn.style.display = 'none';
+                statusText.innerText = "Camera: Success";
                 document.getElementById('result').style.display = 'block';
                 document.getElementById('scannedData').innerHTML = decodedText.replaceAll('|', '<br>');
                 
-                // Extract mobile for Check-in
                 const match = decodedText.match(/Mobile:\s*(\d{10})/);
                 currentMobile = match ? match[1] : "";
             });
         };
 
-        // Manual Start Trigger
+        // Manual Start
         startBtn.addEventListener('click', () => {
             startBtn.style.display = 'none';
+            captureBtn.style.display = 'block';
             statusText.innerText = "Camera: Starting...";
             
             html5QrCode.start(
                 { facingMode: "environment" }, 
-                { fps: 20, qrbox: { width: 250, height: 250 } }, 
+                { fps: 20, qrbox: { width: 280, height: 280 } }, 
                 onScanSuccess
             ).then(() => {
                 statusText.innerText = "Camera: Active (Scanning)";
             }).catch(err => {
-                statusText.innerText = "Error: " + err;
+                alert("Camera Error: " + err);
                 startBtn.style.display = 'block';
             });
         });
 
-        // Check-in logic
+        // NEW: Force a scan from a still frame if auto-scan is stuck
+        captureBtn.addEventListener('click', () => {
+            statusText.innerText = "Analyzing Frame...";
+            const videoElement = document.querySelector('video');
+            
+            if (videoElement) {
+                // The scanImage function forces the library to look at the current video frame as a static image
+                html5QrCode.scanFile(videoElement, false) 
+                .then(decodedText => onScanSuccess(decodedText))
+                .catch(err => {
+                    statusText.innerText = "Still blurry. Try moving closer.";
+                });
+            }
+        });
+
         document.getElementById('checkinBtn').addEventListener('click', function() {
             this.disabled = true;
             this.innerText = "UPDATING...";
-            
             fetch(`${scriptURL}?action=checkin&mobile=${currentMobile}`)
                 .then(res => res.text())
                 .then(response => {
                     alert("Attendance Status: " + response);
-                    location.reload(); // Simplest way to reset everything
+                    location.reload();
                 })
-                .catch(err => {
-                    alert("Sheet Update Failed. Check Internet.");
+                .catch(() => {
+                    alert("Update failed. Check net.");
                     this.disabled = false;
                     this.innerText = "✅ MARK AS PRESENT";
                 });
