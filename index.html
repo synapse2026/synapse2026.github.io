@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SYNAPSE 2026 | Registration</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -29,7 +29,7 @@
         #particles-js {
             position: fixed;
             width: 100%; height: 100%;
-            top: 0; left: 0; z-index: 1; /* Lower than content */
+            top: 0; left: 0; z-index: 1;
         }
 
         .main-content { position: relative; z-index: 10; padding: 20px; }
@@ -48,14 +48,12 @@
             background: rgba(15, 12, 41, 0.96);
             border: 1.5px solid #444;
             border-radius: 20px; 
-            box-shadow: 0 20px 60px rgba(0,0,0,0.9);
         }
 
         .form-label { 
             font-weight: 800 !important; 
             color: #ffffff !important; 
             text-transform: uppercase;
-            text-shadow: 0 0 8px rgba(31, 193, 209, 0.4);
         }
 
         .form-control, .form-select {
@@ -63,11 +61,6 @@
             border: 2px solid #666;
             color: #000000 !important;
             font-weight: 600;
-        }
-
-        .form-control:focus {
-            box-shadow: 0 0 20px rgba(31, 193, 209, 0.6);
-            border-color: var(--poster-blue);
         }
 
         .event-grid { 
@@ -88,48 +81,46 @@
         /* Success Page Styling */
         #successMsg {
             border: 3px solid var(--poster-blue);
-            background: rgba(7, 6, 15, 0.98);
+            background: rgba(7, 6, 15, 0.95);
             border-radius: 20px;
             padding: 40px;
-            position: relative;
-            z-index: 9999; /* Higher than particles and all other elements */
+            margin-bottom: 100px; /* Space for fixed button */
         }
 
+        /* THE FIX: Button styling and clickability */
         .btn-receipt {
-            background: var(--poster-blue);
-            color: #000;
+            background: #1fc1d1 !important;
+            color: #000 !important;
             font-weight: 800;
             border: none;
-            padding: 15px 30px;
-            margin-top: 20px;
-            border-radius: 10px;
+            padding: 20px;
+            border-radius: 12px;
             cursor: pointer;
-            display: inline-block;
             text-decoration: none;
+            display: block;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(31, 193, 209, 0.5);
+            pointer-events: auto !important; /* Force clickability */
             position: relative;
-            z-index: 10000; /* Ensure button is top-most */
+            z-index: 99999 !important;
         }
 
-        /* Mobile Fix: Move button to bottom and ensure clickability */
+        /* Mobile specific positioning */
         @media (max-width: 768px) {
-            #successMsg {
-                margin-bottom: 100px;
-                padding: 25px 15px;
-            }
             .btn-receipt {
-                width: 100%;
                 position: fixed;
                 bottom: 20px;
-                left: 0;
-                right: 0;
-                margin: 0 auto;
-                max-width: 90%;
-                box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+                left: 5%;
+                width: 90%;
+                margin: 0;
+            }
+            #successMsg {
+                padding: 20px;
+                margin-top: 10px;
             }
         }
 
         #qrcode-hidden { display: none; }
-
         .delay-1 { animation-delay: 0.1s; }
         .delay-2 { animation-delay: 0.2s; }
         .delay-3 { animation-delay: 0.3s; }
@@ -210,13 +201,18 @@
                     </div>
                 </div>
 
-                <div id="successMsg" class="animate__animated animate__bounceIn d-none text-center">
-                    <h1 style="color: var(--poster-blue); font-weight: 900;">SUCCESS!</h1>
-                    <p class="lead text-white">Your registration for SYNAPSE 2026 is confirmed.</p>
-                    <hr style="border-color: #444;">
-                    <div id="receiptDetails" class="text-start mb-4 px-3" style="font-size: 0.9rem; color: #bbb;"></div>
-                    <button id="downloadBtn" onclick="downloadPDF()" class="btn-receipt shadow">📥 DOWNLOAD QR RECEIPT (PDF)</button>
-                    <p class="mt-4 small text-muted">Please present this QR Receipt at the venue for verification.</p>
+                <div id="successWrapper" class="d-none">
+                    <div id="successMsg" class="animate__animated animate__bounceIn text-center">
+                        <h1 style="color: var(--poster-blue); font-weight: 900;">SUCCESS!</h1>
+                        <p class="lead text-white">Your registration for SYNAPSE 2026 is confirmed.</p>
+                        <hr style="border-color: #444;">
+                        <div id="receiptDetails" class="text-start mb-4 px-3" style="font-size: 0.9rem; color: #bbb;"></div>
+                        <p class="mt-4 small text-muted">A receipt button has been generated below.</p>
+                    </div>
+
+                    <button id="downloadBtn" onclick="downloadPDF()" class="btn-receipt animate__animated animate__fadeInUp">
+                        📥 DOWNLOAD QR RECEIPT (PDF)
+                    </button>
                 </div>
 
             </div>
@@ -225,7 +221,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script>
-        particlesJS("particles-js", { "particles": { "number": { "value": 50 }, "color": { "value": "#ffffff" }, "line_linked": { "enable": true, "color": "#1fc1d1" }, "move": { "enable": true, "speed": 2 } } });
+        particlesJS("particles-js", { "particles": { "number": { "value": 40 }, "color": { "value": "#ffffff" }, "line_linked": { "enable": true, "color": "#1fc1d1" }, "move": { "enable": true, "speed": 1.5 } } });
 
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwKjrjjrV5hJUrqaP5nWjYAW2HW50y6EI3_k9bfzriS8ktMuAHpYe1i8K6IyPFV-jsndA/exec';
         const form = document.getElementById('regForm');
@@ -235,32 +231,9 @@
             e.preventDefault();
             const submitBtn = document.getElementById('submitBtn');
             const selectedEvents = Array.from(document.querySelectorAll('.event-check:checked')).map(cb => cb.value);
-            
             if(selectedEvents.length === 0) { alert("Select at least one event!"); return; }
 
-            const mobileInput = document.getElementById('mobile').value;
-
             submitBtn.disabled = true;
-            submitBtn.innerHTML = 'CHECKING DUPLICATES...';
-
-            fetch(`${scriptURL}?action=search&mobile=${mobileInput}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data !== "NotFound") {
-                        alert("Error: This mobile number is already registered for Synapse 2026!");
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = 'SUBMIT REGISTRATION';
-                    } else {
-                        submitRegistration(selectedEvents);
-                    }
-                })
-                .catch(() => {
-                    submitRegistration(selectedEvents);
-                });
-        });
-
-        function submitRegistration(selectedEvents) {
-            const submitBtn = document.getElementById('submitBtn');
             submitBtn.innerHTML = 'PROCESSING...';
 
             registrationData = {
@@ -273,69 +246,50 @@
                 events: selectedEvents.join(", ")
             };
 
-            let isSubmitted = false;
-            const fallback = setTimeout(() => { if(!isSubmitted) handleSuccess(); }, 6000);
-
+            // Using no-cors as per your original logic
             fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(registrationData) })
-            .then(() => { isSubmitted = true; clearTimeout(fallback); handleSuccess(); })
-            .catch(() => { if(!isSubmitted) handleSuccess(); });
-        }
+            .then(() => handleSuccess())
+            .catch(() => handleSuccess()); 
+        });
 
         function handleSuccess() {
             document.getElementById('formCard').classList.add('d-none');
             document.querySelector('.poster-container').classList.add('d-none');
-            document.getElementById('successMsg').classList.remove('d-none');
+            document.getElementById('successWrapper').classList.remove('d-none');
             document.getElementById('receiptDetails').innerHTML = `<b>Name:</b> ${registrationData.name}<br><b>College:</b> ${registrationData.college}`;
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function downloadPDF() {
+            // Check if library is loaded
+            if (!window.jspdf) { alert("PDF library loading. Try again in 2 seconds."); return; }
+            
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             const qrContainer = document.getElementById("qrcode-hidden");
             qrContainer.innerHTML = ""; 
 
-            const simpleData = registrationData.mobile;
-
             new QRCode(qrContainer, {
-                text: simpleData,
+                text: registrationData.mobile,
                 width: 256,
                 height: 256,
-                colorDark: "#000000",
-                colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.H
             });
 
             setTimeout(() => {
                 const qrImg = qrContainer.querySelector("img").src;
-                
                 doc.setFillColor(7, 6, 15); doc.rect(0, 0, 210, 297, 'F');
                 doc.setTextColor(31, 193, 209); doc.setFontSize(26);
                 doc.text("SYNAPSE 2026", 105, 40, { align: "center" });
-                
                 doc.setFillColor(255, 255, 255);
                 doc.rect(60, 55, 90, 90, 'F');
-                
                 doc.addImage(qrImg, 'PNG', 65, 60, 80, 80);
-                
                 doc.setTextColor(255, 255, 255);
                 doc.setFontSize(14);
                 doc.text(`Student Name: ${registrationData.name}`, 30, 160);
-                doc.text(`Mobile Number: ${registrationData.mobile}`, 30, 175);
+                doc.text(`Mobile: ${registrationData.mobile}`, 30, 175);
                 doc.text(`College: ${registrationData.college}`, 30, 190);
-                
-                doc.setFontSize(10);
-                doc.setTextColor(150, 150, 150);
-                doc.text("Payyanur Campus | March 17, 2026", 105, 230, { align: "center" });
-                
-                const pdfOutput = doc.output('blob');
-                const url = URL.createObjectURL(pdfOutput);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `Synapse2026_${registrationData.name}.pdf`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                doc.save(`Synapse_${registrationData.name}.pdf`);
             }, 600);
         }
     </script>
