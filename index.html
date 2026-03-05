@@ -14,7 +14,6 @@
         :root {
             --poster-pink: #d11fb7;
             --poster-blue: #1fc1d1;
-            --poster-purple: #741fd1;
             --background-dark: #07060f;
         }
 
@@ -36,34 +35,14 @@
 
         .main-content { position: relative; z-index: 5; padding: 20px; }
 
-        .poster-container {
-            max-width: 800px;
-            margin: 10px auto 30px auto;
-            border-radius: 12px;
-            box-shadow: 0 0 30px rgba(116, 31, 209, 0.4);
-            border: 2px solid var(--poster-purple);
-        }
-
-        .poster-image { width: 100%; height: auto; display: block; border-radius: 10px; }
-
-        .card { 
-            background: rgba(15, 12, 41, 0.96);
-            border: 1.5px solid #444;
-            border-radius: 20px; 
-            box-shadow: 0 20px 60px rgba(0,0,0,0.9);
-        }
-
-        .form-control, .form-select { background: #fff !important; color: #000 !important; font-weight: 600; }
-        .btn-primary { background: linear-gradient(135deg, var(--poster-pink), #741fd1); border: none; padding: 18px; font-weight: 800; }
-
-        /* MINIMAL SUCCESS OVERLAY */
+        /* SUCCESS OVERLAY - Force this to the front */
         #successWrapper {
             position: fixed;
             top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: #000;
-            z-index: 9999999 !important; /* Highest possible depth */
-            display: none; /* Controlled by JS */
+            width: 100vw; height: 100vh;
+            background: var(--background-dark);
+            z-index: 999999 !important;
+            display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -71,35 +50,40 @@
             text-align: center;
         }
 
-        .success-box {
+        .success-card {
+            background: rgba(15, 12, 41, 0.95);
+            border: 2px solid var(--poster-blue);
+            padding: 30px;
+            border-radius: 20px;
             width: 100%;
             max-width: 400px;
-            padding: 25px;
-            border: 2px solid var(--poster-blue);
-            border-radius: 15px;
-            background: #07060f;
+            box-shadow: 0 0 40px rgba(31, 193, 209, 0.3);
         }
 
-        /* BIG REDESIGNED CLICKABLE BUTTON */
+        /* BIG CLICKABLE BUTTON FOR MOBILE */
         .btn-download-final {
             background: #1fc1d1 !important;
             color: #000 !important;
             font-weight: 900;
             border: none;
-            padding: 22px;
+            padding: 20px;
             width: 100%;
-            border-radius: 12px;
+            border-radius: 15px;
             font-size: 1.2rem;
-            margin-top: 30px;
+            margin-top: 25px;
             cursor: pointer !important;
             display: block;
             text-transform: uppercase;
-            box-shadow: 0 10px 30px rgba(31, 193, 209, 0.4);
-            pointer-events: auto !important; /* Forces response */
+            box-shadow: 0 10px 30px rgba(31, 193, 209, 0.5);
+            /* This ensures the button is clickable */
+            pointer-events: auto !important;
             position: relative;
-            z-index: 10000000 !important;
+            z-index: 1000000 !important;
         }
 
+        .form-control, .form-select { background: #fff !important; color: #000 !important; font-weight: 600; }
+        .event-grid { border: 2px solid var(--poster-pink); background: rgba(209, 31, 183, 0.1); border-radius: 15px; padding: 15px; }
+        .btn-primary { background: linear-gradient(135deg, var(--poster-pink), #741fd1); border: none; padding: 15px; font-weight: 800; }
         #qrcode-hidden { display: none; }
     </style>
 </head>
@@ -109,39 +93,42 @@
     <div id="qrcode-hidden"></div> 
 
     <div class="main-content container my-4" id="mainUI">
-        <div class="poster-container animate__animated animate__fadeIn">
-            <img src="synapse-poster.jpg" alt="Synapse 2026 Poster" class="poster-image">
-        </div>
-
         <div class="row justify-content-center">
             <div class="col-lg-7">
-                <div class="card p-4 p-md-5">
-                    <h2 class="text-center mb-4" style="color: var(--poster-blue); font-weight: 900;">REGISTRATION</h2>
+                <div class="card p-4 p-md-5" style="background: rgba(15,12,41,0.9); border-radius: 25px;">
+                    <h2 class="text-center mb-4" style="color: var(--poster-blue); font-weight: 900;">SYNAPSE 2026</h2>
                     <form id="regForm">
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Full Name</label>
+                            <label class="form-label">Full Name</label>
                             <input type="text" id="name" class="form-control" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Mobile Number</label>
+                            <label class="form-label">Mobile Number</label>
                             <input type="tel" id="mobile" class="form-control" pattern="[0-9]{10}" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold">College</label>
+                            <label class="form-label">College</label>
                             <input type="text" id="college" class="form-control" required>
                         </div>
                         <div class="row">
                             <div class="col-6 mb-3">
-                                <label class="form-label fw-bold">Department</label>
+                                <label class="form-label">Dept</label>
                                 <select id="department" class="form-select" required>
                                     <option>CS</option><option>EC</option><option>MECH</option><option>CIVIL</option>
                                 </select>
                             </div>
                             <div class="col-6 mb-3">
-                                <label class="form-label fw-bold">Semester</label>
+                                <label class="form-label">Sem</label>
                                 <select id="semester" class="form-select" required>
                                     <option>S1</option><option>S2</option><option>S4</option><option>S6</option>
                                 </select>
+                            </div>
+                        </div>
+                        <div class="event-grid mt-3">
+                            <label class="d-block text-center mb-2 fw-bold">SELECT EVENTS</label>
+                            <div class="row text-center">
+                                <div class="col-6"><input type="checkbox" class="event-check" value="Hackathon" id="c1"> <label for="c1">Hackathon</label></div>
+                                <div class="col-6"><input type="checkbox" class="event-check" value="Workshop" id="c2"> <label for="c2">Workshop</label></div>
                             </div>
                         </div>
                         <button type="submit" id="submitBtn" class="btn btn-primary w-100 mt-4">SUBMIT REGISTRATION</button>
@@ -152,15 +139,15 @@
     </div>
 
     <div id="successWrapper">
-        <div class="success-box animate__animated animate__zoomIn">
+        <div class="success-card animate__animated animate__zoomIn">
             <h1 style="color: var(--poster-blue); font-weight: 900;">SUCCESS!</h1>
-            <p class="text-white">Registration confirmed for Synapse 2026.</p>
-            <div id="details" class="text-start small text-light border-top border-secondary pt-3 mt-3"></div>
+            <p>Registration confirmed for Synapse 2026.</p>
+            <div id="details" class="text-start small border-top border-secondary pt-2 mt-2"></div>
             
             <button id="finalDownloadBtn" onclick="downloadPDF()" class="btn-download-final">
-                📥 DOWNLOAD RECEIPT (PDF)
+                GET RECEIPT (PDF)
             </button>
-            <p class="mt-4 small text-muted">Tap the blue button above to save your QR receipt.</p>
+            <p class="mt-3 x-small text-muted">Tap the button above to save your QR receipt.</p>
         </div>
     </div>
 
@@ -182,7 +169,8 @@
                 mobile: document.getElementById('mobile').value,
                 college: document.getElementById('college').value,
                 department: document.getElementById('department').value,
-                semester: document.getElementById('semester').value
+                semester: document.getElementById('semester').value,
+                events: Array.from(document.querySelectorAll('.event-check:checked')).map(c => c.value).join(", ")
             };
 
             fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(registrationData) })
@@ -191,19 +179,9 @@
         });
 
         function showSuccess() {
-            // Completely hide the main UI to remove any possible interference
             document.getElementById('mainUI').style.display = 'none';
-            const wrap = document.getElementById('successWrapper');
-            wrap.style.display = 'flex';
-            
-            document.getElementById('details').innerHTML = `
-                <b>Name:</b> ${registrationData.name}<br>
-                <b>ID:</b> ${registrationData.mobile}<br>
-                <b>College:</b> ${registrationData.college}
-            `;
-            
-            // Optional: Auto-try download after 1 second
-            setTimeout(downloadPDF, 1500);
+            document.getElementById('successWrapper').style.display = 'flex';
+            document.getElementById('details').innerHTML = `<b>Name:</b> ${registrationData.name}<br><b>ID:</b> ${registrationData.mobile}`;
         }
 
         function downloadPDF() {
@@ -217,10 +195,12 @@
                 width: 256, height: 256
             });
 
+            // Brief delay to allow QR code generation
             setTimeout(() => {
                 const canvas = qrContainer.querySelector('canvas');
                 const qrImg = canvas ? canvas.toDataURL("image/png") : qrContainer.querySelector("img").src;
 
+                // PDF Design
                 doc.setFillColor(7, 6, 15); doc.rect(0, 0, 210, 297, 'F');
                 doc.setTextColor(31, 193, 209); doc.setFontSize(26);
                 doc.text("SYNAPSE 2026", 105, 40, { align: "center" });
@@ -235,6 +215,7 @@
                 doc.text(`Mobile: ${registrationData.mobile}`, 30, 175);
                 doc.text(`College: ${registrationData.college}`, 30, 190);
 
+                // MOBILE COMPATIBLE DOWNLOAD METHOD
                 const pdfBlob = doc.output('blob');
                 const url = URL.createObjectURL(pdfBlob);
                 const link = document.createElement('a');
