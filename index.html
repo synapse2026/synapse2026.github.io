@@ -21,7 +21,7 @@
         body { 
             background-color: var(--background-dark);
             color: #fff;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
             margin: 0;
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
@@ -36,7 +36,6 @@
 
         .main-content { position: relative; z-index: 5; padding: 20px; }
 
-        /* POSTER STYLING */
         .poster-container {
             max-width: 800px;
             margin: 10px auto 30px auto;
@@ -46,7 +45,32 @@
         }
         .poster-image { width: 100%; height: auto; display: block; border-radius: 10px; }
 
-        /* SUCCESS OVERLAY - The "Working" Framework */
+        /* FORM FIELD VISIBILITY UPDATES */
+        .form-label { 
+            color: #ffffff !important; 
+            font-weight: 700 !important; 
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-control, .form-select { 
+            background: #ffffff !important; 
+            color: #000000 !important; 
+            font-weight: 600 !important;
+            border: 2px solid var(--poster-blue);
+            padding: 12px;
+            border-radius: 10px;
+        }
+
+        .form-control::placeholder {
+            color: #888;
+        }
+
+        /* SUCCESS OVERLAY */
         #successWrapper {
             position: fixed;
             top: 0; left: 0;
@@ -90,9 +114,8 @@
             z-index: 1000000 !important;
         }
 
-        .form-control, .form-select { background: #fff !important; color: #000 !important; font-weight: 600; }
         .event-grid { border: 2px solid var(--poster-pink); background: rgba(209, 31, 183, 0.1); border-radius: 15px; padding: 15px; }
-        .btn-primary { background: linear-gradient(135deg, var(--poster-pink), #741fd1); border: none; padding: 15px; font-weight: 800; }
+        .btn-primary { background: linear-gradient(135deg, var(--poster-pink), #741fd1); border: none; padding: 18px; font-weight: 800; letter-spacing: 1px; }
         #qrcode-hidden { display: none; }
     </style>
 </head>
@@ -110,29 +133,29 @@
         <div class="row justify-content-center">
             <div class="col-lg-7">
                 <div class="card p-4 p-md-5" style="background: rgba(15,12,41,0.95); border-radius: 25px; border: 1px solid #444;">
-                    <h2 class="text-center mb-4" style="color: var(--poster-blue); font-weight: 900; text-transform: uppercase;">Registration</h2>
+                    <h2 class="text-center mb-5" style="color: var(--poster-blue); font-weight: 900; text-transform: uppercase; letter-spacing: 2px;">Registration Form</h2>
                     
                     <form id="regForm">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Full Name</label>
-                            <input type="text" id="name" class="form-control" required>
+                        <div class="mb-4">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" id="name" class="form-control" placeholder="Enter your full name" required>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Mobile Number</label>
-                            <input type="tel" id="mobile" class="form-control" pattern="[0-9]{10}" required>
+                        <div class="mb-4">
+                            <label class="form-label">Mobile Number</label>
+                            <input type="tel" id="mobile" class="form-control" pattern="[0-9]{10}" placeholder="10-digit number" required>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Email Address</label>
-                            <input type="email" id="email" class="form-control" required>
+                        <div class="mb-4">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" id="email" class="form-control" placeholder="name@example.com" required>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">College Name</label>
-                            <input type="text" id="college" class="form-control" required>
+                        <div class="mb-4">
+                            <label class="form-label">College Name</label>
+                            <input type="text" id="college" class="form-control" placeholder="Your college name" required>
                         </div>
                         
                         <div class="row">
-                            <div class="col-6 mb-3">
-                                <label class="form-label fw-bold">Department</label>
+                            <div class="col-6 mb-4">
+                                <label class="form-label">Department</label>
                                 <select id="department" class="form-select" required>
                                     <option value="" disabled selected>Select</option>
                                     <option>Computer Science</option>
@@ -141,8 +164,8 @@
                                     <option>Civil</option>
                                 </select>
                             </div>
-                            <div class="col-6 mb-3">
-                                <label class="form-label fw-bold">Semester</label>
+                            <div class="col-6 mb-4">
+                                <label class="form-label">Semester</label>
                                 <select id="semester" class="form-select" required>
                                     <option>S1</option><option>S2</option><option>S3</option>
                                     <option>S4</option><option>S5</option><option>S6</option>
@@ -150,8 +173,8 @@
                             </div>
                         </div>
 
-                        <div class="event-grid mt-3">
-                            <label class="d-block text-center mb-2 fw-bold text-white">SELECT EVENTS</label>
+                        <div class="event-grid mt-2">
+                            <label class="d-block text-center mb-3 fw-bold text-white">SELECT EVENTS</label>
                             <div class="row g-2">
                                 <div class="col-6">
                                     <div class="form-check">
@@ -240,7 +263,6 @@
                 <b>Mobile:</b> ${registrationData.mobile}<br>
                 <b>College:</b> ${registrationData.college}
             `;
-            // Trigger auto-download like the working version
             setTimeout(downloadPDF, 1000);
         }
 
@@ -259,7 +281,6 @@
                 const canvas = qrContainer.querySelector('canvas');
                 const qrImg = canvas ? canvas.toDataURL("image/png") : qrContainer.querySelector("img").src;
 
-                // PDF Layout
                 doc.setFillColor(7, 6, 15); doc.rect(0, 0, 210, 297, 'F');
                 doc.setTextColor(31, 193, 209); doc.setFontSize(26);
                 doc.text("SYNAPSE 2026", 105, 40, { align: "center" });
