@@ -26,10 +26,13 @@
             overflow-x: hidden;
         }
 
+        /* CRITICAL FIX: Ensure particles never block clicks */
         #particles-js {
             position: fixed;
             width: 100%; height: 100%;
-            top: 0; left: 0; z-index: 1;
+            top: 0; left: 0; 
+            z-index: 1;
+            pointer-events: none !important; 
         }
 
         .main-content { position: relative; z-index: 10; padding: 20px; }
@@ -78,16 +81,14 @@
             letter-spacing: 2px;
         }
 
-        /* Success Page Styling */
         #successMsg {
             border: 3px solid var(--poster-blue);
             background: rgba(7, 6, 15, 0.95);
             border-radius: 20px;
             padding: 40px;
-            margin-bottom: 100px; /* Space for fixed button */
+            margin-bottom: 120px;
         }
 
-        /* THE FIX: Button styling and clickability */
         .btn-receipt {
             background: #1fc1d1 !important;
             color: #000 !important;
@@ -99,24 +100,17 @@
             text-decoration: none;
             display: block;
             text-align: center;
-            box-shadow: 0 0 20px rgba(31, 193, 209, 0.5);
-            pointer-events: auto !important; /* Force clickability */
+            box-shadow: 0 0 25px rgba(31, 193, 209, 0.6);
             position: relative;
             z-index: 99999 !important;
         }
 
-        /* Mobile specific positioning */
         @media (max-width: 768px) {
             .btn-receipt {
                 position: fixed;
                 bottom: 20px;
                 left: 5%;
                 width: 90%;
-                margin: 0;
-            }
-            #successMsg {
-                padding: 20px;
-                margin-top: 10px;
             }
         }
 
@@ -137,7 +131,7 @@
 
     <div class="main-content container my-4">
         
-        <div class="poster-container animate__animated animate__fadeIn">
+        <div class="poster-container animate__animated animate__fadeIn" id="posterDiv">
             <img src="synapse-poster.jpg" alt="Synapse 2026 Poster" class="poster-image">
         </div>
 
@@ -204,10 +198,10 @@
                 <div id="successWrapper" class="d-none">
                     <div id="successMsg" class="animate__animated animate__bounceIn text-center">
                         <h1 style="color: var(--poster-blue); font-weight: 900;">SUCCESS!</h1>
-                        <p class="lead text-white">Your registration for SYNAPSE 2026 is confirmed.</p>
+                        <p class="lead text-white">Confirmed. Your receipt is downloading...</p>
                         <hr style="border-color: #444;">
                         <div id="receiptDetails" class="text-start mb-4 px-3" style="font-size: 0.9rem; color: #bbb;"></div>
-                        <p class="mt-4 small text-muted">A receipt button has been generated below.</p>
+                        <p class="mt-2 small text-info">If download didn't start, click the button below.</p>
                     </div>
 
                     <button id="downloadBtn" onclick="downloadPDF()" class="btn-receipt animate__animated animate__fadeInUp">
@@ -221,7 +215,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script>
-        particlesJS("particles-js", { "particles": { "number": { "value": 40 }, "color": { "value": "#ffffff" }, "line_linked": { "enable": true, "color": "#1fc1d1" }, "move": { "enable": true, "speed": 1.5 } } });
+        particlesJS("particles-js", { "particles": { "number": { "value": 30 }, "color": { "value": "#ffffff" }, "line_linked": { "enable": true, "color": "#1fc1d1" }, "move": { "enable": true, "speed": 1.5 } } });
 
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwKjrjjrV5hJUrqaP5nWjYAW2HW50y6EI3_k9bfzriS8ktMuAHpYe1i8K6IyPFV-jsndA/exec';
         const form = document.getElementById('regForm');
@@ -246,7 +240,6 @@
                 events: selectedEvents.join(", ")
             };
 
-            // Using no-cors as per your original logic
             fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(registrationData) })
             .then(() => handleSuccess())
             .catch(() => handleSuccess()); 
@@ -254,16 +247,19 @@
 
         function handleSuccess() {
             document.getElementById('formCard').classList.add('d-none');
-            document.querySelector('.poster-container').classList.add('d-none');
+            document.getElementById('posterDiv').classList.add('d-none');
             document.getElementById('successWrapper').classList.remove('d-none');
             document.getElementById('receiptDetails').innerHTML = `<b>Name:</b> ${registrationData.name}<br><b>College:</b> ${registrationData.college}`;
+            
             window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // AUTO DOWNLOAD START
+            setTimeout(() => {
+                downloadPDF();
+            }, 1000);
         }
 
         function downloadPDF() {
-            // Check if library is loaded
-            if (!window.jspdf) { alert("PDF library loading. Try again in 2 seconds."); return; }
-            
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             const qrContainer = document.getElementById("qrcode-hidden");
@@ -289,6 +285,8 @@
                 doc.text(`Student Name: ${registrationData.name}`, 30, 160);
                 doc.text(`Mobile: ${registrationData.mobile}`, 30, 175);
                 doc.text(`College: ${registrationData.college}`, 30, 190);
+                
+                // Triggers download automatically
                 doc.save(`Synapse_${registrationData.name}.pdf`);
             }, 600);
         }
