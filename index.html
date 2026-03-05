@@ -28,89 +28,71 @@
         }
 
         #particles-js {
-            position: fixed;
-            width: 100%; height: 100%;
-            top: 0; left: 0; z-index: 1;
-            pointer-events: none !important;
+            position: fixed; width: 100%; height: 100%;
+            top: 0; left: 0; z-index: 1; pointer-events: none !important;
         }
 
         .main-content { position: relative; z-index: 5; padding: 20px; }
 
         .poster-container {
-            max-width: 800px;
-            margin: 10px auto 30px auto;
-            border-radius: 12px;
+            max-width: 800px; margin: 10px auto 30px auto;
+            border-radius: 12px; border: 2px solid var(--poster-purple);
             box-shadow: 0 0 30px rgba(116, 31, 209, 0.4);
-            border: 2px solid var(--poster-purple);
         }
         .poster-image { width: 100%; height: auto; display: block; border-radius: 10px; }
 
-        /* HIGH VISIBILITY LABELS */
         .form-label { 
-            color: #ffffff !important; 
-            font-weight: 800 !important; 
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 1.2px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,1);
-            margin-bottom: 8px;
-            display: block;
+            color: #fff !important; font-weight: 800 !important; 
+            text-transform: uppercase; font-size: 0.85rem;
+            text-shadow: 2px 2px 4px #000; margin-bottom: 8px;
         }
 
+        /* MOBILE INPUT & SPINNER WRAPPER */
+        .mobile-wrapper { position: relative; }
+        
         .form-control, .form-select { 
-            background: #ffffff !important; 
-            color: #000000 !important; 
-            font-weight: 700 !important;
-            border: 2px solid var(--poster-blue);
-            padding: 12px;
-            border-radius: 10px;
+            background: #fff !important; color: #000 !important; 
+            font-weight: 700 !important; border: 2px solid #ccc;
+            padding: 12px; border-radius: 10px; transition: 0.3s;
         }
 
-        /* SUCCESS OVERLAY */
-        #successWrapper {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            background: var(--background-dark);
-            z-index: 999999 !important;
+        .spinner-loader {
+            position: absolute; right: 15px; top: 12px;
+            width: 20px; height: 20px;
+            border: 3px solid rgba(31, 193, 209, 0.3);
+            border-top: 3px solid var(--poster-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
             display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            text-align: center;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .is-invalid-custom { border-color: #ff4d4d !important; box-shadow: 0 0 10px rgba(255, 77, 77, 0.5) !important; }
+        .is-valid-custom { border-color: #2ecc71 !important; box-shadow: 0 0 10px rgba(46, 204, 113, 0.5) !important; }
+        .error-text { color: #ff4d4d; font-size: 0.75rem; font-weight: bold; margin-top: 5px; display: none; }
+
+        #successWrapper {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: var(--background-dark); z-index: 999999 !important;
+            display: none; flex-direction: column; align-items: center;
+            justify-content: center; padding: 20px; text-align: center;
         }
 
         .success-card {
-            background: rgba(15, 12, 41, 0.98);
-            border: 2px solid var(--poster-blue);
-            padding: 30px;
-            border-radius: 20px;
-            width: 100%;
-            max-width: 400px;
+            background: rgba(15, 12, 41, 0.98); border: 2px solid var(--poster-blue);
+            padding: 30px; border-radius: 20px; width: 100%; max-width: 400px;
         }
 
         .btn-download-final {
-            background: #1fc1d1 !important;
-            color: #000 !important;
-            font-weight: 900;
-            border: none;
-            padding: 20px;
-            width: 100%;
-            border-radius: 15px;
-            font-size: 1.2rem;
-            margin-top: 25px;
-            cursor: pointer !important;
-            display: block;
-            text-transform: uppercase;
-            box-shadow: 0 10px 30px rgba(31, 193, 209, 0.5);
-            pointer-events: auto !important;
-            position: relative;
-            z-index: 1000000 !important;
+            background: #1fc1d1 !important; color: #000 !important; font-weight: 900;
+            border: none; padding: 20px; width: 100%; border-radius: 15px;
+            font-size: 1.2rem; margin-top: 25px; cursor: pointer !important;
+            box-shadow: 0 10px 30px rgba(31, 193, 209, 0.5); z-index: 1000000 !important;
         }
 
         .event-grid { border: 2px solid var(--poster-pink); background: rgba(209, 31, 183, 0.1); border-radius: 15px; padding: 15px; }
-        .btn-primary { background: linear-gradient(135deg, var(--poster-pink), #741fd1); border: none; padding: 18px; font-weight: 900; letter-spacing: 1px; }
+        .btn-primary { background: linear-gradient(135deg, var(--poster-pink), #741fd1); border: none; padding: 18px; font-weight: 900; }
         #qrcode-hidden { display: none; }
     </style>
 </head>
@@ -120,32 +102,35 @@
     <div id="qrcode-hidden"></div> 
 
     <div class="main-content container my-4" id="mainUI">
-        
         <div class="poster-container animate__animated animate__fadeIn">
             <img src="synapse-poster.jpg" alt="Synapse 2026 Poster" class="poster-image">
         </div>
 
         <div class="row justify-content-center">
             <div class="col-lg-7">
-                <div class="card p-4 p-md-5" style="background: rgba(15,12,41,0.96); border-radius: 25px; border: 1px solid #444;">
-                    <h2 class="text-center mb-5" style="color: var(--poster-blue); font-weight: 900; text-transform: uppercase; letter-spacing: 2px;">Registration Form</h2>
+                <div class="card p-4 p-md-5" style="background: rgba(15,12,41,0.96); border-radius: 25px;">
+                    <h2 class="text-center mb-5" style="color: var(--poster-blue); font-weight: 900; text-transform: uppercase;">Registration Form</h2>
                     
                     <form id="regForm">
                         <div class="mb-4">
                             <label class="form-label">Full Name</label>
-                            <input type="text" id="name" class="form-control" placeholder="Type Name Here" required>
+                            <input type="text" id="name" class="form-control" required>
                         </div>
                         <div class="mb-4">
                             <label class="form-label">Mobile Number</label>
-                            <input type="tel" id="mobile" class="form-control" pattern="[0-9]{10}" placeholder="10-Digit Mobile" required>
+                            <div class="mobile-wrapper">
+                                <input type="tel" id="mobile" class="form-control" pattern="[0-9]{10}" placeholder="Enter 10 digits" required>
+                                <div id="checkSpinner" class="spinner-loader"></div>
+                            </div>
+                            <div id="mobileError" class="error-text">⚠️ This number is already registered!</div>
                         </div>
                         <div class="mb-4">
                             <label class="form-label">Email Address</label>
-                            <input type="email" id="email" class="form-control" placeholder="Email ID" required>
+                            <input type="email" id="email" class="form-control" required>
                         </div>
                         <div class="mb-4">
                             <label class="form-label">College Name</label>
-                            <input type="text" id="college" class="form-control" placeholder="College Name" required>
+                            <input type="text" id="college" class="form-control" required>
                         </div>
                         
                         <div class="row">
@@ -190,10 +175,7 @@
             <h1 style="color: var(--poster-blue); font-weight: 900;">SUCCESS!</h1>
             <p class="text-white">Registration confirmed. Downloading receipt...</p>
             <div id="details" class="text-start small border-top border-secondary pt-2 mt-2 text-light"></div>
-            
-            <button id="finalDownloadBtn" onclick="downloadPDF()" class="btn-download-final">
-                📥 DOWNLOAD RECEIPT (PDF)
-            </button>
+            <button id="finalDownloadBtn" onclick="downloadPDF()" class="btn-download-final">📥 DOWNLOAD RECEIPT (PDF)</button>
         </div>
     </div>
 
@@ -203,16 +185,56 @@
 
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwKjrjjrV5hJUrqaP5nWjYAW2HW50y6EI3_k9bfzriS8ktMuAHpYe1i8K6IyPFV-jsndA/exec';
         let registrationData = {};
+        let isDuplicate = false;
+
+        const mobileInput = document.getElementById('mobile');
+        const submitBtn = document.getElementById('submitBtn');
+        const errorText = document.getElementById('mobileError');
+        const spinner = document.getElementById('checkSpinner');
+
+        // Reset status as soon as user types (Immediate Correction)
+        mobileInput.addEventListener('input', function() {
+            isDuplicate = false;
+            this.classList.remove('is-invalid-custom', 'is-valid-custom');
+            errorText.style.display = 'none';
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = '1';
+        });
+
+        // Background Duplicate Check on Blur
+        mobileInput.addEventListener('blur', function() {
+            const val = this.value;
+            if(val.length === 10) {
+                spinner.style.display = 'block';
+                
+                fetch(`${scriptURL}?action=search&mobile=${val}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        spinner.style.display = 'none';
+                        if (data !== "NotFound") {
+                            isDuplicate = true;
+                            this.classList.add('is-invalid-custom');
+                            errorText.style.display = 'block';
+                            submitBtn.disabled = true;
+                            submitBtn.style.opacity = '0.5';
+                        } else {
+                            isDuplicate = false;
+                            this.classList.add('is-valid-custom');
+                        }
+                    })
+                    .catch(() => { spinner.style.display = 'none'; });
+            }
+        });
 
         document.getElementById('regForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const btn = document.getElementById('submitBtn');
+            if(isDuplicate) return;
+
             const selectedEvents = Array.from(document.querySelectorAll('.event-check:checked')).map(c => c.value);
-            
             if(selectedEvents.length === 0) { alert("Please select at least one event!"); return; }
 
-            btn.disabled = true;
-            btn.innerHTML = "VERIFYING DATA...";
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = "VERIFYING DATA...";
 
             registrationData = {
                 name: document.getElementById('name').value,
@@ -224,10 +246,8 @@
                 events: selectedEvents.join(", ")
             };
 
-            // STEP 1: Send the data
             fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(registrationData) });
 
-            // STEP 2: Wait exactly 1.5 seconds (Safety Buffer) then show success
             setTimeout(() => {
                 showSuccess();
                 downloadPDF();
@@ -237,11 +257,7 @@
         function showSuccess() {
             document.getElementById('mainUI').style.display = 'none';
             document.getElementById('successWrapper').style.display = 'flex';
-            document.getElementById('details').innerHTML = `
-                <b>Name:</b> ${registrationData.name}<br>
-                <b>Mobile:</b> ${registrationData.mobile}<br>
-                <b>College:</b> ${registrationData.college}
-            `;
+            document.getElementById('details').innerHTML = `<b>Name:</b> ${registrationData.name}<br><b>Mobile:</b> ${registrationData.mobile}`;
         }
 
         function downloadPDF() {
@@ -249,28 +265,20 @@
             const doc = new jsPDF();
             const qrContainer = document.getElementById("qrcode-hidden");
             qrContainer.innerHTML = "";
-
-            new QRCode(qrContainer, {
-                text: registrationData.mobile,
-                width: 256, height: 256
-            });
+            new QRCode(qrContainer, { text: registrationData.mobile, width: 256, height: 256 });
 
             setTimeout(() => {
                 const canvas = qrContainer.querySelector('canvas');
                 const qrImg = canvas ? canvas.toDataURL("image/png") : qrContainer.querySelector("img").src;
-
                 doc.setFillColor(7, 6, 15); doc.rect(0, 0, 210, 297, 'F');
                 doc.setTextColor(31, 193, 209); doc.setFontSize(26);
                 doc.text("SYNAPSE 2026", 105, 40, { align: "center" });
-                doc.setFillColor(255, 255, 255);
-                doc.rect(60, 55, 90, 90, 'F');
+                doc.setFillColor(255, 255, 255); doc.rect(60, 55, 90, 90, 'F');
                 doc.addImage(qrImg, 'PNG', 65, 60, 80, 80);
-                doc.setTextColor(255, 255, 255);
-                doc.setFontSize(14);
+                doc.setTextColor(255, 255, 255); doc.setFontSize(14);
                 doc.text(`Name: ${registrationData.name}`, 30, 160);
                 doc.text(`Mobile: ${registrationData.mobile}`, 30, 175);
                 doc.text(`College: ${registrationData.college}`, 30, 190);
-
                 doc.save(`Synapse_${registrationData.name}.pdf`);
             }, 400);
         }
