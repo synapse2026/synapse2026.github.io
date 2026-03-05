@@ -9,14 +9,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     
     <style>
+        /* Extracting colors from your poster for consistency */
         :root {
-            /* Colors extracted from your poster */
             --poster-pink: #d11fb7;
             --poster-blue: #1fc1d1;
             --poster-purple: #741fd1;
             --background-dark: #07060f;
             --field-border: #333;
-            --input-bg: rgba(255, 255, 255, 0.05);
         }
 
         body { 
@@ -24,31 +23,9 @@
             color: #fff;
             font-family: 'Segoe UI', Roboto, sans-serif;
             min-height: 100vh;
-            margin: 0;
-            overflow-x: hidden;
-            display: flex;
-            align-items: center;
         }
 
-        /* 1. THE MOVING BACKGROUND CONTAINER */
-        #particles-js {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            z-index: -1; /* Critical: Places it behind all content */
-        }
-
-        /* Content Container (Ensure it stacks above particles) */
-        .main-content {
-            position: relative;
-            z-index: 1; 
-            width: 100%;
-            padding: 20px;
-        }
-
-        /* 2. Placing the Poster (Glow & Border) */
+        /* 1. Placing the Poster at the Top (Animate In) */
         .poster-container {
             max-width: 1000px;
             margin: 20px auto 40px auto;
@@ -66,76 +43,57 @@
 
         /* Modern dark form card */
         .card { 
-            background: rgba(15, 12, 41, 0.96); /* Deep indigo/purple */
+            background: rgba(20, 18, 30, 0.95);
             border: 1px solid var(--field-border);
             border-radius: 20px; 
             overflow: hidden;
             box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            color: #ffffff;
+            transition: transform 0.3s ease;
         }
 
-        /* Input Fields - Visibility Updates */
         .form-control, .form-select {
-            background-color: var(--input-bg);
-            border: 2px solid #555;
-            color: #ffffff !important;
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--field-border);
+            color: #fff;
             padding: 12px 15px;
             transition: all 0.3s ease;
         }
 
-        /* Thicker border and blue pulse on focus */
+        /* Matching the color field focus and adding a pulse */
         .form-control:focus, .form-select:focus {
-            background-color: rgba(255, 255, 255, 0.08);
-            color: #ffffff !important;
-            box-shadow: 0 0 15px rgba(31, 193, 209, 0.7); /* Cyan Pulse */
+            background-color: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            box-shadow: 0 0 10px rgba(31, 193, 209, 0.7); /* Poster Blue glow */
             border-color: var(--poster-blue);
         }
 
-        /* Dropdown fix for visibility */
-        .form-select {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
-        }
-
-        /* High visibility labels */
-        .form-label { 
-            font-weight: 700; 
-            color: #ffffff !important; 
-            margin-bottom: 0.6rem; 
-            display: block;
-        }
+        .form-label { font-weight: 600; color: #aaa; margin-bottom: 0.5rem; }
         
         .event-grid { 
             background: rgba(255, 255, 255, 0.02);
             padding: 20px;
             border-radius: 12px;
-            border: 1px solid #555;
-        }
-
-        /* Checkbox label visibility */
-        .form-check-label {
-            color: #ffffff !important;
-            font-weight: 500;
+            border: 1px solid var(--field-border);
         }
 
         /* Pink-to-Purple Gradient Button (Matching Poster) */
         .btn-primary {
             background: linear-gradient(135deg, var(--poster-pink), var(--poster-purple));
             border: none;
-            padding: 18px;
+            padding: 15px;
             font-size: 1.2rem;
             text-transform: uppercase;
             letter-spacing: 2px;
-            color: #ffffff;
             transition: all 0.3s ease;
         }
 
         .btn-primary:hover {
             opacity: 0.9;
-            box-shadow: 0 5px 25px rgba(209, 31, 183, 0.6);
+            box-shadow: 0 5px 20px rgba(209, 31, 183, 0.6);
         }
 
         /* Placeholder coloring */
-        ::placeholder { color: #bbbbbb !important; opacity: 1; }
+        ::placeholder { color: #555 !important; opacity: 1; }
 
         @media (max-width: 576px) {
             .event-grid { grid-template-columns: 1fr; }
@@ -144,163 +102,166 @@
 </head>
 <body>
 
-    <div id="particles-js"></div>
-
-    <div class="main-content container my-5">
-        
-        <div class="poster-container animate__animated animate__fadeIn">
-            <img src="synapse-poster.jpg" alt="Synapse 2026 Tech Fest Poster" class="poster-image">
-        </div>
-
-        <div class="row justify-content-center">
-            <div class="col-lg-8 animate__animated animate__fadeInUp animate__delay-1s">
-                <div class="card">
-                    <div class="card-body p-4 p-md-5">
-                        <h2 class="text-center text-uppercase mb-5" style="color: var(--poster-blue); letter-spacing: 3px; font-weight: 800;">
-                            Registration Form
-                        </h2>
-                        
-                        <form id="regForm">
-                            <div class="row g-4">
-                                <div class="col-md-6">
-                                    <label class="form-label">Student Name</label>
-                                    <input type="text" name="name" class="form-control" placeholder="Jane Doe" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Mobile Number</label>
-                                    <input type="tel" name="mobile" class="form-control" pattern="[0-9]{10}" placeholder="10-digit number" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Email Address</label>
-                                    <input type="email" name="email" class="form-control" placeholder="name@college.edu" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">College Name</label>
-                                    <input type="text" name="college" class="form-control" placeholder="Govt. Polytechnic College, Payyanur" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Department</label>
-                                    <select name="department" class="form-select" required>
-                                        <option value="" selected disabled>Choose Dept</option>
-                                        <option>Computer Science</option>
-                                        <option>Electronics</option>
-                                        <option>Mechanical</option>
-                                        <option>Civil</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Semester</label>
-                                    <select name="semester" class="form-select" required>
-                                        <option>S1</option><option>S2</option><option>S3</option>
-                                        <option>S4</option><option>S5</option><option>S6</option>
-                                        <option>S7</option><option>S8</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="mt-5">
-                                <label class="form-label d-block mb-3 text-center text-uppercase small fw-bold text-muted" style="letter-spacing: 2px;">Participating Events (Select Multiple)</label>
-                                <div class="event-grid row row-cols-1 row-cols-sm-2 g-3">
-                                    <div class="col"><div class="form-check"><input class="form-check-input event-check" type="checkbox" value="Hackathons" id="e1"><label class="form-check-label" for="e1">Hackathons</label></div></div>
-                                    <div class="col"><div class="form-check"><input class="form-check-input event-check" type="checkbox" value="Workshops" id="e2"><label class="form-check-label" for="e2">Workshops</label></div></div>
-                                    <div class="col"><div class="form-check"><input class="form-check-input event-check" type="checkbox" value="Prototypes" id="e3"><label class="form-check-label" for="e3">Prototypes</label></div></div>
-                                    <div class="col"><div class="form-check"><input class="form-check-input event-check" type="checkbox" value="Exhibitions" id="e4"><label class="form-check-label" for="e4">Exhibitions</label></div></div>
-                                    <div class="col"><div class="form-check"><input class="form-check-input event-check" type="checkbox" value="Quizzes" id="e5"><label class="form-check-label" for="e5">Quizzes</label></div></div>
-                                    <div class="col"><div class="form-check"><input class="form-check-input event-check" type="checkbox" value="Gaming" id="e6"><label class="form-check-label" for="e6">Gaming</label></div></div>
-                                </div>
-                            </div>
-
-                            <button type="submit" id="submitBtn" class="btn btn-primary w-100 mt-5 py-3 fw-bold shadow">
-                                COMPLETE REGISTRATION
-                            </button>
-                        </form>
-                        
-                        <div id="successMsg" class="alert alert-success mt-4 d-none text-center py-4" style="border: 2px solid var(--poster-blue); color: var(--poster-blue); background: transparent;">
-                            <h4 class="alert-heading text-uppercase">Registration Confirmed!</h4>
-                            <p class="mb-0 text-white opacity-75">Synapse 2026 awaits you. Check your email soon.</p>
-                        </div>
-                    </div>
-                </div>
-                <p class="text-center mt-4 text-white-50 small">Govt. Residential Women's Polytechnic College, Payyanur</p>
-            </div>
-        </div>
+<div class="container my-5">
+    
+    <div class="poster-container animate__animated animate__fadeIn">
+        <img src="synapse-poster.jpg" alt="Synapse 2026 Tech Fest Poster" class="poster-image">
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <div class="row justify-content-center">
+        <div class="col-lg-8 animate__animated animate__fadeInUp animate__delay-1s">
+            <div class="card">
+                <div class="card-body p-4 p-md-5">
+                    <h2 class="text-center text-uppercase mb-5" style="color: var(--poster-blue); letter-spacing: 3px;">
+                        Registration Form
+                    </h2>
+                    
+                    <form id="regForm">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Student Name</label>
+                                <input type="text" name="name" class="form-control" placeholder="Jane Doe" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Mobile Number</label>
+                                <input type="tel" name="mobile" class="form-control" pattern="[0-9]{10}" placeholder="10-digit number" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" name="email" class="form-control" placeholder="name@college.edu" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">College Name</label>
+                                <input type="text" name="college" class="form-control" placeholder="Govt. Polytechnic College, Payyanur" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Department</label>
+                                <select name="department" class="form-select" required>
+                                    <option value="" selected disabled>Choose Dept</option>
+                                    <option>Computer Science</option>
+                                    <option>Electronics</option>
+                                    <option>Mechanical</option>
+                                    <option>Civil</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Semester</label>
+                                <select name="semester" class="form-select" required>
+                                    <option>S1</option><option>S2</option><option>S3</option>
+                                    <option>S4</option><option>S5</option><option>S6</option>
+                                    <option>S7</option><option>S8</option>
+                                </select>
+                            </div>
+                        </div>
 
-    <script>
-        // 5. CONFIGURE THE MOVING BACKGROUND (The Neural Network Look)
-        particlesJS("particles-js", {
-            "particles": {
-                "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
-                "color": { "value": "#ffffff" },
-                "shape": { "type": "circle" },
-                "opacity": { "value": 0.2, "random": false }, // Very subtle dots
-                "size": { "value": 3, "random": true },
-                "line_linked": {
-                    "enable": true,
-                    "distance": 150,
-                    "color": "#1fc1d1", // Poster Blue lines
-                    "opacity": 0.3,
-                    "width": 1
-                },
-                "move": { "enable": true, "speed": 1.5, "direction": "none", "out_mode": "out" }
-            },
-            "interactivity": {
-                "detect_on": "canvas",
-                "events": {
-                    "onhover": { "enable": true, "mode": "grab" }, // Interacts when you hover
-                    "onclick": { "enable": false },
-                    "resize": true
-                },
-                "modes": {
-                    "grab": { "distance": 140, "line_linked": { "opacity": 0.8 } }
-                }
-            },
-            "retina_detect": true
+                        <div class="mt-5">
+                            <label class="form-label d-block mb-3 text-center text-uppercase small fw-bold text-muted" style="letter-spacing: 2px;">Participating Events (Select Multiple)</label>
+                            <div class="event-grid row row-cols-1 row-cols-sm-2 g-3">
+                                <div class="col">
+                                    <div class="form-check">
+                                        <input class="form-check-input event-check" type="checkbox" value="Hackathons" id="e1">
+                                        <label class="form-check-label" for="e1">Hackathons</label>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-check">
+                                        <input class="form-check-input event-check" type="checkbox" value="Workshops" id="e2">
+                                        <label class="form-check-label" for="e2">Workshops</label>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-check">
+                                        <input class="form-check-input event-check" type="checkbox" value="Prototypes" id="e3">
+                                        <label class="form-check-label" for="e3">Prototypes</label>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-check">
+                                        <input class="form-check-input event-check" type="checkbox" value="Exhibitions" id="e4">
+                                        <label class="form-check-label" for="e4">Exhibitions</label>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-check">
+                                        <input class="form-check-input event-check" type="checkbox" value="Quizzes" id="e5">
+                                        <label class="form-check-label" for="e5">Quizzes</label>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-check">
+                                        <input class="form-check-input event-check" type="checkbox" value="Gaming" id="e6">
+                                        <label class="form-check-label" for="e6">Gaming</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="submitBtn" class="btn btn-primary w-100 mt-5 py-3 fw-bold shadow">
+                            COMPLETE REGISTRATION
+                        </button>
+                    </form>
+                    
+                    <div id="successMsg" class="alert alert-success mt-4 d-none text-center py-4" style="border: 2px solid var(--poster-blue); color: var(--poster-blue); background: transparent;">
+                        <h4 class="alert-heading text-uppercase">Registration Confirmed!</h4>
+                        <p class="mb-0 text-white opacity-75">Synapse 2026 awaits you. Check your email soon.</p>
+                    </div>
+                </div>
+            </div>
+            <p class="text-center mt-4 text-white-50 small">Govt. Residential Women's Polytechnic College, Payyanur</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Using your specific Apps Script URL provided in the previous turn
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbwKjrjjrV5hJUrqaP5nWjYAW2HW50y6EI3_k9bfzriS8ktMuAHpYe1i8K6IyPFV-jsndA/exec';
+    const form = document.getElementById('regForm');
+
+    form.addEventListener('submit', e => {
+        e.preventDefault();
+        const submitBtn = document.getElementById('submitBtn');
+        
+        // Multi-select validation
+        const selectedEvents = Array.from(document.querySelectorAll('.event-check:checked'))
+                                    .map(cb => cb.value);
+        
+        if(selectedEvents.length === 0) {
+            alert("SYNAPSE 2026 requires innovation. Please select at least one event!");
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Submitting...';
+
+        const data = {
+            name: form.name.value,
+            mobile: form.mobile.value,
+            email: form.email.value,
+            college: form.college.value,
+            department: form.department.value,
+            semester: form.semester.value,
+            events: selectedEvents
+        };
+
+        fetch(scriptURL, { 
+            method: 'POST', 
+            mode: 'no-cors', 
+            body: JSON.stringify(data) 
+        })
+        .then(() => {
+            form.reset();
+            form.classList.add('d-none');
+            document.getElementById('successMsg').classList.remove('d-none');
+            // Hide the poster too to focus on success msg
+            document.querySelector('.poster-container').classList.add('d-none');
+            window.scrollTo(0, 0);
+        })
+        .catch(error => {
+            alert("Error: " + error.message);
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Register Now";
         });
-
-        // Use your specific Apps Script URL here
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbwKjrjjrV5hJUrqaP5nWjYAW2HW50y6EI3_k9bfzriS8ktMuAHpYe1i8K6IyPFV-jsndA/exec';
-        const form = document.getElementById('regForm');
-
-        form.addEventListener('submit', e => {
-            e.preventDefault();
-            const submitBtn = document.getElementById('submitBtn');
-            const selectedEvents = Array.from(document.querySelectorAll('.event-check:checked')).map(cb => cb.value);
-            
-            if(selectedEvents.length === 0) {
-                alert("Please select at least one event!");
-                return;
-            }
-
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Submitting...';
-
-            const data = {
-                name: form.name.value,
-                mobile: form.mobile.value,
-                email: form.email.value,
-                college: form.college.value,
-                department: form.department.value,
-                semester: form.semester.value,
-                events: selectedEvents
-            };
-
-            fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) })
-            .then(() => {
-                form.reset();
-                form.classList.add('d-none');
-                document.getElementById('successMsg').classList.remove('d-none');
-                document.querySelector('.poster-container').classList.add('d-none');
-                window.scrollTo(0, 0);
-            })
-            .catch(error => {
-                alert("Error: " + error.message);
-                submitBtn.disabled = false;
-                submitBtn.innerText = "Register Now";
-            });
-        });
-    </script>
+    });
+</script>
 </body>
 </html>
