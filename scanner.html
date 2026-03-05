@@ -3,134 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SYNAPSE 2026 | Diagnostic Scanner</title>
+    <title>Scanner | SYNAPSE 2026</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <style>
         body { background: #07060f; color: #fff; font-family: sans-serif; }
         .container { max-width: 500px; padding: 20px; }
-        #reader { border: 2px solid #1fc1d1; border-radius: 15px; overflow: hidden; background: #000; }
-        
-        /* Debug Tools Styling */
-        .debug-box { background: #111; border: 1px solid #333; color: #0f0; font-family: monospace; font-size: 11px; padding: 10px; height: 120px; overflow-y: auto; border-radius: 8px; text-align: left; }
-        .preview-box { border: 2px solid #ffc107; margin-top: 15px; border-radius: 10px; overflow: hidden; display: none; }
-        #previewCanvas { width: 100%; height: auto; display: block; background: #222; }
-
-        .btn-action { font-weight: 900; padding: 15px; width: 100%; border-radius: 10px; border: none; margin-bottom: 10px; }
-        .result-card { background: rgba(15, 12, 41, 0.98); border-radius: 15px; padding: 25px; margin-top: 20px; display: none; border: 2px solid #1fc1d1; }
-        #qr-input-file { display: none; }
+        #reader { border: 3px solid #1fc1d1; border-radius: 20px; overflow: hidden; background: #000; }
+        .btn-main { background: #1fc1d1; color: #000; font-weight: 900; padding: 15px; width: 100%; border-radius: 10px; border: none; margin-bottom: 10px; }
+        .detail-card { background: rgba(15, 12, 41, 0.98); border-radius: 15px; padding: 25px; margin-top: 20px; display: none; border: 2px solid #1fc1d1; }
+        .label { color: #1fc1d1; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; margin-top: 10px; }
+        .val { font-size: 1.1rem; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        .payment-badge { padding: 5px 15px; border-radius: 20px; font-weight: bold; display: inline-block; margin-top: 10px; }
+        .status-not { background: #ff4757; color: #fff; }
+        .status-done { background: #2ed573; color: #000; }
+        #debug { font-size: 10px; color: #555; margin-top: 20px; text-align: left; }
     </style>
 </head>
 <body>
     <div class="container text-center">
-        <h3 class="mb-4" style="color: #1fc1d1;">SYNAPSE DIAGNOSTIC</h3>
-        
+        <h3 class="mb-4" style="color: #1fc1d1; font-weight: 800;">STAFF VERIFICATION</h3>
         <div id="reader"></div>
-
-        <div id="previewWrapper" class="preview-box">
-            <div class="small bg-warning text-dark fw-bold py-1">PROCESSED IMAGE PREVIEW</div>
-            <canvas id="previewCanvas"></canvas>
+        <div class="mt-4" id="controls">
+            <button id="startBtn" class="btn-main">📸 SCAN RECEIPT</button>
+            <label for="qr-input-file" class="btn btn-outline-warning w-100 py-3 fw-bold">🖼️ UPLOAD PHOTO</label>
+            <input type="file" id="qr-input-file" accept="image/*" capture="environment" style="display:none">
         </div>
 
-        <div class="mt-4">
-            <button id="startBtn" class="btn-action bg-info text-dark">📸 START LIVE SCAN</button>
-            <label for="qr-input-file" class="btn-action bg-warning text-dark">🖼️ UPLOAD & DEBUG</label>
-            <input type="file" id="qr-input-file" accept="image/*" capture="environment">
-            <button class="btn btn-outline-danger btn-sm w-100" onclick="location.reload()">Clear & Restart</button>
+        <div id="result" class="detail-card text-start">
+            <h4 class="text-center" style="color: #d11fb7;">STUDENT DETAILS</h4>
+            <div class="label">Name</div><div id="d-name" class="val">-</div>
+            <div class="label">Mobile</div><div id="d-mobile" class="val">-</div>
+            <div class="label">College</div><div id="d-college" class="val">-</div>
+            <div class="label">Events</div><div id="d-events" class="val">-</div>
+            
+            <div id="paymentArea" class="text-center mt-3">
+                <div id="p-status" class="payment-badge">Checking Payment...</div>
+                <button id="payBtn" class="btn btn-success w-100 mt-4 py-3 fw-bold">✅ CONFIRM PAYMENT & ENTRY</button>
+            </div>
+            <button class="btn btn-link text-white-50 w-100 mt-2" onclick="location.reload()">Cancel</button>
         </div>
 
-        <div class="debug-box mt-3" id="logs">> System Ready...</div>
-
-        <div id="result" class="result-card text-start">
-            <h4 style="color: #1fc1d1;">✓ VERIFIED</h4>
-            <div id="data" class="my-3 fs-5 fw-bold"></div>
-            <button id="checkinBtn" class="btn btn-primary w-100 fw-bold py-3">MARK PRESENT</button>
-        </div>
+        <div id="debug"></div>
     </div>
 
     <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbwKjrjjrV5hJUrqaP5nWjYAW2HW50y6EI3_k9bfzriS8ktMuAHpYe1i8K6IyPFV-jsndA/exec'; // MUST BE YOUR GOOGLE SCRIPT URL
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbwKjrjjrV5hJUrqaP5nWjYAW2HW50y6EI3_k9bfzriS8ktMuAHpYe1i8K6IyPFV-jsndA/exec';
         const html5QrCode = new Html5Qrcode("reader");
-        const logBox = document.getElementById('logs');
         let currentMobile = "";
 
-        function addLog(msg) {
-            const time = new Date().toLocaleTimeString().split(' ')[0];
-            logBox.innerHTML += `<br>[${time}] ${msg}`;
-            logBox.scrollTop = logBox.scrollHeight;
-        }
-
-        const onScanSuccess = (t) => {
-            addLog("SUCCESS: QR Decoded.");
-            navigator.vibrate(200);
+        const fetchDetails = (mobile) => {
+            currentMobile = mobile.trim();
+            document.getElementById('controls').style.display = 'none';
             document.getElementById('result').style.display = 'block';
-            document.getElementById('data').innerText = t;
-            currentMobile = t.replace("Mobile:", "");
-            if (html5QrCode.isScanning) html5QrCode.stop();
+            document.getElementById('p-status').innerText = "FETCHING...";
+
+            fetch(`${scriptURL}?action=search&mobile=${currentMobile}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data === "NotFound") {
+                        alert("Student not found in database!");
+                        location.reload();
+                    } else {
+                        document.getElementById('d-name').innerText = data.name;
+                        document.getElementById('d-mobile').innerText = data.mobile;
+                        document.getElementById('d-college').innerText = data.college;
+                        document.getElementById('d-events').innerText = data.events;
+                        
+                        const p = document.getElementById('p-status');
+                        p.innerText = "PAYMENT: " + data.payment;
+                        p.className = "payment-badge " + (data.payment === "COMPLETED" ? "status-done" : "status-not");
+                        
+                        if(data.payment === "COMPLETED") {
+                            document.getElementById('payBtn').innerText = "ALREADY PAID - MARK ENTRY";
+                        }
+                    }
+                })
+                .catch(err => { alert("Error fetching data. Check internet."); location.reload(); });
         };
 
-        // Live Scanner
+        const onScanSuccess = (t) => {
+            navigator.vibrate(200);
+            if (html5QrCode.isScanning) html5QrCode.stop();
+            fetchDetails(t);
+        };
+
         document.getElementById('startBtn').addEventListener('click', () => {
-            addLog("ACTION: Starting Live Camera...");
-            html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, onScanSuccess)
-            .then(() => addLog("CAMERA: Feed Active."))
-            .catch(e => addLog("ERROR: Camera failed: " + e));
+            html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, onScanSuccess);
         });
 
-        // Photo Upload with Preview and Enhanced Logs
         document.getElementById('qr-input-file').addEventListener('change', e => {
             if (e.target.files.length == 0) return;
-            const file = e.target.files[0];
-            addLog(`FILE: Selected ${file.name} (${Math.round(file.size/1024)}KB)`);
-
-            const reader = new FileReader();
-            reader.onload = f => {
-                const img = new Image();
-                img.onload = () => {
-                    addLog(`IMAGE: Loaded ${img.width}x${img.height}`);
-                    
-                    const canvas = document.getElementById('previewCanvas');
-                    const ctx = canvas.getContext('2d');
-                    const size = 1000; 
-                    canvas.width = size;
-                    canvas.height = size;
-
-                    // Crop Logic: Zoom into the center to avoid black bars
-                    let sX, sY, sW, sH;
-                    if (img.width > img.height) {
-                        sW = img.height; sH = img.height;
-                        sX = (img.width - img.height) / 2; sY = 0;
-                    } else {
-                        sW = img.width; sH = img.width;
-                        sX = 0; sY = (img.height - img.width) / 2;
-                    }
-
-                    addLog("CANVAS: Performing Center-Crop...");
-                    ctx.drawImage(img, sX, sY, sW, sH, 0, 0, size, size);
-                    
-                    // Show the preview so you can see if it's black
-                    document.getElementById('previewWrapper').style.display = 'block';
-                    addLog("ANALYSIS: Identifying QR pattern...");
-
-                    html5QrCode.scanFileV2(canvas, true)
-                    .then(res => onScanSuccess(res.decodedText))
-                    .catch(err => {
-                        addLog("FAIL: QR not detected. Preview the image above.");
-                    });
-                };
-                img.src = f.target.result;
-            };
-            reader.readAsDataURL(file);
+            html5QrCode.scanFileV2(e.target.files[0], true).then(res => fetchDetails(res.decodedText));
         });
 
-        document.getElementById('checkinBtn').addEventListener('click', function() {
-            this.disabled = true; this.innerText = "UPDATING...";
-            fetch(`${scriptURL}?action=checkin&mobile=${currentMobile}`)
-            .then(r => r.text()).then(res => { 
-                addLog("SHEET: " + res);
-                alert(res); 
-                location.reload(); 
-            });
+        document.getElementById('payBtn').addEventListener('click', function() {
+            this.disabled = true;
+            this.innerText = "UPDATING SHEET...";
+            fetch(`${scriptURL}?action=updatePayment&mobile=${currentMobile}`)
+                .then(r => r.text())
+                .then(res => {
+                    alert("Entry Confirmed for " + document.getElementById('d-name').innerText);
+                    location.reload();
+                });
         });
     </script>
 </body>
