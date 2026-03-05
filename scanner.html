@@ -22,7 +22,7 @@
 
         .controls { margin-top: 20px; }
         .btn-start { background: #1fc1d1; color: #000; font-weight: 900; border: none; padding: 15px; width: 100%; border-radius: 10px; margin-bottom: 15px; }
-        .btn-capture { background: #ffc107; color: #000; font-weight: 900; border: none; padding: 12px; width: 100%; border-radius: 10px; display: none; margin-bottom: 10px; }
+        .btn-upload { background: #ffc107; color: #000; font-weight: 900; border: none; padding: 15px; width: 100%; border-radius: 10px; margin-bottom: 10px; }
         .btn-checkin { background: #d11fb7; color: #fff; font-weight: 900; border: none; padding: 15px; width: 100%; border-radius: 10px; }
         
         .result-card { 
@@ -35,6 +35,7 @@
         }
 
         .scan-status { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #1fc1d1; margin: 10px 0; }
+        #qr-input-file { display: none; } /* Hidden file input */
     </style>
 </head>
 <body>
@@ -43,11 +44,13 @@
         <h2 class="my-4" style="color: #1fc1d1; font-weight: 900; letter-spacing: 2px;">SYNAPSE SCANNER</h2>
         
         <div id="reader"></div>
-        <div id="status" class="scan-status">Camera: Offline</div>
+        <div id="status" class="scan-status">System: Ready</div>
 
         <div class="controls">
-            <button id="startBtn" class="btn-start">📸 START CAMERA</button>
-            <button id="captureBtn" class="btn-capture">🔍 CAPTURE & VERIFY MANUALLY</button>
+            <button id="startBtn" class="btn-start">📸 START LIVE CAMERA</button>
+            
+            <label for="qr-input-file" class="btn-upload">🖼️ TAKE PHOTO & VERIFY</label>
+            <input type="file" id="qr-input-file" accept="image/*" capture="environment">
         </div>
 
         <div id="result" class="result-card text-start">
@@ -62,60 +65,60 @@
     <script>
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwKjrjjrV5hJUrqaP5nWjYAW2HW50y6EI3_k9bfzriS8ktMuAHpYe1i8K6IyPFV-jsndA/exec'; // MUST BE YOUR GOOGLE SCRIPT URL
         const html5QrCode = new Html5Qrcode("reader");
-        const startBtn = document.getElementById('startBtn');
-        const captureBtn = document.getElementById('captureBtn');
+        const fileInput = document.getElementById('qr-input-file');
         const statusText = document.getElementById('status');
         let currentMobile = "";
 
+        // Common Success Handler
         const onScanSuccess = (decodedText) => {
             navigator.vibrate(200);
-            html5QrCode.stop().then(() => {
-                captureBtn.style.display = 'none';
-                statusText.innerText = "Camera: Success";
-                document.getElementById('result').style.display = 'block';
-                document.getElementById('scannedData').innerHTML = decodedText.replaceAll('|', '<br>');
-                
-                const match = decodedText.match(/Mobile:\s*(\d{10})/);
-                currentMobile = match ? match[1] : "";
-            });
+            statusText.innerText = "Verification Successful";
+            
+            // Show Result UI
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('scannedData').innerHTML = decodedText.replaceAll('|', '<br>');
+            
+            const match = decodedText.match(/Mobile:\s*(\d{10})/);
+            currentMobile = match ? match[1] : "";
+            
+            // Stop camera if it was running
+            if (html5QrCode.isScanning) {
+                html5QrCode.stop();
+            }
         };
 
-        // Manual Start
-        startBtn.addEventListener('click', () => {
-            startBtn.style.display = 'none';
-            captureBtn.style.display = 'block';
+        // 1. Live Camera Mode
+        document.getElementById('startBtn').addEventListener('click', () => {
             statusText.innerText = "Camera: Starting...";
-            
             html5QrCode.start(
                 { facingMode: "environment" }, 
                 { fps: 20, qrbox: { width: 280, height: 280 } }, 
                 onScanSuccess
             ).then(() => {
-                statusText.innerText = "Camera: Active (Scanning)";
+                statusText.innerText = "Live Scanning Active";
             }).catch(err => {
-                alert("Camera Error: " + err);
-                startBtn.style.display = 'block';
+                statusText.innerText = "Camera Busy or Blocked";
             });
         });
 
-        // NEW: Force a scan from a still frame if auto-scan is stuck
-        captureBtn.addEventListener('click', () => {
-            statusText.innerText = "Analyzing Frame...";
-            const videoElement = document.querySelector('video');
+        // 2. Fail-safe: Photo Upload Mode
+        fileInput.addEventListener('change', e => {
+            if (e.target.files.length == 0) return;
             
-            if (videoElement) {
-                // The scanImage function forces the library to look at the current video frame as a static image
-                html5QrCode.scanFile(videoElement, false) 
+            statusText.innerText = "Processing Photo...";
+            const imageFile = e.target.files[0];
+            
+            html5QrCode.scanFile(imageFile, true)
                 .then(decodedText => onScanSuccess(decodedText))
                 .catch(err => {
-                    statusText.innerText = "Still blurry. Try moving closer.";
+                    statusText.innerText = "Scan Failed. Use better lighting.";
                 });
-            }
         });
 
+        // 3. Attendance Check-in
         document.getElementById('checkinBtn').addEventListener('click', function() {
             this.disabled = true;
-            this.innerText = "UPDATING...";
+            this.innerText = "CHECKING IN...";
             fetch(`${scriptURL}?action=checkin&mobile=${currentMobile}`)
                 .then(res => res.text())
                 .then(response => {
@@ -123,9 +126,8 @@
                     location.reload();
                 })
                 .catch(() => {
-                    alert("Update failed. Check net.");
+                    alert("Network Error.");
                     this.disabled = false;
-                    this.innerText = "✅ MARK AS PRESENT";
                 });
         });
     </script>
