@@ -4,70 +4,121 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SYNAPSE 2026 | Staff Scanner</title>
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 
     <style>
         body { background: #07060f; color: #fff; font-family: sans-serif; }
         .scanner-container { max-width: 500px; margin: auto; padding: 20px; }
-        #reader { border-radius: 20px; overflow: hidden; border: 2px solid #1fc1d1 !important; }
-        .result-card { background: rgba(15, 12, 41, 0.95); border-radius: 15px; padding: 25px; margin-top: 20px; display: none; border: 2px solid #d11fb7; }
-        .btn-checkin { background: #1fc1d1; color: #000; font-weight: 800; border: none; padding: 15px; width: 100%; border-radius: 10px; }
+        
+        #reader { 
+            width: 100%;
+            border-radius: 20px; 
+            overflow: hidden; 
+            border: 3px solid #1fc1d1 !important;
+            background: #000;
+        }
+
+        /* High-Visibility Manual Controls */
+        .controls { margin-top: 20px; }
+        .btn-start { background: #1fc1d1; color: #000; font-weight: 900; border: none; padding: 15px; width: 100%; border-radius: 10px; margin-bottom: 10px; }
+        .btn-checkin { background: #d11fb7; color: #fff; font-weight: 900; border: none; padding: 15px; width: 100%; border-radius: 10px; }
+        
+        .result-card { 
+            background: rgba(15, 12, 41, 0.98); 
+            border-radius: 15px; 
+            padding: 25px; 
+            margin-top: 20px; 
+            display: none; 
+            border: 2px solid #1fc1d1;
+            animation: fadeIn 0.5s;
+        }
+
+        .scan-status { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #1fc1d1; margin-top: 10px; }
     </style>
 </head>
 <body>
 
     <div class="scanner-container text-center">
-        <h2 class="my-4" style="color: #1fc1d1; font-weight: 900;">SYNAPSE SCANNER</h2>
+        <h2 class="my-4" style="color: #1fc1d1; font-weight: 900; letter-spacing: 2px;">SYNAPSE SCANNER</h2>
+        
         <div id="reader"></div>
+        <div id="status" class="scan-status">Camera: Offline</div>
+
+        <div class="controls">
+            <button id="startBtn" class="btn-start">📸 OPEN CAMERA & START SCAN</button>
+        </div>
 
         <div id="result" class="result-card text-start">
-            <h4 style="color: #d11fb7;">STUDENT FOUND</h4>
-            <hr>
-            <div id="scannedData" class="mb-4"></div>
+            <h4 style="color: #1fc1d1;">✓ STUDENT VERIFIED</h4>
+            <hr style="border-color: #444;">
+            <div id="scannedData" class="mb-4" style="line-height: 1.8; font-size: 1.1rem;"></div>
             
             <button id="checkinBtn" class="btn-checkin mb-3">✅ MARK AS PRESENT</button>
-            <button class="btn btn-outline-secondary w-100 text-white" onclick="resetScanner()">Cancel / Next</button>
+            <button class="btn btn-outline-secondary w-100 text-white" onclick="location.reload()">Reset Scanner</button>
         </div>
+
+        <p class="mt-5 small opacity-50">Authorized Staff Only - Payyanur Campus</p>
     </div>
 
     <script>
+        // Replace this with your actual Google Script URL
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwKjrjjrV5hJUrqaP5nWjYAW2HW50y6EI3_k9bfzriS8ktMuAHpYe1i8K6IyPFV-jsndA/exec'; // MUST BE YOUR GOOGLE SCRIPT URL
+        
         const html5QrCode = new Html5Qrcode("reader");
+        const startBtn = document.getElementById('startBtn');
+        const statusText = document.getElementById('status');
         let currentMobile = "";
 
         const onScanSuccess = (decodedText) => {
+            // Stop scanning and vibrate
+            navigator.vibrate(200);
             html5QrCode.stop().then(() => {
+                statusText.innerText = "Camera: Stopped (Success)";
                 document.getElementById('result').style.display = 'block';
                 document.getElementById('scannedData').innerHTML = decodedText.replaceAll('|', '<br>');
                 
-                // Extract mobile number (assuming it follows "Mobile: ")
+                // Extract mobile for Check-in
                 const match = decodedText.match(/Mobile:\s*(\d{10})/);
                 currentMobile = match ? match[1] : "";
             });
         };
 
-        html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, onScanSuccess);
+        // Manual Start Trigger
+        startBtn.addEventListener('click', () => {
+            startBtn.style.display = 'none';
+            statusText.innerText = "Camera: Starting...";
+            
+            html5QrCode.start(
+                { facingMode: "environment" }, 
+                { fps: 20, qrbox: { width: 250, height: 250 } }, 
+                onScanSuccess
+            ).then(() => {
+                statusText.innerText = "Camera: Active (Scanning)";
+            }).catch(err => {
+                statusText.innerText = "Error: " + err;
+                startBtn.style.display = 'block';
+            });
+        });
 
+        // Check-in logic
         document.getElementById('checkinBtn').addEventListener('click', function() {
             this.disabled = true;
-            this.innerText = "UPDATING SHEET...";
+            this.innerText = "UPDATING...";
             
             fetch(`${scriptURL}?action=checkin&mobile=${currentMobile}`)
                 .then(res => res.text())
                 .then(response => {
-                    alert("Attendance Marked: " + response);
-                    resetScanner();
+                    alert("Attendance Status: " + response);
+                    location.reload(); // Simplest way to reset everything
                 })
-                .catch(err => alert("Error: " + err));
+                .catch(err => {
+                    alert("Sheet Update Failed. Check Internet.");
+                    this.disabled = false;
+                    this.innerText = "✅ MARK AS PRESENT";
+                });
         });
-
-        function resetScanner() {
-            document.getElementById('result').style.display = 'none';
-            document.getElementById('checkinBtn').disabled = false;
-            document.getElementById('checkinBtn').innerText = "✅ MARK AS PRESENT";
-            html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, onScanSuccess);
-        }
     </script>
 </body>
 </html>
