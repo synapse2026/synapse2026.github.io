@@ -24,9 +24,9 @@
             font-family: 'Segoe UI', sans-serif;
             margin: 0;
             overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* CRITICAL: Particles must not block touch */
         #particles-js {
             position: fixed;
             width: 100%; height: 100%;
@@ -81,57 +81,57 @@
             letter-spacing: 2px;
         }
 
-        /* Success Message Styling */
+        /* SUCCESS VIEW FIX */
+        #successWrapper {
+            display: none;
+            pointer-events: none; /* Allows touches to pass through the background */
+            position: relative;
+            z-index: 1000;
+        }
+
         #successMsg {
             border: 3px solid var(--poster-blue);
             background: rgba(7, 6, 15, 0.95);
             border-radius: 20px;
             padding: 40px;
-            margin-bottom: 120px;
-            position: relative;
-            z-index: 10;
+            margin-bottom: 30px;
+            pointer-events: auto; /* Box content is clickable */
         }
 
-        /* FIXED BUTTON AT BOTTOM FOR MOBILE */
+        /* THE ORIGINAL BUTTON STYLE + ANIMATION */
         .btn-receipt-fixed {
-            background: #1fc1d1 !important;
+            background: var(--poster-blue) !important;
             color: #000 !important;
-            font-weight: 900;
+            font-weight: 800;
             border: none;
-            padding: 18px;
+            padding: 18px 30px;
             border-radius: 12px;
             cursor: pointer !important;
-            text-decoration: none;
             display: block;
             text-align: center;
-            box-shadow: 0 -5px 25px rgba(31, 193, 209, 0.6);
-            position: fixed;
-            bottom: 20px;
-            left: 5%;
-            width: 90%;
-            z-index: 999999 !important; /* Highest possible */
-            pointer-events: auto !important;
-            text-transform: uppercase;
+            text-decoration: none;
+            box-shadow: 0 0 20px rgba(31, 193, 209, 0.5);
+            pointer-events: auto !important; /* FORCED CLICKABILITY */
+            width: 100%;
+            margin-top: 20px;
+            position: relative;
+            z-index: 2000;
         }
 
-        @media (min-width: 769px) {
+        /* MOBILE BOTTOM PINNING */
+        @media (max-width: 768px) {
             .btn-receipt-fixed {
-                position: relative;
-                width: 100%;
-                left: 0;
-                bottom: 0;
-                margin-top: 20px;
+                position: fixed;
+                bottom: 20px;
+                left: 5%;
+                width: 90%;
+                margin: 0;
+                box-shadow: 0 -5px 25px rgba(0,0,0,0.8);
             }
+            #successMsg { padding: 25px 15px; margin-bottom: 120px; }
         }
 
         #qrcode-hidden { display: none; }
-        .delay-1 { animation-delay: 0.1s; }
-        .delay-2 { animation-delay: 0.2s; }
-        .delay-3 { animation-delay: 0.3s; }
-        .delay-4 { animation-delay: 0.4s; }
-        .delay-5 { animation-delay: 0.5s; }
-        .delay-6 { animation-delay: 0.6s; }
-
     </style>
 </head>
 <body>
@@ -141,7 +141,7 @@
 
     <div class="main-content container my-4">
         
-        <div class="poster-container animate__animated animate__fadeIn">
+        <div class="poster-container animate__animated animate__fadeIn" id="posterDiv">
             <img src="synapse-poster.jpg" alt="Synapse 2026 Poster" class="poster-image">
         </div>
 
@@ -156,62 +156,40 @@
                         
                         <form id="regForm">
                             <div class="row g-4">
-                                <div class="col-md-6 animate__animated animate__fadeInLeft delay-1">
-                                    <label class="form-label">Student Name</label>
-                                    <input type="text" id="name" class="form-control" required>
-                                </div>
-                                <div class="col-md-6 animate__animated animate__fadeInLeft delay-2">
-                                    <label class="form-label">Mobile Number</label>
-                                    <input type="tel" id="mobile" class="form-control" pattern="[0-9]{10}" required>
-                                </div>
-                                <div class="col-md-6 animate__animated animate__fadeInLeft delay-3">
-                                    <label class="form-label">Email Address</label>
-                                    <input type="email" id="email" class="form-control" required>
-                                </div>
-                                <div class="col-md-6 animate__animated animate__fadeInLeft delay-4">
-                                    <label class="form-label">College Name</label>
-                                    <input type="text" id="college" class="form-control" required>
-                                </div>
-                                <div class="col-md-6 animate__animated animate__fadeInLeft delay-5">
+                                <div class="col-md-6"><label class="form-label">Name</label><input type="text" id="name" class="form-control" required></div>
+                                <div class="col-md-6"><label class="form-label">Mobile</label><input type="tel" id="mobile" class="form-control" pattern="[0-9]{10}" required></div>
+                                <div class="col-md-6"><label class="form-label">Email</label><input type="email" id="email" class="form-control" required></div>
+                                <div class="col-md-6"><label class="form-label">College</label><input type="text" id="college" class="form-control" required></div>
+                                <div class="col-md-6">
                                     <label class="form-label">Department</label>
                                     <select id="department" class="form-select" required>
-                                        <option value="" selected disabled>Select</option>
-                                        <option>Computer Science</option>
-                                        <option>Electronics</option>
-                                        <option>Mechanical</option>
-                                        <option>Civil</option>
+                                        <option>Computer Science</option><option>Electronics</option><option>Mechanical</option><option>Civil</option>
                                     </select>
                                 </div>
-                                <div class="col-md-6 animate__animated animate__fadeInLeft delay-6">
+                                <div class="col-md-6">
                                     <label class="form-label">Semester</label>
                                     <select id="semester" class="form-select" required>
-                                        <option>S1</option><option>S2</option><option>S3</option>
-                                        <option>S4</option><option>S5</option><option>S6</option>
+                                        <option>S1</option><option>S2</option><option>S3</option><option>S4</option><option>S6</option>
                                     </select>
                                 </div>
                             </div>
-
                             <div class="mt-5">
-                                <label class="form-label d-block mb-3 text-center">Events Selection</label>
                                 <div class="event-grid row row-cols-2 g-3">
                                     <div class="col"><div class="form-check"><input class="form-check-input event-check" type="checkbox" value="Hackathons" id="e1"><label class="form-check-label text-black" for="e1">Hackathons</label></div></div>
                                     <div class="col"><div class="form-check"><input class="form-check-input event-check" type="checkbox" value="Workshops" id="e2"><label class="form-check-label text-black" for="e2">Workshops</label></div></div>
-                                    <div class="col"><div class="form-check"><input class="form-check-input event-check" type="checkbox" value="Gaming" id="e6"><label class="form-check-label text-black" for="e6">Gaming</label></div></div>
-                                    <div class="col"><div class="form-check"><input class="form-check-input event-check" type="checkbox" value="Quizzes" id="e5"><label class="form-check-label text-black" for="e5">Quizzes</label></div></div>
                                 </div>
-                                <button type="submit" id="submitBtn" class="btn btn-primary w-100 mt-5 shadow">SUBMIT REGISTRATION</button>
+                                <button type="submit" id="submitBtn" class="btn btn-primary w-100 mt-5">SUBMIT REGISTRATION</button>
                             </div>
                         </form>
                     </div>
                 </div>
 
-                <div id="successWrapper" class="d-none">
+                <div id="successWrapper">
                     <div id="successMsg" class="animate__animated animate__bounceIn text-center">
                         <h1 style="color: var(--poster-blue); font-weight: 900;">SUCCESS!</h1>
-                        <p class="lead text-white">Your registration for SYNAPSE 2026 is confirmed.</p>
+                        <p class="lead text-white">Registration confirmed.</p>
                         <hr style="border-color: #444;">
-                        <div id="receiptDetails" class="text-start mb-4 px-3" style="font-size: 1rem; color: #fff;"></div>
-                        <p class="mt-4 small text-muted">A copy of your receipt is being prepared.</p>
+                        <div id="receiptDetails" class="text-start mb-4 px-3" style="font-size: 1rem; color: #bbb;"></div>
                     </div>
 
                     <button id="downloadBtn" onclick="downloadPDF()" class="btn-receipt-fixed animate__animated animate__fadeInUp">
@@ -225,29 +203,21 @@
 
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script>
-        particlesJS("particles-js", { "particles": { "number": { "value": 40 }, "color": { "value": "#ffffff" }, "line_linked": { "enable": true, "color": "#1fc1d1" }, "move": { "enable": true, "speed": 1.5 } } });
+        particlesJS("particles-js", { "particles": { "number": { "value": 30 }, "line_linked": { "enable": true, "color": "#1fc1d1" }, "move": { "speed": 1.5 } } });
 
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwKjrjjrV5hJUrqaP5nWjYAW2HW50y6EI3_k9bfzriS8ktMuAHpYe1i8K6IyPFV-jsndA/exec';
         let registrationData = {};
 
         document.getElementById('regForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const submitBtn = document.getElementById('submitBtn');
-            const selectedEvents = Array.from(document.querySelectorAll('.event-check:checked')).map(cb => cb.value);
-            
-            if(selectedEvents.length === 0) { alert("Select at least one event!"); return; }
-
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = 'PROCESSING...';
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true; btn.innerHTML = 'PROCESSING...';
 
             registrationData = {
                 name: document.getElementById('name').value,
                 mobile: document.getElementById('mobile').value,
-                email: document.getElementById('email').value,
                 college: document.getElementById('college').value,
-                department: document.getElementById('department').value,
-                semester: document.getElementById('semester').value,
-                events: selectedEvents.join(", ")
+                events: Array.from(document.querySelectorAll('.event-check:checked')).map(c => c.value).join(", ")
             };
 
             fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(registrationData) })
@@ -257,57 +227,38 @@
 
         function handleSuccess() {
             document.getElementById('formCard').classList.add('d-none');
-            document.getElementById('successWrapper').classList.remove('d-none');
-            document.getElementById('receiptDetails').innerHTML = `<b>Name:</b> ${registrationData.name}<br><b>College:</b> ${registrationData.college}<br><b>Mobile:</b> ${registrationData.mobile}`;
+            document.getElementById('successWrapper').style.display = 'block';
+            document.getElementById('receiptDetails').innerHTML = `<b>Name:</b> ${registrationData.name}<br><b>ID:</b> ${registrationData.mobile}`;
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            
-            // Auto-trigger download
-            setTimeout(downloadPDF, 1500);
+            setTimeout(downloadPDF, 1500); // Auto-download
         }
 
         function downloadPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             const qrContainer = document.getElementById("qrcode-hidden");
-            qrContainer.innerHTML = ""; 
-
-            new QRCode(qrContainer, {
-                text: registrationData.mobile,
-                width: 256,
-                height: 256,
-                correctLevel: QRCode.CorrectLevel.H
-            });
+            qrContainer.innerHTML = "";
+            new QRCode(qrContainer, { text: registrationData.mobile, width: 256, height: 256 });
 
             setTimeout(() => {
                 const qrImg = qrContainer.querySelector("img").src;
-                
-                // PDF Background & Header
                 doc.setFillColor(7, 6, 15); doc.rect(0, 0, 210, 297, 'F');
                 doc.setTextColor(31, 193, 209); doc.setFontSize(26);
                 doc.text("SYNAPSE 2026", 105, 40, { align: "center" });
-                
-                // QR Box
-                doc.setFillColor(255, 255, 255);
-                doc.rect(60, 55, 90, 90, 'F');
+                doc.setFillColor(255, 255, 255); doc.rect(60, 55, 90, 90, 'F');
                 doc.addImage(qrImg, 'PNG', 65, 60, 80, 80);
+                doc.setTextColor(255, 255, 255); doc.setFontSize(14);
+                doc.text(`Name: ${registrationData.name}`, 30, 160);
+                doc.text(`Mobile: ${registrationData.mobile}`, 30, 175);
                 
-                // Text Details
-                doc.setTextColor(255, 255, 255);
-                doc.setFontSize(14);
-                doc.text(`Student Name: ${registrationData.name}`, 30, 160);
-                doc.text(`Mobile Number: ${registrationData.mobile}`, 30, 175);
-                doc.text(`College: ${registrationData.college}`, 30, 190);
-                
-                // Mobile-friendly blob download
-                const pdfOutput = doc.output('blob');
-                const url = URL.createObjectURL(pdfOutput);
+                const pdfBlob = doc.output('blob');
+                const url = URL.createObjectURL(pdfBlob);
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = `Synapse2026_${registrationData.name}.pdf`;
+                link.download = `Synapse_${registrationData.name}.pdf`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-                URL.revokeObjectURL(url);
             }, 600);
         }
     </script>
