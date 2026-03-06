@@ -65,7 +65,7 @@
     </div>
 
     <div class="section-card">
-        <h5 class="mb-3">🏆 Mark Winners</h5>
+        <h5 class="mb-3">🏆 Mark Winners </h5>
         <div class="mb-4">
             <label class="small text-white-50 d-block mb-2">1. SELECT RANK</label>
             <select id="winnerPosition" class="form-select bg-dark text-white border-warning fw-bold">
@@ -183,15 +183,69 @@
     }
 
     function exportTablePDF(tableId, fileName) {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('l', 'mm', 'a4');
-        const event = document.getElementById('eventSelector').value;
-        doc.setFontSize(20); doc.setTextColor(31, 193, 209); doc.text(`SYNAPSE 2026: ${event}`, 14, 15);
-        const colMapping = tableId === 'participantTable' ? [0, 2, 3, 4, 5, 6, 7] : [0, 1, 2, 3, 4, 5];
-        doc.autoTable({ html: `#${tableId}`, startY: 30, theme: 'grid', headStyles: { fillColor: [31, 193, 209], textColor: [0, 0, 0] }, columns: colMapping });
-        doc.save(`${fileName}_${event}.pdf`);
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('l', 'mm', 'a4'); 
+    const event = document.getElementById('eventSelector').value;
+
+    doc.setFontSize(20);
+    doc.setTextColor(31, 193, 209);
+    doc.text(`SYNAPSE 2026: ${event}`, 14, 15);
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Report Generated: ${new Date().toLocaleString()}`, 14, 22);
+
+    // 1. Manually extract rows from the HTML table to ensure all 7 columns are captured
+    const table = document.getElementById(tableId);
+    const rows = [];
+    const tableBody = table.querySelector('tbody');
+    
+    for (let i = 0; i < tableBody.rows.length; i++) {
+        const row = tableBody.rows[i];
+        const rowData = [];
+        
+        if (tableId === 'participantTable') {
+            // We pull: SL(0), Name(2), Mobile(3), College(4), Dept(5), Sem(6), Status(7)
+            rowData.push(row.cells[0].innerText); // SL
+            rowData.push(row.cells[2].innerText); // Name
+            rowData.push(row.cells[3].innerText); // Mobile
+            rowData.push(row.cells[4].innerText); // College
+            rowData.push(row.cells[5].innerText); // Dept
+            rowData.push(row.cells[6].innerText); // Sem
+            rowData.push(row.cells[7].innerText); // Status (The missing Column K)
+        } else {
+            // Winner Table: SL(0), Position(1), Name(2), Mobile(3), College(4), Dept(5)
+            for (let j = 0; j < 6; j++) {
+                rowData.push(row.cells[j].innerText);
+            }
+        }
+        rows.push(rowData);
     }
+
+    // 2. Define Headers
+    const headers = tableId === 'participantTable' 
+        ? [['SL', 'Name', 'Mobile', 'College', 'Dept', 'Sem', 'Status']]
+        : [['SL', 'Position', 'Name', 'Mobile', 'College', 'Dept']];
+
+    // 3. Generate PDF using the extracted array
+    doc.autoTable({
+        head: headers,
+        body: rows,
+        startY: 30,
+        theme: 'grid',
+        headStyles: { fillColor: [31, 193, 209], textColor: [0, 0, 0], fontStyle: 'bold' },
+        styles: { fontSize: 9 },
+        didParseCell: function (data) {
+            // Target the last column (index 6 in the PDF) for coloring
+            if (tableId === 'participantTable' && data.section === 'body' && data.column.index === 6) {
+                if (data.cell.raw === 'ABSENT') {
+                    data.cell.styles.textColor = [255, 0, 0];
+                }
+            }
+        }
+    });
+
+    doc.save(`${fileName}_${event}.pdf`);
+}
 </script>
 </body>
 </html>
-
