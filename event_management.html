@@ -17,9 +17,8 @@
         
         h3, h5 { font-family: 'Orbitron', sans-serif; letter-spacing: 2px; color: var(--neon-blue); text-shadow: 0 0 10px rgba(31, 193, 209, 0.3); text-transform: uppercase; }
         .section-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 15px; margin-bottom: 20px; }
-        .form-select { background: rgba(0,0,0,0.5) !important; color: #fff !important; border: 1px solid #444; }
+        .form-select, .form-control { background: rgba(0,0,0,0.5) !important; color: #fff !important; border: 1px solid #444; }
         
-        /* Fixed Scrollable List Logic */
         .scrollable-container { 
             max-height: 350px; 
             overflow-y: auto; 
@@ -28,7 +27,6 @@
             -webkit-overflow-scrolling: touch; 
         }
         
-        /* Sticky Header */
         .table thead th { 
             position: sticky; 
             top: 0; 
@@ -58,11 +56,8 @@
 
     <div class="section-card">
         <span class="label-cyber">1. SELECT EVENT</span>
-        <select id="eventSelector" class="form-select" onchange="fetchParticipants()">
-            <option selected disabled>Choose Event...</option>
-            <option>Paper Presentation</option><option>Robotics</option>
-            <option>Coding Contest</option><option>Tech Quiz</option>
-            <option>Hackathons</option><option>Gaming</option><option>Workshops</option>
+        <select id="eventSelector" class="form-select shadow-none" onchange="fetchParticipants()">
+            <option selected disabled>Loading Events...</option>
         </select>
         <div id="loader" class="text-center mt-3 d-none" style="color: var(--neon-blue); font-family: 'Orbitron'; font-size: 0.8rem;">SYNCING DATABASE...</div>
     </div>
@@ -70,6 +65,8 @@
     <div class="section-card d-none" id="attendanceSection">
         <h5 class="mb-3" style="font-size: 0.9rem;">Paid Attendees</h5>
         
+        <input type="text" id="attendeeSearch" class="form-control mb-3 shadow-none" placeholder="🔍 Search Name or Mobile..." onkeyup="filterTable()">
+
         <div class="scrollable-container">
             <table class="table table-dark table-hover mb-0" id="participantTable">
                 <thead>
@@ -130,6 +127,19 @@
     const html5QrCode = new Html5Qrcode("reader");
     let currentData = [];
 
+    window.onload = () => {
+        fetch(`${scriptURL}?action=getUniqueEvents`)
+            .then(res => res.json())
+            .then(events => {
+                const selector = document.getElementById('eventSelector');
+                selector.innerHTML = '<option selected disabled>Choose Event...</option>';
+                events.forEach(evt => {
+                    selector.innerHTML += `<option value="${evt}">${evt}</option>`;
+                });
+            })
+            .catch(err => console.error("Event load failed"));
+    };
+
     function fetchParticipants() {
         const event = document.getElementById('eventSelector').value;
         const body = document.getElementById('participantBody');
@@ -139,7 +149,7 @@
         body.innerHTML = "";
         document.getElementById('attendanceSection').classList.add('d-none');
 
-        fetch(`${scriptURL}?action=search&event=${event}`)
+        fetch(`${scriptURL}?action=getEventList&event=${event}`)
             .then(res => res.json())
             .then(data => {
                 currentData = data;
@@ -149,42 +159,62 @@
                 document.getElementById('winnerSection').classList.remove('d-none');
 
                 data.forEach((p, index) => {
-                    const isPresent = p.eventStatus === "PRESENT";
+                    // CORRECTED ATTENDANCE DISPLAY LOGIC: Check for specific "Event: PRESENT" in string
+                    const allAtt = (p.eventStatus || "").split('|');
+                    const isPresentForEvent = allAtt.some(a => a.trim() === event + ": PRESENT");
+                    
                     body.innerHTML += `
                         <tr>
                             <td>${index + 1}</td>
-                            <td><input type="checkbox" class="user-check form-check-input" value="${p.mobile}" ${isPresent ? 'disabled' : ''}></td>
+                            <td><input type="checkbox" class="user-check form-check-input" value="${p.mobile}" ${isPresentForEvent ? 'disabled' : ''}></td>
                             <td>
                                 <strong>${p.name}</strong>
                                 <span class="info-sub">${p.mobile} | ${p.dept}</span>
                                 <span class="info-sub" style="color: var(--neon-blue)">${p.college}</span>
                             </td>
-                            <td><span class="${isPresent ? 'bg-present' : 'text-white-50 small'}">${p.eventStatus}</span></td>
+                            <td><span class="${isPresentForEvent ? 'bg-present' : 'text-white-50 small'}">${isPresentForEvent ? 'PRESENT' : 'ABSENT'}</span></td>
                         </tr>`;
                     
                     if(p.winnerStatus && p.winnerStatus !== "") {
-                        document.getElementById('winnerBody').innerHTML += `
-                            <tr>
-                                <td class="text-warning fw-bold small">${p.winnerStatus}</td>
-                                <td>
-                                    <strong>${p.name}</strong>
-                                    <span class="info-sub">${p.mobile} | ${p.dept}</span>
-                                    <span class="info-sub" style="color: var(--neon-blue)">${p.college}</span>
-                                </td>
-                            </tr>`;
+                        const allWins = p.winnerStatus.split('|');
+                        const specificWin = allWins.find(win => win.trim().startsWith(event + ":"));
+                        
+                        if (specificWin) {
+                            document.getElementById('winnerBody').innerHTML += `
+                                <tr>
+                                    <td class="text-warning fw-bold small">${specificWin.trim()}</td>
+                                    <td>
+                                        <strong>${p.name}</strong>
+                                        <span class="info-sub">${p.mobile} | ${p.dept}</span>
+                                        <span class="info-sub" style="color: var(--neon-blue)">${p.college}</span>
+                                    </td>
+                                </tr>`;
+                        }
                     }
                 });
             });
     }
 
+    function filterTable() {
+        const input = document.getElementById('attendeeSearch').value.toUpperCase();
+        const rows = document.getElementById('participantBody').getElementsByTagName('tr');
+        for (let i = 0; i < rows.length; i++) {
+            const text = rows[i].innerText.toUpperCase();
+            rows[i].style.display = text.indexOf(input) > -1 ? "" : "none";
+        }
+    }
+
     function toggleAll(source) { document.querySelectorAll('.user-check:not([disabled])').forEach(c => c.checked = source.checked); }
 
     function submitBulkAttendance() {
+        const event = document.getElementById('eventSelector').value; // Get selected event
         const selected = Array.from(document.querySelectorAll('.user-check:checked')).map(c => c.value);
         if(selected.length === 0) return alert("Select students!");
-        if(!confirm(`Mark ${selected.length} as PRESENT?`)) return;
-        const promises = selected.map(mob => fetch(`${scriptURL}?action=markEventAttendance&mobile=${mob}`));
-        Promise.all(promises).then(() => { alert("Database Updated!"); fetchParticipants(); });
+        if(!confirm(`Mark ${selected.length} as PRESENT for ${event}?`)) return;
+        
+        // CORRECTED: Passing 'event' parameter to ensure event-specific attendance marking in Sheet
+        const promises = selected.map(mob => fetch(`${scriptURL}?action=markEventAttendance&mobile=${mob}&event=${event}`));
+        Promise.all(promises).then(() => { alert("Attendance Updated!"); fetchParticipants(); });
     }
 
     function startWinnerScan() {
@@ -203,9 +233,28 @@
     function processWinnerUpdate(mobile) {
         const pos = document.getElementById('winnerPosition').value;
         const event = document.getElementById('eventSelector').value;
+        const student = currentData.find(p => p.mobile.toString() === mobile.toString());
+
+        if (!student) {
+            alert(`⚠️ ERROR: Participant not registered for ${event}.`);
+            return;
+        }
+
+        // CORRECTED: Validation check for specific event attendance
+        const allAtt = (student.eventStatus || "").split('|');
+        const isPresentForEvent = allAtt.some(a => a.trim() === event + ": PRESENT");
+
+        if (!isPresentForEvent) {
+            alert(`⚠️ ERROR: ${student.name} is marked as ABSENT for ${event}. Mark attendance first.`);
+            return;
+        }
+
         fetch(`${scriptURL}?action=markWinner&mobile=${mobile}&position=${pos}&event=${event}`)
             .then(r => r.text())
-            .then(res => { alert(res.includes("Error") ? res : "Winner Marked!"); fetchParticipants(); });
+            .then(res => { 
+                alert(res.includes("Error") ? res : `🏆 Success: Marked ${pos} for ${event}`); 
+                fetchParticipants(); 
+            });
     }
 
     function exportTablePDF(tableId, fileName) {
@@ -218,7 +267,10 @@
         const rows = [];
         if (tableId === 'participantTable') {
             currentData.forEach((p, i) => {
-                rows.push([i+1, p.name, p.mobile, p.college, p.dept, p.semester, p.eventStatus]);
+                // Corrected for PDF export status
+                const allAtt = (p.eventStatus || "").split('|');
+                const isPresentForEvent = allAtt.some(a => a.trim() === event + ": PRESENT");
+                rows.push([i+1, p.name, p.mobile, p.college, p.dept, p.semester, isPresentForEvent ? 'PRESENT' : 'ABSENT']);
             });
             doc.autoTable({ 
                 head: [['SL', 'Name', 'Mobile', 'College', 'Dept', 'Sem', 'Status']], 
@@ -226,8 +278,13 @@
                 headStyles: { fillColor: [31, 193, 209], textColor: [0, 0, 0] }
             });
         } else {
-            currentData.filter(p => p.winnerStatus).forEach((p, i) => {
-                rows.push([i+1, p.winnerStatus, p.name, p.mobile, p.college, p.dept]);
+            currentData.forEach((p, i) => {
+                if(p.winnerStatus) {
+                    const specificWin = p.winnerStatus.split('|').find(w => w.trim().startsWith(event + ":"));
+                    if(specificWin) {
+                        rows.push([rows.length + 1, specificWin.trim(), p.name, p.mobile, p.college, p.dept]);
+                    }
+                }
             });
             doc.autoTable({ 
                 head: [['SL', 'Position', 'Name', 'Mobile', 'College', 'Dept']], 
