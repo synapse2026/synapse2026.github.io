@@ -4,42 +4,144 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scanner | SYNAPSE 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
     <style>
-        body { background: #07060f; color: #fff; font-family: sans-serif; }
-        .container { max-width: 500px; padding: 20px; }
-        #reader { border: 3px solid #1fc1d1; border-radius: 20px; overflow: hidden; background: #000; }
-        .detail-card { background: rgba(15, 12, 41, 0.98); border-radius: 15px; padding: 25px; margin-top: 20px; display: none; border: 2px solid #1fc1d1; }
-        .label { color: #1fc1d1; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; margin-top: 8px; }
-        .val { font-size: 1rem; border-bottom: 1px solid #333; padding-bottom: 4px; overflow-wrap: break-word; }
-        .badge-status { padding: 8px 20px; border-radius: 25px; font-weight: 800; display: inline-block; margin-top: 15px; width: 100%; }
-        .bg-red { background: #ff4757; color: #fff; }
-        .bg-green { background: #2ed573; color: #000; }
+        :root {
+            --neon-blue: #1fc1d1;
+            --neon-pink: #d11fb7;
+            --dark-bg: #0a0a0f;
+            --warning-gold: #ffc107;
+        }
+
+        body { 
+            background: var(--dark-bg); 
+            color: #fff; 
+            font-family: 'Rajdhani', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .container { max-width: 450px; padding: 25px; margin: auto; }
+
+        h3 { 
+            font-family: 'Orbitron', sans-serif; 
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(31, 193, 209, 0.5);
+            font-weight: 700;
+        }
+
+        #reader { 
+            border: 2px solid var(--neon-blue); 
+            border-radius: 15px; 
+            overflow: hidden; 
+            background: #000;
+        }
+
+        .control-panel {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .form-control {
+            background: rgba(0,0,0,0.5) !important;
+            color: #fff !important;
+            border: 1px solid #444;
+            font-size: 1.2rem;
+        }
+
+        .detail-card { 
+            background: linear-gradient(145deg, #0f0c29, #1a1a2e); 
+            border-radius: 20px; 
+            padding: 25px; 
+            margin-top: 20px; 
+            display: none; 
+            border: 1px solid var(--neon-pink);
+            box-shadow: 0 0 30px rgba(209, 31, 183, 0.2);
+        }
+
+        .label { color: var(--neon-blue); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-top: 12px; }
+        .val { font-size: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
+        
+        .badge-status { 
+            padding: 12px; border-radius: 10px; font-weight: 800; 
+            display: inline-block; margin-top: 20px; width: 100%; 
+            font-family: 'Orbitron', sans-serif; font-size: 0.85rem;
+        }
+
+        .bg-red { background: rgba(255, 71, 87, 0.2); color: #ff4757; border: 1px solid #ff4757; }
+        .bg-green { background: rgba(46, 213, 115, 0.2); color: #2ed573; border: 1px solid #2ed573; }
+        .bg-process { background: rgba(255, 193, 7, 0.1); color: var(--warning-gold); border: 1px solid var(--warning-gold); }
+        
+        /* QR Container Styling */
+        #qr-preview-area {
+            background: #fff; 
+            padding: 20px; 
+            border-radius: 15px;
+            display: inline-block; 
+            margin: 15px 0;
+            box-shadow: 0 0 25px rgba(255,255,255,0.15);
+        }
+
+        .qr-instruction {
+            color: #aaa;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
+
     <div class="container text-center">
-        <h3 class="mb-4" style="color: #1fc1d1; font-weight: 800;">STAFF GATE CONTROL</h3>
+        <h3 class="mb-4" style="color: var(--neon-blue);">GATE CONTROL</h3>
+        
         <div id="reader"></div>
-        <div class="mt-4" id="controls">
-            <button onclick="html5QrCode.start({ facingMode: 'environment' }, { fps: 20, qrbox: 250 }, onScanSuccess)" class="btn btn-info w-100 py-3 fw-bold">📸 SCAN QR CODE</button>
-            <label for="qr-input" class="btn btn-outline-warning w-100 mt-2 py-2 fw-bold">🖼️ UPLOAD PHOTO</label>
-            <input type="file" id="qr-input" accept="image/*" capture="environment" style="display:none">
+
+        <div id="controls">
+            <button onclick="startScanner()" class="btn btn-info w-100 py-3 mt-4 mb-3 fw-bold">📸 OPEN SCANNER</button>
+            
+            <div class="control-panel">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="small text-white-50">MANUAL OVERRIDE</span>
+                    <span id="digit-count" class="text-white-50">0/10</span>
+                </div>
+                <div class="input-group">
+                    <input type="tel" id="manual-mobile" class="form-control" placeholder="Phone Number" maxlength="10">
+                    <button onclick="handleManualSearch()" class="btn btn-warning px-3 fw-bold">SEARCH</button>
+                </div>
+            </div>
         </div>
 
         <div id="result" class="detail-card text-start">
-            <h5 class="text-center" style="color: #d11fb7; font-weight: 900;">STUDENT INFO</h5>
-            <div class="label">Name</div><div id="d-name" class="val">-</div>
-            <div class="label">Mobile</div><div id="d-mobile" class="val">-</div>
-            <div class="label">Events</div><div id="d-events" class="val">-</div>
+            <h5 class="text-center mb-1" style="color: var(--neon-pink); font-family: 'Orbitron';">VERIFICATION</h5>
             
-            <div id="statusArea" class="mt-3 text-center">
-                <div id="p-badge" class="badge-status">Checking...</div>
-                <button id="confirmBtn" class="btn btn-primary w-100 mt-3 py-3 fw-bold">MARK PAYMENT & ENTRY</button>
-                <div id="alreadyVerifiedMsg" class="mt-3 text-success fw-bold d-none">✓ ENTRY ALREADY VERIFIED</div>
+            <div id="qr-display-section" class="text-center d-none border-bottom border-secondary mb-3">
+                <div class="qr-instruction mt-2">Student can scan/photo this QR</div>
+                <div id="qr-preview-area"></div>
             </div>
-            <button class="btn btn-link text-white-50 w-100 mt-2" onclick="location.reload()">Back</button>
+
+            <div id="infoFields">
+                <div class="label">Attendee Name</div><div id="d-name" class="val">-</div>
+                <div class="label">Mobile Number</div><div id="d-mobile" class="val">-</div>
+                <div class="label">Events</div><div id="d-events" class="val">-</div>
+            </div>
+            
+            <div id="statusArea" class="text-center">
+                <div id="p-badge" class="badge-status">INITIALIZING...</div>
+                <button id="confirmBtn" class="btn btn-primary w-100 mt-3 py-3 fw-bold d-none">MARK ENTRY & PAYMENT</button>
+                <div id="alreadyVerifiedMsg" class="mt-3 text-success fw-bold d-none">✓ ENTRY GRANTED</div>
+            </div>
+            
+            <button class="btn btn-link text-white-50 w-100 mt-3 text-decoration-none" onclick="location.reload()">← BACK TO HOME</button>
         </div>
     </div>
 
@@ -48,47 +150,82 @@
         const html5QrCode = new Html5Qrcode("reader");
         let currentMob = "";
 
+        // UI Digit Counter
+        document.getElementById('manual-mobile').addEventListener('input', e => {
+            const len = e.target.value.length;
+            const counter = document.getElementById('digit-count');
+            counter.innerText = `${len}/10`;
+            counter.style.color = (len === 10) ? '#2ed573' : '#aaa';
+        });
+
+        function startScanner() {
+            html5QrCode.start({ facingMode: 'environment' }, { fps: 20, qrbox: 250 }, onScanSuccess)
+                .catch(() => alert("Camera error. Please allow permissions."));
+        }
+
+        function handleManualSearch() {
+            const val = document.getElementById('manual-mobile').value.trim();
+            if(val.length < 10) return alert("Please enter 10 digits");
+            handleData(val);
+        }
+
         const handleData = (mobile) => {
             currentMob = mobile.trim();
             document.getElementById('controls').style.display = 'none';
             document.getElementById('result').style.display = 'block';
             
+            const badge = document.getElementById('p-badge');
+            badge.innerText = "SEARCHING DATABASE...";
+            badge.className = "badge-status bg-process";
+
             fetch(`${scriptURL}?action=search&mobile=${currentMob}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data === "NotFound") { alert("Not Found!"); location.reload(); return; }
-                    
+                .then(res => res.text())
+                .then(responseText => {
+                    if (responseText === "NotFound") {
+                        badge.innerText = "REGISTRATION NOT FOUND";
+                        badge.className = "badge-status bg-red";
+                        document.getElementById('d-name').innerText = "NOT FOUND";
+                        document.getElementById('d-mobile').innerText = currentMob;
+                        return;
+                    }
+
+                    const data = JSON.parse(responseText);
                     document.getElementById('d-name').innerText = data.name;
                     document.getElementById('d-mobile').innerText = data.mobile;
                     document.getElementById('d-events').innerText = data.events;
                     
-                    const badge = document.getElementById('p-badge');
-                    const btn = document.getElementById('confirmBtn');
-                    const msg = document.getElementById('alreadyVerifiedMsg');
+                    // Show Large QR for Student
+                    const qrArea = document.getElementById("qr-preview-area");
+                    qrArea.innerHTML = "";
+                    new QRCode(qrArea, { text: data.mobile, width: 180, height: 180 });
+                    document.getElementById('qr-display-section').classList.remove('d-none');
 
                     if (data.payment === "COMPLETED") {
-                        badge.innerText = "PAYMENT: COMPLETED";
+                        badge.innerText = "STATUS: PAID & VERIFIED";
                         badge.className = "badge-status bg-green";
-                        btn.classList.add('d-none');
-                        msg.classList.remove('d-none');
+                        document.getElementById('alreadyVerifiedMsg').classList.remove('d-none');
                     } else {
-                        badge.innerText = "PAYMENT: PENDING";
+                        badge.innerText = "STATUS: PAYMENT PENDING";
                         badge.className = "badge-status bg-red";
-                        btn.classList.remove('d-none');
-                        msg.classList.add('d-none');
+                        document.getElementById('confirmBtn').classList.remove('d-none');
                     }
+                })
+                .catch(() => {
+                    badge.innerText = "NETWORK ERROR";
+                    badge.className = "badge-status bg-red";
                 });
         };
 
-        const onScanSuccess = (t) => { navigator.vibrate(200); if(html5QrCode.isScanning) html5QrCode.stop(); handleData(t); };
-        document.getElementById('qr-input').addEventListener('change', e => {
-            html5QrCode.scanFileV2(e.target.files[0], true).then(res => handleData(res.decodedText));
-        });
+        const onScanSuccess = (t) => { 
+            if(html5QrCode.isScanning) html5QrCode.stop(); 
+            handleData(t); 
+        };
 
         document.getElementById('confirmBtn').addEventListener('click', function() {
-            this.disabled = true; this.innerText = "UPDATING...";
+            this.disabled = true; this.innerText = "PROCESSING...";
             fetch(`${scriptURL}?action=updatePayment&mobile=${currentMob}`)
-                .then(r => r.text()).then(() => { alert("Entry Successful!"); location.reload(); });
+                .then(r => r.text())
+                .then(() => { alert("Entry Confirmed!"); location.reload(); });
         });
     </script>
 </body>
