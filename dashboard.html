@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Command Center | SYNAPSE 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        :root { --neon-blue: #1fc1d1; --neon-pink: #d11fb7; --dark-bg: #050508; --warning-gold: #ffc107; }
+        body { background-color: var(--dark-bg); background-image: linear-gradient(rgba(31, 193, 209, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(31, 193, 209, 0.05) 1px, transparent 1px); background-size: 40px 40px; animation: moveGrid 30s linear infinite; color: #fff; font-family: 'Rajdhani', sans-serif; overflow-x: hidden; }
+        @keyframes moveGrid { from { background-position: 0 0; } to { background-position: 0 1000px; } }
+        .container { max-width: 600px; padding: 15px; margin: auto; position: relative; }
+        h3, h5 { font-family: 'Orbitron', sans-serif; color: var(--neon-blue); text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px var(--neon-blue); }
+        .hud-card { background: rgba(0, 0, 0, 0.85); border: 1px solid var(--neon-blue); border-radius: 12px; padding: 15px; text-align: center; }
+        .hud-val { font-family: 'Orbitron'; font-size: 1.6rem; color: var(--neon-pink); }
+        .hud-label { font-size: 0.65rem; text-transform: uppercase; color: #888; letter-spacing: 1px; }
+        .section-card { background: rgba(15, 15, 25, 0.9); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 20px; margin-bottom: 20px; backdrop-filter: blur(10px); }
+        .report-preview { max-height: 320px; overflow-y: auto; border: 1px solid #333; border-radius: 8px; background: #000; }
+        .table { color: #fff; font-size: 0.8rem; margin-bottom: 0; }
+        .table thead th { position: sticky; top: 0; background: var(--neon-blue); color: #000; z-index: 5; font-family: 'Orbitron'; font-size: 0.6rem; }
+        .event-divider { background: rgba(31, 193, 209, 0.2); color: var(--neon-blue); font-weight: bold; text-transform: uppercase; font-family: 'Orbitron'; font-size: 0.7rem; }
+        .btn-cyber { font-family: 'Orbitron', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 0.75rem; border: 1px solid var(--neon-blue); color: var(--neon-blue); background: transparent; transition: 0.3s; }
+        .btn-cyber:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px var(--neon-blue); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="text-center my-4">
+        <h3>COMMAND CENTER</h3>
+        <p class="text-white-50 small" style="letter-spacing: 4px;">SYNAPSE 2026 ANALYTICS</p>
+    </div>
+
+    <div class="row g-2 mb-4 text-center">
+        <div class="col-6 col-md-3"><div class="hud-card"><div id="hud-total" class="hud-val">0</div><div class="hud-label">Total Reg</div></div></div>
+        <div class="col-6 col-md-3"><div class="hud-card"><div id="hud-paid" class="hud-val" style="color:#2ed573">0</div><div class="hud-label">Paid</div></div></div>
+        <div class="col-6 col-md-3"><div class="hud-card"><div id="hud-present" class="hud-val" style="color:var(--neon-blue)">0</div><div class="hud-label">Attended</div></div></div>
+        <div class="col-6 col-md-3"><div class="hud-card"><div id="hud-winners" class="hud-val" style="color:var(--warning-gold)">0</div><div class="hud-label">Winners</div></div></div>
+    </div>
+
+    <div class="section-card" style="height: 250px;">
+        <h5 style="font-size: 0.75rem; color: var(--neon-pink);">Live System Pulse</h5>
+        <canvas id="pulseChart"></canvas>
+    </div>
+
+    <div class="section-card">
+        <label class="hud-label">System Data Filter</label>
+        <div class="row g-2">
+            <div class="col-6">
+                <select id="reportCategory" class="form-select bg-dark text-white border-secondary" onchange="updateView()">
+                    <option value="reg">Registrations</option>
+                    <option value="paid">Payments Only</option>
+                    <option value="att">Attendance Log</option>
+                    <option value="win">Hall of Winners</option>
+                </select>
+            </div>
+            <div class="col-6">
+                <select id="reportScope" class="form-select bg-dark text-white border-secondary" onchange="updateView()">
+                    <option value="all">Global Master List</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <h5 style="font-size: 0.8rem;">Data Stream Preview</h5>
+        <div class="report-preview">
+            <table class="table table-dark table-hover" id="reportTable">
+                <thead id="reportHead"></thead>
+                <tbody id="reportBody"></tbody>
+            </table>
+        </div>
+        <button class="btn btn-cyber w-100 py-3 mt-3" onclick="downloadPDF()">📥 GENERATE ENCRYPTED PDF</button>
+    </div>
+</div>
+
+<script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbwKjrjjrV5hJUrqaP5nWjYAW2HW50y6EI3_k9bfzriS8ktMuAHpYe1i8K6IyPFV-jsndA/exec';
+    let masterData = [];
+    let myChart;
+
+    window.onload = () => {
+        // Populating the event dropdown dynamically
+        fetch(`${scriptURL}?action=getUniqueEvents`).then(res => res.json()).then(events => {
+            const scope = document.getElementById('reportScope');
+            events.forEach(evt => { const opt = document.createElement('option'); opt.value = evt; opt.innerText = evt; scope.appendChild(opt); });
+        });
+        refreshDashboard();
+    };
+
+    function refreshDashboard() {
+        fetch(`${scriptURL}?action=getMasterData`).then(res => res.json()).then(data => {
+            masterData = data;
+            calculateStats(data);
+            updateView();
+        });
+    }
+
+    function calculateStats(data) {
+        let stats = { total: data.length, paid: 0, present: 0, winners: 0 };
+        data.forEach(p => {
+            if (p.payment === "COMPLETED") stats.paid++;
+            if (p.attendance && p.attendance !== "ABSENT") stats.present += p.attendance.split('|').length; // Multi-event split logic
+            if (p.winner) stats.winners += p.winner.split('|').length; // Multi-winner split logic
+        });
+
+        document.getElementById('hud-total').innerText = stats.total;
+        document.getElementById('hud-paid').innerText = stats.paid;
+        document.getElementById('hud-present').innerText = stats.present;
+        document.getElementById('hud-winners').innerText = stats.winners;
+        renderPulseChart(stats);
+    }
+
+    function renderPulseChart(stats) {
+        const ctx = document.getElementById('pulseChart').getContext('2d');
+        if(myChart) myChart.destroy();
+        myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Registration', 'Paid', 'Attended', 'Winners'],
+                datasets: [{
+                    label: 'Count',
+                    data: [stats.total, stats.paid, stats.present, stats.winners],
+                    backgroundColor: ['rgba(209, 31, 183, 0.3)', 'rgba(46, 213, 115, 0.3)', 'rgba(31, 193, 209, 0.3)', 'rgba(255, 193, 7, 0.3)'],
+                    borderColor: ['#d11fb7', '#2ed573', '#1fc1d1', '#ffc107'],
+                    borderWidth: 2,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { ticks: { color: '#888' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                    x: { ticks: { color: '#fff', font: { family: 'Orbitron', size: 10 } }, grid: { display: false } }
+                }
+            }
+        });
+    }
+
+    function updateView() {
+        const cat = document.getElementById('reportCategory').value;
+        const scope = document.getElementById('reportScope').value;
+        const body = document.getElementById('reportBody');
+        let displayList = [];
+        
+        masterData.forEach(p => {
+            if (cat === 'win' && p.winner) {
+                p.winner.split('|').forEach(w => { 
+                    if (scope === 'all' || w.trim().startsWith(scope + ":")) 
+                        displayList.push({ ...p, currentResult: w.trim(), eventGroup: w.split(':')[0].trim() }); 
+                });
+            } else if (cat === 'att' && p.attendance && p.attendance !== "ABSENT") {
+                p.attendance.split('|').forEach(a => { 
+                    if (scope === 'all' || a.trim().startsWith(scope + ":")) 
+                        displayList.push({ ...p, currentResult: a.trim(), eventGroup: a.split(':')[0].trim() }); 
+                });
+            } else if (scope === 'all' || p.events.includes(scope)) {
+                if (cat === 'paid' && p.payment !== "COMPLETED") return;
+                displayList.push({ ...p, currentResult: (cat === 'reg' ? 'REGISTERED' : p.payment), eventGroup: 'General List' });
+            }
+        });
+
+        // Grouping and sorting logic for event-wise PDF/UI separation
+        displayList.sort((a, b) => a.eventGroup.localeCompare(b.eventGroup));
+
+        document.getElementById('reportHead').innerHTML = `<tr><th>SL</th><th>Participant</th><th>College</th><th>Result</th></tr>`;
+        let html = "", lastGroup = "";
+        displayList.forEach((p, i) => {
+            if (p.eventGroup !== lastGroup && scope === 'all') {
+                html += `<tr class="event-divider"><td colspan="4">${p.eventGroup}</td></tr>`;
+                lastGroup = p.eventGroup;
+            }
+            html += `<tr><td>${i+1}</td><td><strong>${p.name}</strong><br><small>${p.mobile}</small></td><td>${p.college}</td><td style="color:var(--neon-blue)">${p.currentResult}</td></tr>`;
+        });
+        body.innerHTML = html;
+        window.currentData = displayList;
+    }
+
+    function downloadPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('l', 'mm', 'a4');
+        const catName = document.getElementById('reportCategory').selectedOptions[0].text;
+        const scope = document.getElementById('reportScope').value;
+        
+        doc.setFontSize(20); doc.setTextColor(31, 193, 209);
+        doc.text(`SYNAPSE 2026: ${catName.toUpperCase()}`, 14, 15);
+        
+        let rows = [], lastGroup = "";
+        window.currentData.forEach((p, i) => {
+            // Inserting event headers into PDF rows for separation
+            if (p.eventGroup !== lastGroup && scope === 'all') {
+                rows.push([{ content: p.eventGroup, colSpan: 7, styles: { fillColor: [31, 193, 209], textColor: [0,0,0], fontStyle: 'bold', halign: 'center' } }]);
+                lastGroup = p.eventGroup;
+            }
+            rows.push([i+1, p.name, p.mobile, p.college, p.dept, p.sem, p.currentResult]);
+        });
+
+        doc.autoTable({
+            head: [['SL', 'Name', 'Mobile', 'College', 'Dept', 'Sem', 'Status/Rank']],
+            body: rows, startY: 25, theme: 'grid',
+            headStyles: { fillColor: [20, 20, 30], textColor: [31, 193, 209] },
+            styles: { fontSize: 8 }
+        });
+        doc.save(`SYNAPSE_MASTER_${catName.replace(/\s+/g, '_')}.pdf`);
+    }
+</script>
+</body>
+</html>
