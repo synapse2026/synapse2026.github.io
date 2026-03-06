@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Event Control | SYNAPSE 2026</title>
+    <title>Event Hub | SYNAPSE 2026</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
@@ -11,138 +11,170 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
     <style>
-        :root { --neon-blue: #1fc1d1; --neon-pink: #d11fb7; --dark-bg: #0a0a0f; }
-        body { background: var(--dark-bg); color: #fff; font-family: 'Rajdhani', sans-serif; }
-        .container { max-width: 1150px; padding: 20px; }
-        h3, h5 { font-family: 'Orbitron', sans-serif; color: var(--neon-blue); text-transform: uppercase; }
-        .section-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 20px; margin-bottom: 25px; }
+        :root { --neon-blue: #1fc1d1; --neon-pink: #d11fb7; --dark-bg: #0a0a0f; --warning-gold: #ffc107; }
+        body { background: var(--dark-bg); color: #fff; font-family: 'Rajdhani', sans-serif; min-height: 100vh; }
+        .container { max-width: 500px; padding: 15px; margin: auto; }
+        
+        h3, h5 { font-family: 'Orbitron', sans-serif; letter-spacing: 2px; color: var(--neon-blue); text-shadow: 0 0 10px rgba(31, 193, 209, 0.3); text-transform: uppercase; }
+        .section-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 15px; margin-bottom: 20px; }
+        .form-select { background: rgba(0,0,0,0.5) !important; color: #fff !important; border: 1px solid #444; }
+        
+        /* Fixed Scrollable List Logic */
+        .scrollable-container { 
+            max-height: 350px; 
+            overflow-y: auto; 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
+            margin-bottom: 10px; 
+            -webkit-overflow-scrolling: touch; 
+        }
+        
+        /* Sticky Header */
+        .table thead th { 
+            position: sticky; 
+            top: 0; 
+            background: #0d1117; 
+            z-index: 2; 
+            color: var(--neon-blue); 
+            font-family: 'Orbitron'; 
+            font-size: 0.7rem; 
+            border-bottom: 2px solid var(--neon-blue);
+        }
+
+        .table { color: #fff; border-color: rgba(255,255,255,0.1); font-size: 0.85rem; }
+        .bg-present { background: rgba(46, 213, 115, 0.2); color: #2ed573; border: 1px solid #2ed573; padding: 2px 5px; border-radius: 4px; font-weight: 700; font-size: 0.65rem; }
+        .label-cyber { color: var(--neon-blue); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        .btn-cyber { font-family: 'Orbitron', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .info-sub { color: #aaa; font-size: 0.75rem; line-height: 1.2; display: block; margin-top: 2px; }
         #reader { border: 2px solid var(--neon-pink); border-radius: 15px; overflow: hidden; background: #000; display: none; margin-bottom: 15px; }
-        .table { color: #fff; border-color: #333; font-size: 0.85rem; }
-        .table thead { background: var(--neon-blue); color: #000; }
-        .bg-present { background: rgba(46, 213, 115, 0.2); color: #2ed573; border: 1px solid #2ed573; padding: 2px 8px; border-radius: 4px; }
-        .loading-overlay { display: none; color: var(--neon-blue); font-weight: bold; letter-spacing: 2px; text-align: center; margin-top: 15px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="text-center my-4">
-        <h3>Event Operations Hub</h3>
-        <p class="text-white-50">SYNAPSE 2026 | Attendance & Winner Panel</p>
+        <h3>EVENT HUB</h3>
+        <p class="text-white-50 small" style="font-family: 'Orbitron';">SYNAPSE 2026</p>
     </div>
 
     <div class="section-card">
-        <label class="form-label fw-bold">SELECT EVENT</label>
-        <select id="eventSelector" class="form-select bg-dark text-white border-secondary" onchange="fetchParticipants()">
+        <span class="label-cyber">1. SELECT EVENT</span>
+        <select id="eventSelector" class="form-select" onchange="fetchParticipants()">
             <option selected disabled>Choose Event...</option>
             <option>Paper Presentation</option><option>Robotics</option>
             <option>Coding Contest</option><option>Tech Quiz</option>
             <option>Hackathons</option><option>Gaming</option><option>Workshops</option>
         </select>
-        <div id="loader" class="loading-overlay">DATA IS LOADING... PLEASE WAIT</div>
+        <div id="loader" class="text-center mt-3 d-none" style="color: var(--neon-blue); font-family: 'Orbitron'; font-size: 0.8rem;">SYNCING DATABASE...</div>
     </div>
 
     <div class="section-card d-none" id="attendanceSection">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5>Paid Attendees </h5>
-            <div>
-                <button class="btn btn-sm btn-outline-info me-2" onclick="exportTablePDF('participantTable', 'Attendee_List')">📥 PDF LIST</button>
-                <button class="btn btn-sm btn-success" onclick="submitBulkAttendance()">✅ BULK MARK PRESENT</button>
-            </div>
-        </div>
-        <div class="table-responsive">
-            <table class="table table-dark table-hover" id="participantTable">
+        <h5 class="mb-3" style="font-size: 0.9rem;">Paid Attendees</h5>
+        
+        <div class="scrollable-container">
+            <table class="table table-dark table-hover mb-0" id="participantTable">
                 <thead>
                     <tr>
-                        <th>SL</th>
-                        <th><input type="checkbox" id="selectAll" onclick="toggleAll(this)"></th>
-                        <th>Name</th><th>Mobile</th><th>College</th><th>Dept</th><th>Sem</th><th>Status</th>
+                        <th width="30">SL</th>
+                        <th width="30"><input type="checkbox" id="selectAll" onclick="toggleAll(this)"></th>
+                        <th>Participant Info</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody id="participantBody"></tbody>
             </table>
         </div>
+        
+        <div class="mt-2">
+            <button class="btn btn-success w-100 mb-2 btn-cyber py-2" onclick="submitBulkAttendance()">✅ Mark Selected Present</button>
+            <button class="btn btn-outline-info w-100 btn-cyber py-2" onclick="exportTablePDF('participantTable', 'Attendee_List')">📥 Export Attendee PDF</button>
+        </div>
     </div>
 
     <div class="section-card">
-        <h5 class="mb-3">🏆 Mark Winners </h5>
-        <div class="mb-4">
-            <label class="small text-white-50 d-block mb-2">1. SELECT RANK</label>
-            <select id="winnerPosition" class="form-select bg-dark text-white border-warning fw-bold">
-                <option value="1st Place">1st Place</option>
-                <option value="2nd Place">2nd Place</option>
-                <option value="3rd Place">3rd Place</option>
-            </select>
-        </div>
-        <div class="row g-3">
-            <div class="col-md-6 border-end border-secondary">
-                <label class="small text-white-50 d-block mb-2 text-center">METHOD A: QR SCAN</label>
-                <div id="reader"></div>
-                <button id="scanBtn" onclick="startWinnerScan()" class="btn btn-warning w-100 py-3 fw-bold">📸 OPEN SCANNER</button>
+        <h5 class="mb-3" style="font-size: 0.9rem;">🏆 Winner Marking</h5>
+        <div id="reader"></div>
+        <div class="row g-2">
+            <div class="col-12 mb-2">
+                <span class="label-cyber">SELECT RANK</span>
+                <select id="winnerPosition" class="form-select border-warning shadow-none">
+                    <option value="1st Place">1st Place</option>
+                    <option value="2nd Place">2nd Place</option>
+                    <option value="3rd Place">3rd Place</option>
+                </select>
             </div>
-            <div class="col-md-6">
-                <label class="small text-white-50 d-block mb-2 text-center">METHOD B: MANUAL MOBILE</label>
-                <div class="input-group">
-                    <input type="tel" id="backupMobile" class="form-control bg-dark text-white border-warning py-3" placeholder="Enter Mobile #">
-                    <button onclick="handleWinnerManual()" class="btn btn-outline-warning fw-bold px-4">MARK</button>
-                </div>
+            <div class="col-6">
+                <button onclick="startWinnerScan()" class="btn btn-warning w-100 btn-cyber py-2">📸 SCAN</button>
+            </div>
+            <div class="col-6">
+                <button onclick="handleWinnerManualPrompt()" class="btn btn-outline-warning w-100 btn-cyber py-2">⌨ MANUAL</button>
             </div>
         </div>
     </div>
 
     <div class="section-card d-none" id="winnerSection">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5>Winner Result Board</h5>
-            <button class="btn btn-sm btn-outline-warning" onclick="exportTablePDF('winnerTable', 'Winners_Report')">📥 SAVE WINNERS PDF</button>
+        <h5 class="mb-3" style="font-size: 0.9rem;">Result Board</h5>
+        <div class="table-responsive">
+            <table class="table table-bordered border-secondary" id="winnerTable">
+                <thead class="table-dark text-warning">
+                    <tr><th>Pos</th><th>Winner Info</th></tr>
+                </thead>
+                <tbody id="winnerBody"></tbody>
+            </table>
         </div>
-        <table class="table table-bordered border-secondary" id="winnerTable">
-            <thead class="table-warning text-dark">
-                <tr><th>SL</th><th>Position</th><th>Name</th><th>Mobile</th><th>College</th><th>Department</th></tr>
-            </thead>
-            <tbody id="winnerBody"></tbody>
-        </table>
+        <button class="btn btn-outline-warning w-100 btn-cyber py-2 mt-2" onclick="exportTablePDF('winnerTable', 'Winners_Report')">📥 Export Winners PDF</button>
     </div>
 </div>
 
 <script>
     const scriptURL = 'https://script.google.com/macros/s/AKfycbwKjrjjrV5hJUrqaP5nWjYAW2HW50y6EI3_k9bfzriS8ktMuAHpYe1i8K6IyPFV-jsndA/exec';
     const html5QrCode = new Html5Qrcode("reader");
+    let currentData = [];
 
     function fetchParticipants() {
         const event = document.getElementById('eventSelector').value;
         const body = document.getElementById('participantBody');
         const loader = document.getElementById('loader');
-        loader.style.display = "block";
+        
+        loader.classList.remove('d-none');
         body.innerHTML = "";
         document.getElementById('attendanceSection').classList.add('d-none');
 
         fetch(`${scriptURL}?action=search&event=${event}`)
             .then(res => res.json())
             .then(data => {
-                loader.style.display = "none";
+                currentData = data;
+                loader.classList.add('d-none');
                 document.getElementById('winnerBody').innerHTML = "";
                 document.getElementById('attendanceSection').classList.remove('d-none');
                 document.getElementById('winnerSection').classList.remove('d-none');
-                let winCount = 1;
 
                 data.forEach((p, index) => {
                     const isPresent = p.eventStatus === "PRESENT";
-                    body.innerHTML += `<tr>
-                        <td>${index + 1}</td>
-                        <td><input type="checkbox" class="user-check form-check-input" value="${p.mobile}" ${isPresent ? 'disabled' : ''}></td>
-                        <td>${p.name}</td><td>${p.mobile}</td><td>${p.college}</td><td>${p.dept}</td><td>${p.semester}</td>
-                        <td><span class="${isPresent ? 'bg-present' : 'text-white-50'}">${p.eventStatus}</span></td>
-                    </tr>`;
+                    body.innerHTML += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td><input type="checkbox" class="user-check form-check-input" value="${p.mobile}" ${isPresent ? 'disabled' : ''}></td>
+                            <td>
+                                <strong>${p.name}</strong>
+                                <span class="info-sub">${p.mobile} | ${p.dept}</span>
+                                <span class="info-sub" style="color: var(--neon-blue)">${p.college}</span>
+                            </td>
+                            <td><span class="${isPresent ? 'bg-present' : 'text-white-50 small'}">${p.eventStatus}</span></td>
+                        </tr>`;
                     
                     if(p.winnerStatus && p.winnerStatus !== "") {
-                        document.getElementById('winnerBody').innerHTML += `<tr class="table-dark">
-                            <td>${winCount++}</td><td class="text-warning fw-bold">${p.winnerStatus}</td>
-                            <td>${p.name}</td><td>${p.mobile}</td><td>${p.college}</td><td>${p.dept}</td>
-                        </tr>`;
+                        document.getElementById('winnerBody').innerHTML += `
+                            <tr>
+                                <td class="text-warning fw-bold small">${p.winnerStatus}</td>
+                                <td>
+                                    <strong>${p.name}</strong>
+                                    <span class="info-sub">${p.mobile} | ${p.dept}</span>
+                                    <span class="info-sub" style="color: var(--neon-blue)">${p.college}</span>
+                                </td>
+                            </tr>`;
                     }
                 });
-            })
-            .catch(() => loader.innerText = "ERROR: CHECK SCRIPT URL");
+            });
     }
 
     function toggleAll(source) { document.querySelectorAll('.user-check:not([disabled])').forEach(c => c.checked = source.checked); }
@@ -150,10 +182,9 @@
     function submitBulkAttendance() {
         const selected = Array.from(document.querySelectorAll('.user-check:checked')).map(c => c.value);
         if(selected.length === 0) return alert("Select students!");
-        const event = document.getElementById('eventSelector').value;
         if(!confirm(`Mark ${selected.length} as PRESENT?`)) return;
         const promises = selected.map(mob => fetch(`${scriptURL}?action=markEventAttendance&mobile=${mob}`));
-        Promise.all(promises).then(() => { alert("Done!"); fetchParticipants(); });
+        Promise.all(promises).then(() => { alert("Database Updated!"); fetchParticipants(); });
     }
 
     function startWinnerScan() {
@@ -164,10 +195,9 @@
         });
     }
 
-    function handleWinnerManual() {
-        const mob = document.getElementById('backupMobile').value.trim();
-        if(mob.length < 10) return alert("Enter valid mobile #");
-        processWinnerUpdate(mob);
+    function handleWinnerManualPrompt() {
+        const mob = prompt("Enter Participant Mobile:");
+        if(mob && mob.length >= 10) processWinnerUpdate(mob);
     }
 
     function processWinnerUpdate(mobile) {
@@ -175,77 +205,38 @@
         const event = document.getElementById('eventSelector').value;
         fetch(`${scriptURL}?action=markWinner&mobile=${mobile}&position=${pos}&event=${event}`)
             .then(r => r.text())
-            .then(res => { 
-                alert(res.includes("Error") ? res : "Winner Marked!"); 
-                fetchParticipants(); 
-                document.getElementById('backupMobile').value = "";
-            });
+            .then(res => { alert(res.includes("Error") ? res : "Winner Marked!"); fetchParticipants(); });
     }
 
     function exportTablePDF(tableId, fileName) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('l', 'mm', 'a4'); 
-    const event = document.getElementById('eventSelector').value;
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('l', 'mm', 'a4');
+        const event = document.getElementById('eventSelector').value;
+        doc.setFontSize(18); doc.setTextColor(31, 193, 209);
+        doc.text(`SYNAPSE 2026: ${event}`, 14, 15);
 
-    doc.setFontSize(20);
-    doc.setTextColor(31, 193, 209);
-    doc.text(`SYNAPSE 2026: ${event}`, 14, 15);
-    doc.setFontSize(10);
-    doc.setTextColor(100);
-    doc.text(`Report Generated: ${new Date().toLocaleString()}`, 14, 22);
-
-    // 1. Manually extract rows from the HTML table to ensure all 7 columns are captured
-    const table = document.getElementById(tableId);
-    const rows = [];
-    const tableBody = table.querySelector('tbody');
-    
-    for (let i = 0; i < tableBody.rows.length; i++) {
-        const row = tableBody.rows[i];
-        const rowData = [];
-        
+        const rows = [];
         if (tableId === 'participantTable') {
-            // We pull: SL(0), Name(2), Mobile(3), College(4), Dept(5), Sem(6), Status(7)
-            rowData.push(row.cells[0].innerText); // SL
-            rowData.push(row.cells[2].innerText); // Name
-            rowData.push(row.cells[3].innerText); // Mobile
-            rowData.push(row.cells[4].innerText); // College
-            rowData.push(row.cells[5].innerText); // Dept
-            rowData.push(row.cells[6].innerText); // Sem
-            rowData.push(row.cells[7].innerText); // Status (The missing Column K)
+            currentData.forEach((p, i) => {
+                rows.push([i+1, p.name, p.mobile, p.college, p.dept, p.semester, p.eventStatus]);
+            });
+            doc.autoTable({ 
+                head: [['SL', 'Name', 'Mobile', 'College', 'Dept', 'Sem', 'Status']], 
+                body: rows, startY: 25, theme: 'grid',
+                headStyles: { fillColor: [31, 193, 209], textColor: [0, 0, 0] }
+            });
         } else {
-            // Winner Table: SL(0), Position(1), Name(2), Mobile(3), College(4), Dept(5)
-            for (let j = 0; j < 6; j++) {
-                rowData.push(row.cells[j].innerText);
-            }
+            currentData.filter(p => p.winnerStatus).forEach((p, i) => {
+                rows.push([i+1, p.winnerStatus, p.name, p.mobile, p.college, p.dept]);
+            });
+            doc.autoTable({ 
+                head: [['SL', 'Position', 'Name', 'Mobile', 'College', 'Dept']], 
+                body: rows, startY: 25, theme: 'grid',
+                headStyles: { fillColor: [255, 193, 7], textColor: [0, 0, 0] }
+            });
         }
-        rows.push(rowData);
+        doc.save(`${fileName}_${event}.pdf`);
     }
-
-    // 2. Define Headers
-    const headers = tableId === 'participantTable' 
-        ? [['SL', 'Name', 'Mobile', 'College', 'Dept', 'Sem', 'Status']]
-        : [['SL', 'Position', 'Name', 'Mobile', 'College', 'Dept']];
-
-    // 3. Generate PDF using the extracted array
-    doc.autoTable({
-        head: headers,
-        body: rows,
-        startY: 30,
-        theme: 'grid',
-        headStyles: { fillColor: [31, 193, 209], textColor: [0, 0, 0], fontStyle: 'bold' },
-        styles: { fontSize: 9 },
-        didParseCell: function (data) {
-            // Target the last column (index 6 in the PDF) for coloring
-            if (tableId === 'participantTable' && data.section === 'body' && data.column.index === 6) {
-                if (data.cell.raw === 'ABSENT') {
-                    data.cell.styles.textColor = [255, 0, 0];
-                }
-            }
-        }
-    });
-
-    doc.save(`${fileName}_${event}.pdf`);
-}
 </script>
 </body>
 </html>
