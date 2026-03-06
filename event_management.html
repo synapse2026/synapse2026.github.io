@@ -15,16 +15,12 @@
         body { background: var(--dark-bg); color: #fff; font-family: 'Rajdhani', sans-serif; }
         .container { max-width: 1150px; padding: 20px; }
         h3, h5 { font-family: 'Orbitron', sans-serif; color: var(--neon-blue); text-transform: uppercase; }
-        .section-card { 
-            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px; padding: 20px; margin-bottom: 25px;
-        }
+        .section-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 20px; margin-bottom: 25px; }
         #reader { border: 2px solid var(--neon-pink); border-radius: 15px; overflow: hidden; background: #000; display: none; margin-bottom: 15px; }
         .table { color: #fff; border-color: #333; font-size: 0.85rem; }
         .table thead { background: var(--neon-blue); color: #000; }
         .bg-present { background: rgba(46, 213, 115, 0.2); color: #2ed573; border: 1px solid #2ed573; padding: 2px 8px; border-radius: 4px; }
-        .btn-neon { background: var(--neon-blue); color: #000; font-weight: 700; border: none; }
-        .loading-overlay { display: none; color: var(--neon-blue); font-weight: bold; letter-spacing: 2px; }
+        .loading-overlay { display: none; color: var(--neon-blue); font-weight: bold; letter-spacing: 2px; text-align: center; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -32,43 +28,35 @@
 <div class="container">
     <div class="text-center my-4">
         <h3>Event Operations Hub</h3>
-        <p class="text-white-50">Auto-Sync Attendance & Winner Validation</p>
+        <p class="text-white-50">SYNAPSE 2026 | Attendance & Winner Panel</p>
     </div>
 
     <div class="section-card">
         <label class="form-label fw-bold">SELECT EVENT</label>
         <select id="eventSelector" class="form-select bg-dark text-white border-secondary" onchange="fetchParticipants()">
-            <option selected disabled>Choose Event to load data...</option>
-            <option>Paper Presentation</option>
-            <option>Robotics</option>
-            <option>Coding Contest</option>
-            <option>Tech Quiz</option>
-            <option>Hackathons</option>
-            <option>Gaming</option>
+            <option selected disabled>Choose Event...</option>
+            <option>Paper Presentation</option><option>Robotics</option>
+            <option>Coding Contest</option><option>Tech Quiz</option>
+            <option>Hackathons</option><option>Gaming</option><option>Workshops</option>
         </select>
-        <div id="loader" class="text-center mt-3 loading-overlay">DATA IS LOADING... PLEASE WAIT</div>
+        <div id="loader" class="loading-overlay">DATA IS LOADING... PLEASE WAIT</div>
     </div>
 
     <div class="section-card d-none" id="attendanceSection">
-        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
-            <h5>Paid Attendees</h5>
-            <div class="mt-2">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5>Paid Attendees (Col K)</h5>
+            <div>
                 <button class="btn btn-sm btn-outline-info me-2" onclick="exportTablePDF('participantTable', 'Attendee_List')">📥 PDF LIST</button>
-                <button class="btn btn-sm btn-success" onclick="submitBulkAttendance()">✅ MARK SELECTED AS PRESENT</button>
+                <button class="btn btn-sm btn-success" onclick="submitBulkAttendance()">✅ BULK MARK PRESENT</button>
             </div>
         </div>
         <div class="table-responsive">
             <table class="table table-dark table-hover" id="participantTable">
                 <thead>
                     <tr>
-                        <th width="50">SL</th>
-                        <th width="40"><input type="checkbox" id="selectAll" onclick="toggleAll(this)"></th>
-                        <th>Name</th>
-                        <th>Mobile</th>
-                        <th>College</th>
-                        <th>Dept</th>
-                        <th>Sem</th>
-                        <th>Status</th>
+                        <th>SL</th>
+                        <th><input type="checkbox" id="selectAll" onclick="toggleAll(this)"></th>
+                        <th>Name</th><th>Mobile</th><th>College</th><th>Dept</th><th>Sem</th><th>Status</th>
                     </tr>
                 </thead>
                 <tbody id="participantBody"></tbody>
@@ -77,23 +65,26 @@
     </div>
 
     <div class="section-card">
-        <h5>🏆 Mark Winners</h5>
-        <div id="reader"></div>
-        <div class="row g-2 mb-3">
-            <div class="col-12 mb-2">
-                <select id="winnerPosition" class="form-select bg-dark text-white border-warning">
-                    <option value="1st Place">1st Place</option>
-                    <option value="2nd Place">2nd Place</option>
-                    <option value="3rd Place">3rd Place</option>
-                </select>
+        <h5 class="mb-3">🏆 Mark Winners (Col L)</h5>
+        <div class="mb-4">
+            <label class="small text-white-50 d-block mb-2">1. SELECT RANK</label>
+            <select id="winnerPosition" class="form-select bg-dark text-white border-warning fw-bold">
+                <option value="1st Place">1st Place</option>
+                <option value="2nd Place">2nd Place</option>
+                <option value="3rd Place">3rd Place</option>
+            </select>
+        </div>
+        <div class="row g-3">
+            <div class="col-md-6 border-end border-secondary">
+                <label class="small text-white-50 d-block mb-2 text-center">METHOD A: QR SCAN</label>
+                <div id="reader"></div>
+                <button id="scanBtn" onclick="startWinnerScan()" class="btn btn-warning w-100 py-3 fw-bold">📸 OPEN SCANNER</button>
             </div>
             <div class="col-md-6">
-                <button id="scanBtn" onclick="startWinnerScan()" class="btn btn-warning w-100 py-2">📸 SCAN WINNER QR</button>
-            </div>
-            <div class="col-md-6">
+                <label class="small text-white-50 d-block mb-2 text-center">METHOD B: MANUAL MOBILE</label>
                 <div class="input-group">
-                    <input type="tel" id="backupMobile" class="form-control bg-dark text-white border-warning" placeholder="Enter Mobile #">
-                    <button onclick="handleWinnerManual()" class="btn btn-outline-warning">MARK</button>
+                    <input type="tel" id="backupMobile" class="form-control bg-dark text-white border-warning py-3" placeholder="Enter Mobile #">
+                    <button onclick="handleWinnerManual()" class="btn btn-outline-warning fw-bold px-4">MARK</button>
                 </div>
             </div>
         </div>
@@ -101,7 +92,7 @@
 
     <div class="section-card d-none" id="winnerSection">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5>Result Board</h5>
+            <h5>Winner Result Board</h5>
             <button class="btn btn-sm btn-outline-warning" onclick="exportTablePDF('winnerTable', 'Winners_Report')">📥 SAVE WINNERS PDF</button>
         </div>
         <table class="table table-bordered border-secondary" id="winnerTable">
@@ -121,7 +112,6 @@
         const event = document.getElementById('eventSelector').value;
         const body = document.getElementById('participantBody');
         const loader = document.getElementById('loader');
-        
         loader.style.display = "block";
         body.innerHTML = "";
         document.getElementById('attendanceSection').classList.add('d-none');
@@ -133,121 +123,72 @@
                 document.getElementById('winnerBody').innerHTML = "";
                 document.getElementById('attendanceSection').classList.remove('d-none');
                 document.getElementById('winnerSection').classList.remove('d-none');
+                let winCount = 1;
 
-                let winnerCount = 1;
                 data.forEach((p, index) => {
-                    const isActive = p.eventStatus !== "ABSENT";
-                    const slNo = index + 1;
-
-                    // UI Table Row
-                    body.innerHTML += `
-                        <tr>
-                            <td>${slNo}</td>
-                            <td><input type="checkbox" class="user-check form-check-input" value="${p.mobile}" ${isActive ? 'disabled' : ''}></td>
-                            <td>${p.name}</td>
-                            <td>${p.mobile}</td>
-                            <td>${p.college}</td>
-                            <td>${p.dept}</td>
-                            <td>${p.semester}</td>
-                            <td><span class="${isActive ? 'bg-present' : 'text-white-50'}">${p.eventStatus}</span></td>
-                        </tr>`;
+                    const isPresent = p.eventStatus === "PRESENT";
+                    body.innerHTML += `<tr>
+                        <td>${index + 1}</td>
+                        <td><input type="checkbox" class="user-check form-check-input" value="${p.mobile}" ${isPresent ? 'disabled' : ''}></td>
+                        <td>${p.name}</td><td>${p.mobile}</td><td>${p.college}</td><td>${p.dept}</td><td>${p.semester}</td>
+                        <td><span class="${isPresent ? 'bg-present' : 'text-white-50'}">${p.eventStatus}</span></td>
+                    </tr>`;
                     
-                    if(p.eventStatus.includes('Place')) {
-                        document.getElementById('winnerBody').innerHTML += `
-                            <tr class="table-dark">
-                                <td>${winnerCount++}</td>
-                                <td class="fw-bold text-warning">${p.eventStatus}</td>
-                                <td>${p.name}</td>
-                                <td>${p.mobile}</td>
-                                <td>${p.college}</td>
-                                <td>${p.dept}</td>
-                            </tr>`;
+                    if(p.winnerStatus && p.winnerStatus !== "") {
+                        document.getElementById('winnerBody').innerHTML += `<tr class="table-dark">
+                            <td>${winCount++}</td><td class="text-warning fw-bold">${p.winnerStatus}</td>
+                            <td>${p.name}</td><td>${p.mobile}</td><td>${p.college}</td><td>${p.dept}</td>
+                        </tr>`;
                     }
                 });
             })
-            .catch(() => {
-                loader.innerText = "ERROR LOADING DATA. PLEASE REFRESH.";
-            });
+            .catch(() => loader.innerText = "ERROR: CHECK SCRIPT URL");
     }
 
-    function toggleAll(source) {
-        const checkboxes = document.querySelectorAll('.user-check:not([disabled])');
-        checkboxes.forEach(c => c.checked = source.checked);
-    }
+    function toggleAll(source) { document.querySelectorAll('.user-check:not([disabled])').forEach(c => c.checked = source.checked); }
 
     function submitBulkAttendance() {
         const selected = Array.from(document.querySelectorAll('.user-check:checked')).map(c => c.value);
-        if(selected.length === 0) return alert("Select participants!");
-        
+        if(selected.length === 0) return alert("Select students!");
         const event = document.getElementById('eventSelector').value;
-        if(!confirm(`Mark ${selected.length} students as PRESENT?`)) return;
-
-        const promises = selected.map(mob => 
-            fetch(`${scriptURL}?action=markEventAttendance&mobile=${mob}&position=PRESENT`)
-        );
-
-        Promise.all(promises).then(() => {
-            alert("Attendance updated!");
-            fetchParticipants();
-        });
+        if(!confirm(`Mark ${selected.length} as PRESENT?`)) return;
+        const promises = selected.map(mob => fetch(`${scriptURL}?action=markEventAttendance&mobile=${mob}`));
+        Promise.all(promises).then(() => { alert("Done!"); fetchParticipants(); });
     }
 
     function startWinnerScan() {
         const reader = document.getElementById('reader');
         reader.style.display = 'block';
         html5QrCode.start({ facingMode: 'environment' }, { fps: 15, qrbox: 250 }, (mobile) => {
-            html5QrCode.stop().then(() => {
-                reader.style.display = 'none';
-                processWinnerUpdate(mobile);
-            });
+            html5QrCode.stop().then(() => { reader.style.display = 'none'; processWinnerUpdate(mobile); });
         });
     }
 
     function handleWinnerManual() {
         const mob = document.getElementById('backupMobile').value.trim();
-        if(mob.length < 10) return alert("Enter valid 10-digit mobile #");
+        if(mob.length < 10) return alert("Enter valid mobile #");
         processWinnerUpdate(mob);
     }
 
     function processWinnerUpdate(mobile) {
-        const event = document.getElementById('eventSelector').value;
         const pos = document.getElementById('winnerPosition').value;
-        
+        const event = document.getElementById('eventSelector').value;
         fetch(`${scriptURL}?action=markWinner&mobile=${mobile}&position=${pos}&event=${event}`)
             .then(r => r.text())
-            .then(res => {
-                if (res.includes("Error")) {
-                    alert(res);
-                } else {
-                    alert(`Winner Recorded: ${pos}`);
-                    fetchParticipants();
-                }
+            .then(res => { 
+                alert(res.includes("Error") ? res : "Winner Marked!"); 
+                fetchParticipants(); 
                 document.getElementById('backupMobile').value = "";
             });
     }
 
     function exportTablePDF(tableId, fileName) {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('l', 'mm', 'a4'); 
+        const doc = new jsPDF('l', 'mm', 'a4');
         const event = document.getElementById('eventSelector').value;
-
-        doc.setFontSize(20);
-        doc.setTextColor(31, 193, 209);
-        doc.text(`SYNAPSE 2026: ${event}`, 14, 15);
-        doc.setFontSize(10);
-        doc.text(`Report Generated: ${new Date().toLocaleString()}`, 14, 22);
-
-        // Logic to skip the checkbox column (index 1) for the main table
-        const columnIndices = tableId === 'participantTable' ? [0, 2, 3, 4, 5, 6, 7] : [0, 1, 2, 3, 4, 5];
-
-        doc.autoTable({
-            html: `#${tableId}`,
-            startY: 30,
-            theme: 'grid',
-            headStyles: { fillColor: [31, 193, 209], textColor: [0, 0, 0] },
-            columns: columnIndices
-        });
-
+        doc.setFontSize(20); doc.setTextColor(31, 193, 209); doc.text(`SYNAPSE 2026: ${event}`, 14, 15);
+        const colMapping = tableId === 'participantTable' ? [0, 2, 3, 4, 5, 6, 7] : [0, 1, 2, 3, 4, 5];
+        doc.autoTable({ html: `#${tableId}`, startY: 30, theme: 'grid', headStyles: { fillColor: [31, 193, 209], textColor: [0, 0, 0] }, columns: colMapping });
         doc.save(`${fileName}_${event}.pdf`);
     }
 </script>
