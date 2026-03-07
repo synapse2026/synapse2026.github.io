@@ -36,11 +36,13 @@
         /* TECH SAVVY MOBILE ANIMATION */
         .glass-panel {
             position: relative;
-            background: rgba(15, 12, 41, 0.94);
+            /* Reduced opacity to see particles through the form */
+            background: rgba(15, 12, 41, 0.85) !important;
             border-radius: 25px;
-            border: 1px solid rgba(116, 31, 209, 0.3);
-            overflow: hidden; /* Clips the background animation */
+            border: 2px solid rgba(31, 193, 209, 0.3);
+            overflow: hidden;
             z-index: 5;
+            backdrop-filter: blur(10px);
         }
 
         /* Moving glow effect behind boxes */
@@ -49,8 +51,8 @@
             position: absolute;
             top: -50%; left: -50%;
             width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(31, 193, 209, 0.1) 0%, rgba(209, 31, 183, 0.05) 30%, transparent 70%);
-            animation: rotateGlow 10s linear infinite;
+            background: radial-gradient(circle, rgba(209, 31, 183, 0.15) 0%, rgba(31, 193, 209, 0.1) 30%, transparent 70%);
+            animation: rotateGlow 8s linear infinite;
             z-index: -1;
         }
 
@@ -72,51 +74,68 @@
             color: #fff !important; font-weight: 800 !important; 
             text-transform: uppercase; font-size: 0.85rem;
             text-shadow: 2px 2px 4px #000; margin-bottom: 8px;
+            font-family: 'Orbitron', sans-serif;
         }
 
-        .mobile-wrapper { position: relative; }
-        
         .form-control, .form-select { 
-            background: rgba(255, 255, 255, 0.95) !important; color: #000 !important; 
+            background: rgba(255, 255, 255, 0.9) !important; 
             font-weight: 700 !important; border: 2px solid #ccc;
             padding: 12px; border-radius: 10px; transition: 0.3s;
         }
 
-        .spinner-loader {
-            position: absolute; right: 15px; top: 12px;
-            width: 20px; height: 20px;
-            border: 3px solid rgba(31, 193, 209, 0.3);
-            border-top: 3px solid var(--poster-blue);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            display: none;
+        /* STAGGERED EVENT ANIMATIONS */
+        .event-grid { 
+            border: 2px solid var(--poster-pink); 
+            background: rgba(209, 31, 183, 0.1); 
+            border-radius: 20px; 
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(209, 31, 183, 0.2);
         }
 
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        .status-msg { font-size: 0.75rem; font-weight: bold; margin-top: 8px; display: none; align-items: center; }
-        .error-text { color: #ff4d4d; }
-
-        .is-invalid-custom { border-color: #ff4d4d !important; box-shadow: 0 0 15px rgba(255, 77, 77, 0.4) !important; }
-        .is-valid-custom { border-color: #2ecc71 !important; box-shadow: 0 0 15px rgba(46, 204, 113, 0.4) !important; }
-
-        .event-grid { border: 2px solid var(--poster-pink); background: rgba(209, 31, 183, 0.15); border-radius: 20px; padding: 20px; box-shadow: inset 0 0 15px rgba(209, 31, 183, 0.2); }
         .event-card {
-            background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px; padding: 15px; height: 100%; transition: 0.3s; cursor: pointer;
+            background: rgba(0, 0, 0, 0.5); 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px; padding: 15px; height: 100%; 
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            cursor: pointer;
+            opacity: 0; /* Starts hidden for animation */
         }
-        .event-card:hover { background: rgba(31, 193, 209, 0.15); border-color: var(--poster-blue); transform: scale(1.02); }
+
+        /* Animation Classes */
+        .slide-in-left { animation: slideLeft 0.8s forwards; }
+        .slide-in-right { animation: slideRight 0.8s forwards; }
+
+        @keyframes slideLeft {
+            from { opacity: 0; transform: translateX(-50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes slideRight {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .event-card:hover { 
+            background: rgba(31, 193, 209, 0.2); 
+            border-color: var(--poster-blue); 
+            transform: scale(1.05); 
+            box-shadow: 0 0 15px var(--poster-blue);
+        }
+
         .event-title { font-family: 'Orbitron', sans-serif; color: var(--poster-blue); font-weight: 900; font-size: 0.9rem; text-transform: uppercase; display: block; margin-bottom: 5px; }
         .event-desc { color: #ddd; font-size: 0.75rem; line-height: 1.3; display: block; }
 
-        .terms-container { background: rgba(0, 0, 0, 0.6); border-radius: 15px; padding: 20px; border: 1px solid var(--poster-purple); margin-top: 30px; }
-        .terms-title { font-family: 'Orbitron', sans-serif; font-size: 0.9rem; color: var(--poster-pink); margin-bottom: 12px; display: block; }
-        .terms-list { font-size: 0.8rem; color: #eee; padding-left: 15px; margin-bottom: 15px; }
+        .terms-container { 
+            background: rgba(0, 0, 0, 0.7); 
+            border-radius: 15px; padding: 20px; 
+            border: 1px solid var(--poster-purple); 
+            margin-top: 30px;
+            box-shadow: 0 0 15px rgba(116, 31, 209, 0.3);
+        }
 
         .btn-primary { 
             background: linear-gradient(135deg, var(--poster-pink), #741fd1); border: none; padding: 18px; 
             font-weight: 900; font-family: 'Orbitron', sans-serif; letter-spacing: 1.5px;
-            box-shadow: 0 5px 15px rgba(209, 31, 183, 0.4);
+            box-shadow: 0 0 20px rgba(209, 31, 183, 0.5);
         }
 
         #successWrapper {
@@ -128,9 +147,7 @@
 
         .success-card { background: rgba(15, 12, 41, 0.98); border: 2px solid var(--poster-blue); padding: 30px; border-radius: 20px; width: 100%; max-width: 450px; }
         .powered-by { color: var(--poster-pink); font-weight: bold; font-size: 0.8rem; margin-top: 15px; letter-spacing: 1px; }
-        .reminder-text { color: #fff; font-size: 0.75rem; margin-top: 10px; font-style: italic; }
         .btn-download-final { background: #1fc1d1 !important; color: #000 !important; font-weight: 900; border: none; padding: 20px; width: 100%; border-radius: 15px; font-family: 'Orbitron'; margin-top: 20px; }
-        #qrcode-hidden { display: none; }
     </style>
 </head>
 <body>
@@ -139,13 +156,13 @@
     <div id="qrcode-hidden"></div> 
 
     <div class="main-content container my-4" id="mainUI">
-        <div class="poster-container animate__animated animate__fadeIn">
+        <div class="poster-container animate__animated animate__fadeInDown">
             <img src="synapse-poster.jpg" alt="Synapse 2026 Poster" class="poster-image">
         </div>
 
         <div class="row justify-content-center">
             <div class="col-lg-8">
-                <div class="card p-4 p-md-5 glass-panel">
+                <div class="card p-4 p-md-5 glass-panel animate__animated animate__fadeInUp">
                     <h2 class="text-center mb-5" style="color: var(--poster-blue); font-weight: 900; font-family: 'Orbitron'; text-transform: uppercase; position: relative; z-index: 10;">Registration</h2>
                     
                     <form id="regForm" style="position: relative; z-index: 10;">
@@ -156,12 +173,12 @@
                         
                         <div class="mb-4">
                             <label class="form-label">Mobile Number</label>
-                            <div class="mobile-wrapper">
+                            <div class="mobile-wrapper" style="position: relative;">
                                 <input type="tel" id="mobile" class="form-control" placeholder="10 digits" maxlength="10" required>
                                 <div id="checkSpinner" class="spinner-loader"></div>
                             </div>
-                            <div id="mobileError" class="status-msg error-text">⚠️ This number is already registered!</div>
-                            <div id="mobileLengthError" class="status-msg error-text">⚠️ Please enter exactly 10 digits.</div>
+                            <div id="mobileError" class="status-msg error-text" style="display:none; color: #ff4d4d; font-size: 0.8rem; margin-top: 5px;">⚠️ This number is already registered!</div>
+                            <div id="mobileLengthError" class="status-msg error-text" style="display:none; color: #ff4d4d; font-size: 0.8rem; margin-top: 5px;">⚠️ Please enter exactly 10 digits.</div>
                         </div>
 
                         <div class="mb-4">
@@ -197,18 +214,18 @@
                         <div class="event-grid mt-2">
                             <label class="d-block text-center mb-4 fw-bold text-white" style="font-family: 'Orbitron'; font-size: 0.8rem;">CHOOSE EVENTS</label>
                             <div class="row g-3">
-                                <div class="col-md-6"><label class="event-card d-flex align-items-start" for="c1"><input type="checkbox" class="event-check form-check-input me-3" value="Glow Craft" id="c1"><div><span class="event-title">Glow Craft</span><span class="event-desc">LED pattern making using Arduino</span></div></label></div>
-                                <div class="col-md-6"><label class="event-card d-flex align-items-start" for="c2"><input type="checkbox" class="event-check form-check-input me-3" value="Reverse X" id="c2"><div><span class="event-title">Reverse X</span><span class="event-desc">Hardware to circuit diagram</span></div></label></div>
-                                <div class="col-md-6"><label class="event-card d-flex align-items-start" for="c3"><input type="checkbox" class="event-check form-check-input me-3" value="Trail Blaze" id="c3"><div><span class="event-title">Trail Blaze</span><span class="event-desc">Decode the code</span></div></label></div>
-                                <div class="col-md-6"><label class="event-card d-flex align-items-start" for="c4"><input type="checkbox" class="event-check form-check-input me-3" value="Brain 2 Bot" id="c4"><div><span class="event-title">Brain 2 Bot</span><span class="event-desc">AI content generation using prompt</span></div></label></div>
-                                <div class="col-md-6"><label class="event-card d-flex align-items-start" for="c5"><input type="checkbox" class="event-check form-check-input me-3" value="The Titan Trials" id="c5"><div><span class="event-title">The Titan Trials</span><span class="event-desc">Best Manager competition</span></div></label></div>
-                                <div class="col-md-6"><label class="event-card d-flex align-items-start" for="c6"><input type="checkbox" class="event-check form-check-input me-3" value="Pixel Crash" id="c6"><div><span class="event-title">Pixel Crash</span><span class="event-desc">Poster Designing competition</span></div></label></div>
-                                <div class="col-md-6"><label class="event-card d-flex align-items-start" for="c7"><input type="checkbox" class="event-check form-check-input me-3" value="Innosense" id="c7"><div><span class="event-title">Innosense</span><span class="event-desc">Let sensors make some sense</span></div></label></div>
-                                <div class="col-md-6"><label class="event-card d-flex align-items-start" for="c8"><input type="checkbox" class="event-check form-check-input me-3" value="Seminar Presentation" id="c8"><div><span class="event-title">Seminar</span><span class="event-desc">Showcase your technical seminars</span></div></label></div>
+                                <div class="col-md-6"><label class="event-card slide-in-left d-flex align-items-start" for="c1" style="animation-delay: 0.1s;"><input type="checkbox" class="event-check form-check-input me-3" value="Glow Craft" id="c1"><div><span class="event-title">Glow Craft</span><span class="event-desc">LED pattern making using Arduino</span></div></label></div>
+                                <div class="col-md-6"><label class="event-card slide-in-right d-flex align-items-start" for="c2" style="animation-delay: 0.2s;"><input type="checkbox" class="event-check form-check-input me-3" value="Reverse X" id="c2"><div><span class="event-title">Reverse X</span><span class="event-desc">Hardware to circuit diagram</span></div></label></div>
+                                <div class="col-md-6"><label class="event-card slide-in-left d-flex align-items-start" for="c3" style="animation-delay: 0.3s;"><input type="checkbox" class="event-check form-check-input me-3" value="Trail Blaze" id="c3"><div><span class="event-title">Trail Blaze</span><span class="event-desc">Decode the code</span></div></label></div>
+                                <div class="col-md-6"><label class="event-card slide-in-right d-flex align-items-start" for="c4" style="animation-delay: 0.4s;"><input type="checkbox" class="event-check form-check-input me-3" value="Brain 2 Bot" id="c4"><div><span class="event-title">Brain 2 Bot</span><span class="event-desc">AI content generation using prompt</span></div></label></div>
+                                <div class="col-md-6"><label class="event-card slide-in-left d-flex align-items-start" for="c5" style="animation-delay: 0.5s;"><input type="checkbox" class="event-check form-check-input me-3" value="The Titan Trials" id="c5"><div><span class="event-title">The Titan Trials</span><span class="event-desc">Best Manager competition</span></div></label></div>
+                                <div class="col-md-6"><label class="event-card slide-in-right d-flex align-items-start" for="c6" style="animation-delay: 0.6s;"><input type="checkbox" class="event-check form-check-input me-3" value="Pixel Crash" id="c6"><div><span class="event-title">Pixel Crash</span><span class="event-desc">Poster Designing competition</span></div></label></div>
+                                <div class="col-md-6"><label class="event-card slide-in-left d-flex align-items-start" for="c7" style="animation-delay: 0.7s;"><input type="checkbox" class="event-check form-check-input me-3" value="Innosense" id="c7"><div><span class="event-title">Innosense</span><span class="event-desc">Let sensors make some sense</span></div></label></div>
+                                <div class="col-md-6"><label class="event-card slide-in-right d-flex align-items-start" for="c8" style="animation-delay: 0.8s;"><input type="checkbox" class="event-check form-check-input me-3" value="Seminar Presentation" id="c8"><div><span class="event-title">Seminar</span><span class="event-desc">Showcase your technical seminars</span></div></label></div>
                             </div>
                         </div>
 
-                        <div class="terms-container">
+                        <div class="terms-container animate__animated animate__fadeIn" style="animation-delay: 1s;">
                             <span class="terms-title">TERMS & CONDITIONS</span>
                             <ul class="terms-list">
                                 <li>Students can participate in multiple events; choose one in case of schedule conflicts.</li>
@@ -223,7 +240,7 @@
                             </div>
                         </div>
 
-                        <button type="submit" id="submitBtn" class="btn btn-primary w-100 mt-4 shadow-lg">FINALIZE REGISTRATION</button>
+                        <button type="submit" id="submitBtn" class="btn btn-primary w-100 mt-4 shadow-lg animate__animated animate__pulse animate__infinite">FINALIZE REGISTRATION</button>
                     </form>
                 </div>
             </div>
@@ -235,7 +252,7 @@
             <h1 style="color: var(--poster-blue); font-weight: 900; font-family: 'Orbitron';">SUCCESS!</h1>
             <p class="text-white">Registration confirmed. Downloading receipt...</p>
             <div id="details" class="text-start small border-top border-secondary pt-2 mt-2 text-light"></div>
-            <div class="reminder-text"><b>Reminder:</b> Please bring this QR code on the event day!</div>
+            <div class="reminder-text" style="color: #fff; font-size: 0.75rem; margin-top: 10px; font-style: italic;"><b>Reminder:</b> Please bring this QR code on the event day!</div>
             <div class="powered-by">POWERED BY TEAM CT GRWPC</div>
             <button id="finalDownloadBtn" onclick="downloadPDF()" class="btn-download-final">📥 DOWNLOAD PDF</button>
         </div>
@@ -245,13 +262,13 @@
     <script>
         particlesJS("particles-js", {
             "particles": {
-                "number": { "value": 45, "density": { "enable": true, "value_area": 800 } },
+                "number": { "value": 60, "density": { "enable": true, "value_area": 800 } },
                 "color": { "value": ["#d11fb7", "#1fc1d1", "#741fd1"] },
                 "shape": { "type": "circle" },
-                "opacity": { "value": 0.5, "random": true },
-                "size": { "value": 4, "random": true },
-                "line_linked": { "enable": true, "distance": 150, "color": "#741fd1", "opacity": 0.2, "width": 1 },
-                "move": { "enable": true, "speed": 1.5, "direction": "none", "random": true, "out_mode": "out" }
+                "opacity": { "value": 0.6, "random": true },
+                "size": { "value": 5, "random": true },
+                "line_linked": { "enable": true, "distance": 150, "color": "#741fd1", "opacity": 0.3, "width": 1 },
+                "move": { "enable": true, "speed": 2, "direction": "none", "random": true, "out_mode": "out" }
             }
         });
 
@@ -279,7 +296,7 @@
             if(val.length !== 10) {
                 if(val.length > 0) {
                     this.classList.add('is-invalid-custom');
-                    lengthError.style.display = 'flex';
+                    lengthError.style.display = 'block';
                     submitBtn.disabled = true;
                 }
                 return;
@@ -293,7 +310,7 @@
                     if (data !== "NotFound") {
                         isDuplicate = true;
                         this.classList.add('is-invalid-custom');
-                        errorText.style.display = 'flex';
+                        errorText.style.display = 'block';
                         submitBtn.disabled = true;
                         submitBtn.style.opacity = '0.5';
                     } else {
@@ -342,23 +359,17 @@
             setTimeout(() => {
                 const canvas = qrContainer.querySelector('canvas');
                 const qrImg = canvas ? canvas.toDataURL("image/png") : qrContainer.querySelector("img").src;
-                
                 doc.setFillColor(7, 6, 15); doc.rect(0, 0, 210, 297, 'F');
                 doc.setTextColor(31, 193, 209); doc.setFontSize(26);
                 doc.text("SYNAPSE 2026", 105, 30, { align: "center" });
-                
                 doc.setFillColor(255, 255, 255); doc.rect(75, 40, 60, 60, 'F');
                 doc.addImage(qrImg, 'PNG', 78, 43, 54, 54);
-                
                 doc.setTextColor(255, 255, 255); doc.setFontSize(18);
                 doc.text(`${registrationData.mobile}`, 105, 115, { align: "center" });
-
                 doc.setFontSize(10);
                 doc.text("Please bring this QR code on the event day!", 105, 125, { align: "center" });
-                
                 doc.setTextColor(209, 31, 183); doc.setFontSize(12);
                 doc.text("POWERED BY TEAM CT GRWPC", 105, 140, { align: "center" });
-                
                 doc.save(`Synapse_${registrationData.name}.pdf`);
             }, 400);
         }
