@@ -6,6 +6,7 @@
     <title>SYNAPSE 2026 | Registration</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -47,7 +48,6 @@
             text-shadow: 2px 2px 4px #000; margin-bottom: 8px;
         }
 
-        /* MOBILE INPUT & SPINNER WRAPPER */
         .mobile-wrapper { position: relative; }
         
         .form-control, .form-select { 
@@ -68,9 +68,29 @@
 
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+        .status-msg { font-size: 0.75rem; font-weight: bold; margin-top: 8px; display: none; align-items: center; }
+        .error-text { color: #ff4d4d; }
+
         .is-invalid-custom { border-color: #ff4d4d !important; box-shadow: 0 0 10px rgba(255, 77, 77, 0.5) !important; }
         .is-valid-custom { border-color: #2ecc71 !important; box-shadow: 0 0 10px rgba(46, 204, 113, 0.5) !important; }
-        .error-text { color: #ff4d4d; font-size: 0.75rem; font-weight: bold; margin-top: 5px; display: none; }
+
+        .event-grid { border: 2px solid var(--poster-pink); background: rgba(209, 31, 183, 0.1); border-radius: 20px; padding: 20px; }
+        .event-card {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px; padding: 15px; height: 100%; transition: 0.3s; cursor: pointer;
+        }
+        .event-card:hover { background: rgba(31, 193, 209, 0.1); border-color: var(--poster-blue); transform: translateY(-2px); }
+        .event-title { font-family: 'Orbitron', sans-serif; color: var(--poster-blue); font-weight: 900; font-size: 0.9rem; text-transform: uppercase; display: block; margin-bottom: 5px; }
+        .event-desc { color: #ccc; font-size: 0.75rem; line-height: 1.3; display: block; }
+
+        .terms-container { background: rgba(0, 0, 0, 0.4); border-radius: 15px; padding: 20px; border: 1px solid var(--poster-purple); margin-top: 30px; }
+        .terms-title { font-family: 'Orbitron', sans-serif; font-size: 0.9rem; color: var(--poster-pink); margin-bottom: 12px; display: block; }
+        .terms-list { font-size: 0.8rem; color: #ddd; padding-left: 15px; margin-bottom: 15px; }
+
+        .btn-primary { 
+            background: linear-gradient(135deg, var(--poster-pink), #741fd1); border: none; padding: 18px; 
+            font-weight: 900; font-family: 'Orbitron', sans-serif; letter-spacing: 1.5px;
+        }
 
         #successWrapper {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -79,20 +99,10 @@
             justify-content: center; padding: 20px; text-align: center;
         }
 
-        .success-card {
-            background: rgba(15, 12, 41, 0.98); border: 2px solid var(--poster-blue);
-            padding: 30px; border-radius: 20px; width: 100%; max-width: 400px;
-        }
-
-        .btn-download-final {
-            background: #1fc1d1 !important; color: #000 !important; font-weight: 900;
-            border: none; padding: 20px; width: 100%; border-radius: 15px;
-            font-size: 1.2rem; margin-top: 25px; cursor: pointer !important;
-            box-shadow: 0 10px 30px rgba(31, 193, 209, 0.5); z-index: 1000000 !important;
-        }
-
-        .event-grid { border: 2px solid var(--poster-pink); background: rgba(209, 31, 183, 0.1); border-radius: 15px; padding: 15px; }
-        .btn-primary { background: linear-gradient(135deg, var(--poster-pink), #741fd1); border: none; padding: 18px; font-weight: 900; }
+        .success-card { background: rgba(15, 12, 41, 0.98); border: 2px solid var(--poster-blue); padding: 30px; border-radius: 20px; width: 100%; max-width: 450px; }
+        .powered-by { color: var(--poster-pink); font-weight: bold; font-size: 0.8rem; margin-top: 15px; letter-spacing: 1px; }
+        .reminder-text { color: #fff; font-size: 0.75rem; margin-top: 10px; font-style: italic; }
+        .btn-download-final { background: #1fc1d1 !important; color: #000 !important; font-weight: 900; border: none; padding: 20px; width: 100%; border-radius: 15px; font-family: 'Orbitron'; margin-top: 20px; }
         #qrcode-hidden { display: none; }
     </style>
 </head>
@@ -107,44 +117,48 @@
         </div>
 
         <div class="row justify-content-center">
-            <div class="col-lg-7">
-                <div class="card p-4 p-md-5" style="background: rgba(15,12,41,0.96); border-radius: 25px;">
-                    <h2 class="text-center mb-5" style="color: var(--poster-blue); font-weight: 900; text-transform: uppercase;">Registration Form</h2>
+            <div class="col-lg-8">
+                <div class="card p-4 p-md-5" style="background: rgba(15,12,41,0.96); border-radius: 25px; border: 1px solid rgba(116, 31, 209, 0.3);">
+                    <h2 class="text-center mb-5" style="color: var(--poster-blue); font-weight: 900; font-family: 'Orbitron'; text-transform: uppercase;">Registration</h2>
                     
                     <form id="regForm">
                         <div class="mb-4">
                             <label class="form-label">Full Name</label>
                             <input type="text" id="name" class="form-control" required>
                         </div>
+                        
                         <div class="mb-4">
                             <label class="form-label">Mobile Number</label>
                             <div class="mobile-wrapper">
-                                <input type="tel" id="mobile" class="form-control" pattern="[0-9]{10}" placeholder="Enter 10 digits" required>
+                                <input type="tel" id="mobile" class="form-control" placeholder="10 digits" maxlength="10" required>
                                 <div id="checkSpinner" class="spinner-loader"></div>
                             </div>
-                            <div id="mobileError" class="error-text">⚠️ This number is already registered!</div>
+                            <div id="mobileError" class="status-msg error-text">⚠️ This number is already registered!</div>
+                            <div id="mobileLengthError" class="status-msg error-text">⚠️ Please enter exactly 10 digits.</div>
                         </div>
+
                         <div class="mb-4">
                             <label class="form-label">Email Address</label>
                             <input type="email" id="email" class="form-control" required>
                         </div>
+
                         <div class="mb-4">
                             <label class="form-label">College Name</label>
                             <input type="text" id="college" class="form-control" required>
                         </div>
-                        
+
                         <div class="row">
-                            <div class="col-6 mb-4">
+                            <div class="col-md-7 mb-4">
                                 <label class="form-label">Department</label>
                                 <select id="department" class="form-select" required>
                                     <option value="" disabled selected>Select</option>
-                                    <option>Computer Science</option>
-                                    <option>Electronics</option>
-                                    <option>Mechanical</option>
-                                    <option>Civil</option>
+                                    <option>Computer Engg</option><option>Electronics Engg</option>
+                                    <option>Instrumentation Engg</option><option>Mechanical Engg</option>
+                                    <option>CABM</option><option>Electrical Engg</option>
+                                    <option>Auto Mobile Engg</option><option>Others</option>
                                 </select>
                             </div>
-                            <div class="col-6 mb-4">
+                            <div class="col-md-5 mb-4">
                                 <label class="form-label">Semester</label>
                                 <select id="semester" class="form-select" required>
                                     <option>S1</option><option>S2</option><option>S3</option>
@@ -154,16 +168,35 @@
                         </div>
 
                         <div class="event-grid mt-2">
-                            <label class="d-block text-center mb-3 fw-bold text-white">SELECT EVENTS</label>
-                            <div class="row g-2">
-                                <div class="col-6"><div class="form-check"><input type="checkbox" class="event-check form-check-input" value="Hackathons" id="c1"><label class="form-check-label text-white small" for="c1">Hackathons</label></div></div>
-                                <div class="col-6"><div class="form-check"><input type="checkbox" class="event-check form-check-input" value="Workshops" id="c2"><label class="form-check-label text-white small" for="c2">Workshops</label></div></div>
-                                <div class="col-6"><div class="form-check"><input type="checkbox" class="event-check form-check-input" value="Gaming" id="c3"><label class="form-check-label text-white small" for="c3">Gaming</label></div></div>
-                                <div class="col-6"><div class="form-check"><input type="checkbox" class="event-check form-check-input" value="Quizzes" id="c4"><label class="form-check-label text-white small" for="c4">Quizzes</label></div></div>
+                            <label class="d-block text-center mb-4 fw-bold text-white" style="font-family: 'Orbitron'; font-size: 0.8rem;">CHOOSE EVENTS</label>
+                            <div class="row g-3">
+                                <div class="col-md-6"><label class="event-card d-flex align-items-start" for="c1"><input type="checkbox" class="event-check form-check-input me-3" value="Glow Craft" id="c1"><div><span class="event-title">Glow Craft</span><span class="event-desc">LED pattern making using Arduino</span></div></label></div>
+                                <div class="col-md-6"><label class="event-card d-flex align-items-start" for="c2"><input type="checkbox" class="event-check form-check-input me-3" value="Reverse X" id="c2"><div><span class="event-title">Reverse X</span><span class="event-desc">Hardware to circuit diagram</span></div></label></div>
+                                <div class="col-md-6"><label class="event-card d-flex align-items-start" for="c3"><input type="checkbox" class="event-check form-check-input me-3" value="Trail Blaze" id="c3"><div><span class="event-title">Trail Blaze</span><span class="event-desc">Decode the code</span></div></label></div>
+                                <div class="col-md-6"><label class="event-card d-flex align-items-start" for="c4"><input type="checkbox" class="event-check form-check-input me-3" value="Brain 2 Bot" id="c4"><div><span class="event-title">Brain 2 Bot</span><span class="event-desc">AI content generation using prompt</span></div></label></div>
+                                <div class="col-md-6"><label class="event-card d-flex align-items-start" for="c5"><input type="checkbox" class="event-check form-check-input me-3" value="The Titan Trials" id="c5"><div><span class="event-title">The Titan Trials</span><span class="event-desc">Best Manager competition</span></div></label></div>
+                                <div class="col-md-6"><label class="event-card d-flex align-items-start" for="c6"><input type="checkbox" class="event-check form-check-input me-3" value="Pixel Crash" id="c6"><div><span class="event-title">Pixel Crash</span><span class="event-desc">Poster Designing competition</span></div></label></div>
+                                <div class="col-md-6"><label class="event-card d-flex align-items-start" for="c7"><input type="checkbox" class="event-check form-check-input me-3" value="Innosense" id="c7"><div><span class="event-title">Innosense</span><span class="event-desc">Let sensors make some sense</span></div></label></div>
+                                <div class="col-md-6"><label class="event-card d-flex align-items-start" for="c8"><input type="checkbox" class="event-check form-check-input me-3" value="Seminar Presentation" id="c8"><div><span class="event-title">Seminar</span><span class="event-desc">Showcase your technical seminars</span></div></label></div>
                             </div>
                         </div>
 
-                        <button type="submit" id="submitBtn" class="btn btn-primary w-100 mt-4 shadow-lg">SUBMIT REGISTRATION</button>
+                        <div class="terms-container">
+                            <span class="terms-title">TERMS & CONDITIONS</span>
+                            <ul class="terms-list">
+                                <li>Students can participate in multiple events; choose one in case of schedule conflicts.</li>
+                                <li>A registration fee of <b>₹50</b> is payable at the desk on the event day.</li>
+                                <li><b>Show the QR code receipt at the registration desk for entry.</b></li>
+                                <li>For group events, every participating student must register individually.</li>
+                                <li>Participants must obey all rules set by the officials.</li>
+                            </ul>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="agreeCheck" required>
+                                <label class="form-check-label small text-white fw-bold" for="agreeCheck">I AGREE TO THE TERMS AND CONDITIONS</label>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="submitBtn" class="btn btn-primary w-100 mt-4 shadow-lg">FINALIZE REGISTRATION</button>
                     </form>
                 </div>
             </div>
@@ -172,16 +205,28 @@
 
     <div id="successWrapper">
         <div class="success-card animate__animated animate__zoomIn">
-            <h1 style="color: var(--poster-blue); font-weight: 900;">SUCCESS!</h1>
+            <h1 style="color: var(--poster-blue); font-weight: 900; font-family: 'Orbitron';">SUCCESS!</h1>
             <p class="text-white">Registration confirmed. Downloading receipt...</p>
             <div id="details" class="text-start small border-top border-secondary pt-2 mt-2 text-light"></div>
-            <button id="finalDownloadBtn" onclick="downloadPDF()" class="btn-download-final">📥 DOWNLOAD RECEIPT (PDF)</button>
+            <div class="reminder-text"><b>Reminder:</b> Please bring this QR code on the event day!</div>
+            <div class="powered-by">POWERED BY TEAM CT GRWPC</div>
+            <button id="finalDownloadBtn" onclick="downloadPDF()" class="btn-download-final">📥 DOWNLOAD PDF</button>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script>
-        particlesJS("particles-js", { "particles": { "number": { "value": 30 }, "move": { "speed": 1.5 } } });
+        particlesJS("particles-js", {
+            "particles": {
+                "number": { "value": 45, "density": { "enable": true, "value_area": 800 } },
+                "color": { "value": ["#d11fb7", "#1fc1d1", "#741fd1"] },
+                "shape": { "type": "circle" },
+                "opacity": { "value": 0.5, "random": true },
+                "size": { "value": 4, "random": true },
+                "line_linked": { "enable": true, "distance": 150, "color": "#741fd1", "opacity": 0.2, "width": 1 },
+                "move": { "enable": true, "speed": 1.5, "direction": "none", "random": true, "out_mode": "out" }
+            }
+        });
 
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwKjrjjrV5hJUrqaP5nWjYAW2HW50y6EI3_k9bfzriS8ktMuAHpYe1i8K6IyPFV-jsndA/exec';
         let registrationData = {};
@@ -190,52 +235,55 @@
         const mobileInput = document.getElementById('mobile');
         const submitBtn = document.getElementById('submitBtn');
         const errorText = document.getElementById('mobileError');
+        const lengthError = document.getElementById('mobileLengthError');
         const spinner = document.getElementById('checkSpinner');
 
-        // Reset status as soon as user types (Immediate Correction)
         mobileInput.addEventListener('input', function() {
             isDuplicate = false;
             this.classList.remove('is-invalid-custom', 'is-valid-custom');
             errorText.style.display = 'none';
+            lengthError.style.display = 'none';
             submitBtn.disabled = false;
             submitBtn.style.opacity = '1';
         });
 
-        // Background Duplicate Check on Blur
         mobileInput.addEventListener('blur', function() {
             const val = this.value;
-            if(val.length === 10) {
-                spinner.style.display = 'block';
-                
-                fetch(`${scriptURL}?action=search&mobile=${val}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        spinner.style.display = 'none';
-                        if (data !== "NotFound") {
-                            isDuplicate = true;
-                            this.classList.add('is-invalid-custom');
-                            errorText.style.display = 'block';
-                            submitBtn.disabled = true;
-                            submitBtn.style.opacity = '0.5';
-                        } else {
-                            isDuplicate = false;
-                            this.classList.add('is-valid-custom');
-                        }
-                    })
-                    .catch(() => { spinner.style.display = 'none'; });
+            if(val.length !== 10) {
+                if(val.length > 0) {
+                    this.classList.add('is-invalid-custom');
+                    lengthError.style.display = 'flex';
+                    submitBtn.disabled = true;
+                }
+                return;
             }
+
+            spinner.style.display = 'block';
+            fetch(`${scriptURL}?action=search&mobile=${val}`)
+                .then(res => res.json())
+                .then(data => {
+                    spinner.style.display = 'none';
+                    if (data !== "NotFound") {
+                        isDuplicate = true;
+                        this.classList.add('is-invalid-custom');
+                        errorText.style.display = 'flex';
+                        submitBtn.disabled = true;
+                        submitBtn.style.opacity = '0.5';
+                    } else {
+                        isDuplicate = false;
+                        this.classList.add('is-valid-custom');
+                    }
+                })
+                .catch(() => { spinner.style.display = 'none'; });
         });
 
         document.getElementById('regForm').addEventListener('submit', function(e) {
             e.preventDefault();
             if(isDuplicate) return;
-
             const selectedEvents = Array.from(document.querySelectorAll('.event-check:checked')).map(c => c.value);
             if(selectedEvents.length === 0) { alert("Please select at least one event!"); return; }
-
             submitBtn.disabled = true;
             submitBtn.innerHTML = "VERIFYING DATA...";
-
             registrationData = {
                 name: document.getElementById('name').value,
                 mobile: document.getElementById('mobile').value,
@@ -245,9 +293,7 @@
                 semester: document.getElementById('semester').value,
                 events: selectedEvents.join(", ")
             };
-
             fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(registrationData) });
-
             setTimeout(() => {
                 showSuccess();
                 downloadPDF();
@@ -257,7 +303,7 @@
         function showSuccess() {
             document.getElementById('mainUI').style.display = 'none';
             document.getElementById('successWrapper').style.display = 'flex';
-            document.getElementById('details').innerHTML = `<b>Name:</b> ${registrationData.name}<br><b>Mobile:</b> ${registrationData.mobile}`;
+            document.getElementById('details').innerHTML = `<b>Name:</b> ${registrationData.name}<br><b>Phone:</b> ${registrationData.mobile}`;
         }
 
         function downloadPDF() {
@@ -266,19 +312,26 @@
             const qrContainer = document.getElementById("qrcode-hidden");
             qrContainer.innerHTML = "";
             new QRCode(qrContainer, { text: registrationData.mobile, width: 256, height: 256 });
-
             setTimeout(() => {
                 const canvas = qrContainer.querySelector('canvas');
                 const qrImg = canvas ? canvas.toDataURL("image/png") : qrContainer.querySelector("img").src;
+                
                 doc.setFillColor(7, 6, 15); doc.rect(0, 0, 210, 297, 'F');
                 doc.setTextColor(31, 193, 209); doc.setFontSize(26);
-                doc.text("SYNAPSE 2026", 105, 40, { align: "center" });
-                doc.setFillColor(255, 255, 255); doc.rect(60, 55, 90, 90, 'F');
-                doc.addImage(qrImg, 'PNG', 65, 60, 80, 80);
-                doc.setTextColor(255, 255, 255); doc.setFontSize(14);
-                doc.text(`Name: ${registrationData.name}`, 30, 160);
-                doc.text(`Mobile: ${registrationData.mobile}`, 30, 175);
-                doc.text(`College: ${registrationData.college}`, 30, 190);
+                doc.text("SYNAPSE 2026", 105, 30, { align: "center" });
+                
+                doc.setFillColor(255, 255, 255); doc.rect(75, 40, 60, 60, 'F');
+                doc.addImage(qrImg, 'PNG', 78, 43, 54, 54);
+                
+                doc.setTextColor(255, 255, 255); doc.setFontSize(18);
+                doc.text(`${registrationData.mobile}`, 105, 115, { align: "center" });
+
+                doc.setFontSize(10);
+                doc.text("Please bring this QR code on the event day!", 105, 125, { align: "center" });
+                
+                doc.setTextColor(209, 31, 183); doc.setFontSize(12);
+                doc.text("POWERED BY TEAM CT GRWPC", 105, 140, { align: "center" });
+                
                 doc.save(`Synapse_${registrationData.name}.pdf`);
             }, 400);
         }
