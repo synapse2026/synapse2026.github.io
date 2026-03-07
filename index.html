@@ -33,7 +33,33 @@
             top: 0; left: 0; z-index: 1; pointer-events: none !important;
         }
 
-        .main-content { position: relative; z-index: 5; padding: 20px; }
+        /* TECH SAVVY MOBILE ANIMATION */
+        .glass-panel {
+            position: relative;
+            background: rgba(15, 12, 41, 0.94);
+            border-radius: 25px;
+            border: 1px solid rgba(116, 31, 209, 0.3);
+            overflow: hidden; /* Clips the background animation */
+            z-index: 5;
+        }
+
+        /* Moving glow effect behind boxes */
+        .glass-panel::before {
+            content: "";
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(31, 193, 209, 0.1) 0%, rgba(209, 31, 183, 0.05) 30%, transparent 70%);
+            animation: rotateGlow 10s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes rotateGlow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .main-content { position: relative; z-index: 10; padding: 20px; }
 
         .poster-container {
             max-width: 800px; margin: 10px auto 30px auto;
@@ -51,7 +77,7 @@
         .mobile-wrapper { position: relative; }
         
         .form-control, .form-select { 
-            background: #fff !important; color: #000 !important; 
+            background: rgba(255, 255, 255, 0.95) !important; color: #000 !important; 
             font-weight: 700 !important; border: 2px solid #ccc;
             padding: 12px; border-radius: 10px; transition: 0.3s;
         }
@@ -71,25 +97,26 @@
         .status-msg { font-size: 0.75rem; font-weight: bold; margin-top: 8px; display: none; align-items: center; }
         .error-text { color: #ff4d4d; }
 
-        .is-invalid-custom { border-color: #ff4d4d !important; box-shadow: 0 0 10px rgba(255, 77, 77, 0.5) !important; }
-        .is-valid-custom { border-color: #2ecc71 !important; box-shadow: 0 0 10px rgba(46, 204, 113, 0.5) !important; }
+        .is-invalid-custom { border-color: #ff4d4d !important; box-shadow: 0 0 15px rgba(255, 77, 77, 0.4) !important; }
+        .is-valid-custom { border-color: #2ecc71 !important; box-shadow: 0 0 15px rgba(46, 204, 113, 0.4) !important; }
 
-        .event-grid { border: 2px solid var(--poster-pink); background: rgba(209, 31, 183, 0.1); border-radius: 20px; padding: 20px; }
+        .event-grid { border: 2px solid var(--poster-pink); background: rgba(209, 31, 183, 0.15); border-radius: 20px; padding: 20px; box-shadow: inset 0 0 15px rgba(209, 31, 183, 0.2); }
         .event-card {
-            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px; padding: 15px; height: 100%; transition: 0.3s; cursor: pointer;
         }
-        .event-card:hover { background: rgba(31, 193, 209, 0.1); border-color: var(--poster-blue); transform: translateY(-2px); }
+        .event-card:hover { background: rgba(31, 193, 209, 0.15); border-color: var(--poster-blue); transform: scale(1.02); }
         .event-title { font-family: 'Orbitron', sans-serif; color: var(--poster-blue); font-weight: 900; font-size: 0.9rem; text-transform: uppercase; display: block; margin-bottom: 5px; }
-        .event-desc { color: #ccc; font-size: 0.75rem; line-height: 1.3; display: block; }
+        .event-desc { color: #ddd; font-size: 0.75rem; line-height: 1.3; display: block; }
 
-        .terms-container { background: rgba(0, 0, 0, 0.4); border-radius: 15px; padding: 20px; border: 1px solid var(--poster-purple); margin-top: 30px; }
+        .terms-container { background: rgba(0, 0, 0, 0.6); border-radius: 15px; padding: 20px; border: 1px solid var(--poster-purple); margin-top: 30px; }
         .terms-title { font-family: 'Orbitron', sans-serif; font-size: 0.9rem; color: var(--poster-pink); margin-bottom: 12px; display: block; }
-        .terms-list { font-size: 0.8rem; color: #ddd; padding-left: 15px; margin-bottom: 15px; }
+        .terms-list { font-size: 0.8rem; color: #eee; padding-left: 15px; margin-bottom: 15px; }
 
         .btn-primary { 
             background: linear-gradient(135deg, var(--poster-pink), #741fd1); border: none; padding: 18px; 
             font-weight: 900; font-family: 'Orbitron', sans-serif; letter-spacing: 1.5px;
+            box-shadow: 0 5px 15px rgba(209, 31, 183, 0.4);
         }
 
         #successWrapper {
@@ -118,10 +145,10 @@
 
         <div class="row justify-content-center">
             <div class="col-lg-8">
-                <div class="card p-4 p-md-5" style="background: rgba(15,12,41,0.96); border-radius: 25px; border: 1px solid rgba(116, 31, 209, 0.3);">
-                    <h2 class="text-center mb-5" style="color: var(--poster-blue); font-weight: 900; font-family: 'Orbitron'; text-transform: uppercase;">Registration</h2>
+                <div class="card p-4 p-md-5 glass-panel">
+                    <h2 class="text-center mb-5" style="color: var(--poster-blue); font-weight: 900; font-family: 'Orbitron'; text-transform: uppercase; position: relative; z-index: 10;">Registration</h2>
                     
-                    <form id="regForm">
+                    <form id="regForm" style="position: relative; z-index: 10;">
                         <div class="mb-4">
                             <label class="form-label">Full Name</label>
                             <input type="text" id="name" class="form-control" required>
@@ -184,7 +211,7 @@
                         <div class="terms-container">
                             <span class="terms-title">TERMS & CONDITIONS</span>
                             <ul class="terms-list">
-                                <li>Students can participate in multiple events; in case of schedule conflicts students needs to choose one of them</li>
+                                <li>Students can participate in multiple events; choose one in case of schedule conflicts.</li>
                                 <li>A registration fee of <b>₹50</b> is payable at the desk on the event day.</li>
                                 <li><b>Show the QR code receipt at the registration desk for entry.</b></li>
                                 <li>For group events, every participating student must register individually.</li>
