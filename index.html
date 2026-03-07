@@ -60,7 +60,6 @@
             opacity: 0;
         }
         
-        /* FIX: Dropdown option visibility */
         .form-select option {
             background-color: #1a1a2e !important;
             color: #fff !important;
@@ -94,17 +93,36 @@
 
         #eventSection, #termsSection { display: none; }
 
-        .event-grid { border: 2px solid var(--poster-pink); background: rgba(209, 31, 183, 0.05); border-radius: 20px; padding: 20px; }
+        .event-grid { border: 2px solid var(--poster-pink); background: rgba(209, 31, 183, 0.05); border-radius: 20px; padding: 15px; }
         
         .event-card {
             background: rgba(255, 255, 255, 0.03) !important; 
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px; padding: 15px; height: 100%; 
+            border-radius: 12px; padding: 12px; height: 100%; 
             opacity: 0; cursor: pointer;
+            display: flex !important;
+            align-items: flex-start;
         }
 
-        .event-title { font-family: 'Orbitron', sans-serif; color: var(--poster-blue); font-weight: 900; font-size: 0.9rem; text-transform: uppercase; display: block; margin-bottom: 5px; }
-        .event-desc { color: #eee; font-size: 0.75rem; line-height: 1.3; display: block; }
+        .event-check {
+            flex-shrink: 0; /* Prevents checkbox from getting small */
+            width: 18px;
+            height: 18px;
+            margin-top: 4px;
+        }
+
+        .event-title { 
+            font-family: 'Orbitron', sans-serif; 
+            color: var(--poster-blue); 
+            font-weight: 900; 
+            font-size: 0.8rem; /* Slightly smaller for mobile fit */
+            text-transform: uppercase; 
+            display: block; 
+            margin-bottom: 3px;
+            word-wrap: break-word; /* Allows long titles to wrap */
+        }
+        
+        .event-desc { color: #eee; font-size: 0.7rem; line-height: 1.2; display: block; }
 
         .terms-container { 
             background: rgba(0, 0, 0, 0.3); 
@@ -170,15 +188,14 @@
                         <div id="eventSection">
                             <h2>Choose Events</h2>
                             <div class="event-grid">
-                                <div class="row g-3">
-                                    <div class="col-6"><label class="event-card d-flex align-items-start" for="c1" id="ec1"><input type="checkbox" class="event-check form-check-input me-3" value="Glow Craft" id="c1"><div><span class="event-title">Glow Craft</span><span class="event-desc">LED pattern making using Arduino</span></div></label></div>
-                                    <div class="col-6"><label class="event-card d-flex align-items-start" for="c2" id="ec2"><input type="checkbox" class="event-check form-check-input me-3" value="Reverse X" id="c2"><div><span class="event-title">Reverse X</span><span class="event-desc">hardware to circuit diagram</span></div></label></div>
-                                    <div class="col-6"><label class="event-card d-flex align-items-start" for="c3" id="ec3"><input type="checkbox" class="event-check form-check-input me-3" value="Trail Blaze" id="c3"><div><span class="event-title">Trail Blaze</span><span class="event-desc">decode the code</span></div></label></div>
-                                    <div class="col-6"><label class="event-card d-flex align-items-start" for="c4" id="ec4"><input type="checkbox" class="event-check form-check-input me-3" value="Brain 2 Bot" id="c4"><div><span class="event-title">Brain 2 Bot</span><span class="event-desc">AI content generation using prompt</span></div></label></div>
-                                    <div class="col-6"><label class="event-card d-flex align-items-start" for="c5" id="ec5"><input type="checkbox" class="event-check form-check-input me-3" value="Titan Trials" id="c5"><div><span class="event-title">Titan Trials</span><span class="event-desc">Best Manager</span></div></label></div>
-                                    <div class="col-6"><label class="event-card d-flex align-items-start" for="c6" id="ec6"><input type="checkbox" class="event-check form-check-input me-3" value="Pixel Crash" id="c6"><div><span class="event-title">Pixel Crash</span><span class="event-desc">Poster Designing</span></div></label></div>
-                                    <div class="col-6"><label class="event-card d-flex align-items-start" for="c7" id="ec7"><input type="checkbox" class="event-check form-check-input me-3" value="Innosense" id="c7"><div><span class="event-title">Innosense</span><span class="event-desc">Let sensors make some sense</span></div></label></div>
-                                    <div class="col-6"><label class="event-card d-flex align-items-start" for="c8" id="ec8"><input type="checkbox" class="event-check form-check-input me-3" value="Seminar Presentation" id="c8"><div><span class="event-title">Seminar Presentation</span><span class="event-desc">showcase your seminars</span></div></label></div>
+                                <div class="row g-2"> <div class="col-6"><label class="event-card" for="c1" id="ec1"><input type="checkbox" class="event-check form-check-input me-2" value="Glow Craft" id="c1"><div><span class="event-title">Glow Craft</span><span class="event-desc">LED patterns</span></div></label></div>
+                                    <div class="col-6"><label class="event-card" for="c2" id="ec2"><input type="checkbox" class="event-check form-check-input me-2" value="Reverse X" id="c2"><div><span class="event-title">Reverse X</span><span class="event-desc">circuit logic</span></div></label></div>
+                                    <div class="col-6"><label class="event-card" for="c3" id="ec3"><input type="checkbox" class="event-check form-check-input me-2" value="Trail Blaze" id="c3"><div><span class="event-title">Trail Blaze</span><span class="event-desc">decode code</span></div></label></div>
+                                    <div class="col-6"><label class="event-card" for="c4" id="ec4"><input type="checkbox" class="event-check form-check-input me-2" value="Brain 2 Bot" id="c4"><div><span class="event-title">Brain 2 Bot</span><span class="event-desc">AI prompts</span></div></label></div>
+                                    <div class="col-6"><label class="event-card" for="c5" id="ec5"><input type="checkbox" class="event-check form-check-input me-2" value="Titan Trials" id="c5"><div><span class="event-title">Titan Trials</span><span class="event-desc">Best Manager</span></div></label></div>
+                                    <div class="col-6"><label class="event-card" for="c6" id="ec6"><input type="checkbox" class="event-check form-check-input me-2" value="Pixel Crash" id="c6"><div><span class="event-title">Pixel Crash</span><span class="event-desc">Poster Design</span></div></label></div>
+                                    <div class="col-6"><label class="event-card" for="c7" id="ec7"><input type="checkbox" class="event-check form-check-input me-2" value="Innosense" id="c7"><div><span class="event-title">Innosense</span><span class="event-desc">Sensors logic</span></div></label></div>
+                                    <div class="col-6"><label class="event-card" for="c8" id="ec8"><input type="checkbox" class="event-check form-check-input me-2" value="Seminar Presentation" id="c8"><div><span class="event-title">Seminar Presentation</span><span class="event-desc">showcase tech</span></div></label></div>
                                 </div>
                             </div>
                             <button type="button" class="btn-nav" style="display:block" onclick="showTerms()">VIEW TERMS</button>
@@ -188,8 +205,8 @@
                             <h2>Terms & Conditions</h2>
                             <div class="terms-container">
                                 <ul class="terms-list">
-                                    <li>Students can participate in any no of events. In case of schedule conflicts, students have to pick one.</li>
-                                    <li>Registration fee: 50 rupees at desk.</li>
+                                    <li>Multiple event participation allowed.</li>
+                                    <li>Registration fee: 50 INR.</li>
                                     <li>Show QR code at desk.</li>
                                     <li>Follow committee rules.</li>
                                 </ul>
@@ -218,13 +235,13 @@
     <script>
         particlesJS("particles-js", {
             "particles": {
-                "number": { "value": 70 },
+                "number": { "value": 60 },
                 "color": { "value": ["#d11fb7", "#1fc1d1", "#741fd1"] },
                 "shape": { "type": "circle" },
                 "opacity": { "value": 0.8 },
-                "size": { "value": 5 },
-                "line_linked": { "enable": true, "distance": 150, "color": "#741fd1", "opacity": 0.4, "width": 1 },
-                "move": { "enable": true, "speed": 3, "out_mode": "out" }
+                "size": { "value": 4 },
+                "line_linked": { "enable": true, "distance": 120, "color": "#741fd1", "opacity": 0.4, "width": 1 },
+                "move": { "enable": true, "speed": 2, "out_mode": "out" }
             }
         });
 
