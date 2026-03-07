@@ -33,7 +33,6 @@
             top: 0; left: 0; z-index: 1; pointer-events: none !important;
         }
 
-        /* TECH SAVVY PANEL WITH DYNAMIC GLOW */
         .glass-panel {
             position: relative;
             background: rgba(15, 12, 41, 0.85) !important;
@@ -74,7 +73,6 @@
             padding: 12px; border-radius: 10px;
         }
 
-        /* SPINNER RESTORED */
         .spinner-loader {
             position: absolute; right: 15px; top: 12px;
             width: 20px; height: 20px;
@@ -88,11 +86,12 @@
 
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* INDIVIDUAL ITEM FLY-IN ANIMATIONS */
+        /* EVENT ANIMATIONS - TRIGGERED VIA JS */
         .event-grid { 
             border: 2px solid var(--poster-pink); 
             background: rgba(209, 31, 183, 0.1); 
             border-radius: 20px; padding: 20px;
+            display: none; /* Initially Hidden */
         }
 
         .event-card {
@@ -100,7 +99,7 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 12px; padding: 15px; height: 100%; 
             transition: 0.3s; cursor: pointer;
-            opacity: 0; /* Hidden initially for animation */
+            opacity: 0;
         }
 
         @keyframes flyFromLeft { from { opacity: 0; transform: translateX(-100px); } to { opacity: 1; transform: translateX(0); } }
@@ -108,32 +107,30 @@
         @keyframes flyFromTop { from { opacity: 0; transform: translateY(-100px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes flyFromBottom { from { opacity: 0; transform: translateY(100px); } to { opacity: 1; transform: translateY(0); } }
 
-        .fly-left { animation: flyFromLeft 0.8s forwards; }
-        .fly-right { animation: flyFromRight 0.8s forwards; }
-        .fly-top { animation: flyFromTop 0.8s forwards; }
-        .fly-bottom { animation: flyFromBottom 0.8s forwards; }
+        .fly-left { animation: flyFromLeft 1s forwards; }
+        .fly-right { animation: flyFromRight 1s forwards; }
+        .fly-top { animation: flyFromTop 1s forwards; }
+        .fly-bottom { animation: flyFromBottom 1s forwards; }
 
         .event-title { font-family: 'Orbitron', sans-serif; color: var(--poster-blue); font-weight: 900; font-size: 0.9rem; text-transform: uppercase; display: block; margin-bottom: 5px; }
         .event-desc { color: #eee; font-size: 0.75rem; line-height: 1.3; display: block; }
 
-        /* TERMS MOBILE VISIBILITY FIX */
         .terms-container { 
             background: rgba(0, 0, 0, 0.85); 
             border-radius: 15px; padding: 20px; 
             border: 1px solid var(--poster-purple); 
             margin-top: 30px;
-            position: relative;
-            z-index: 15;
+            display: none; /* Initially Hidden */
         }
 
         .terms-title { font-family: 'Orbitron', sans-serif; font-size: 0.95rem; color: var(--poster-pink); font-weight: 900; margin-bottom: 12px; display: block; }
         .terms-list { font-size: 0.85rem; color: #fff; padding-left: 15px; margin-bottom: 15px; list-style-type: decimal; }
-        .terms-list li { margin-bottom: 8px; line-height: 1.4; }
 
         .btn-primary { 
             background: linear-gradient(135deg, var(--poster-pink), #741fd1); border: none; padding: 18px; 
             font-weight: 900; font-family: 'Orbitron', sans-serif; letter-spacing: 1.5px;
             box-shadow: 0 0 20px rgba(209, 31, 183, 0.5);
+            display: none; /* Initially Hidden */
         }
 
         #successWrapper {
@@ -158,27 +155,21 @@
 
         <div class="row justify-content-center">
             <div class="col-lg-8">
-                <div class="card p-4 p-md-5 glass-panel animate__animated animate__fadeInUp">
+                <div class="card p-4 p-md-5 glass-panel">
                     <h2 class="text-center mb-5" style="color: var(--poster-blue); font-weight: 900; font-family: 'Orbitron'; text-transform: uppercase;">Registration</h2>
                     
                     <form id="regForm">
-                        <div class="mb-4">
-                            <label class="form-label">Full Name</label>
-                            <input type="text" id="name" class="form-control" required>
-                        </div>
-                        
+                        <div class="mb-4"><label class="form-label">Full Name</label><input type="text" id="name" class="form-control check-trigger" required></div>
                         <div class="mb-4">
                             <label class="form-label">Mobile Number</label>
                             <div class="mobile-wrapper">
-                                <input type="tel" id="mobile" class="form-control" placeholder="10 digits" maxlength="10" required>
+                                <input type="tel" id="mobile" class="form-control check-trigger" placeholder="10 digits" maxlength="10" required>
                                 <div id="checkSpinner" class="spinner-loader"></div>
                             </div>
                             <div id="mobileError" class="status-msg error-text" style="display:none; color: #ff4d4d; font-size: 0.8rem; margin-top: 5px; font-weight: bold;">⚠️ Already registered!</div>
-                            <div id="mobileLengthError" class="status-msg error-text" style="display:none; color: #ff4d4d; font-size: 0.8rem; margin-top: 5px; font-weight: bold;">⚠️ Enter 10 digits!</div>
                         </div>
-
-                        <div class="mb-4"><label class="form-label">Email Address</label><input type="email" id="email" class="form-control" required></div>
-                        <div class="mb-4"><label class="form-label">College Name</label><input type="text" id="college" class="form-control" required></div>
+                        <div class="mb-4"><label class="form-label">Email Address</label><input type="email" id="email" class="form-control check-trigger" required></div>
+                        <div class="mb-4"><label class="form-label">College Name</label><input type="text" id="college" class="form-control check-trigger" required></div>
 
                         <div class="row">
                             <div class="col-md-7 mb-4">
@@ -200,28 +191,27 @@
                             </div>
                         </div>
 
-                        <div class="event-grid mt-2">
+                        <div class="event-grid mt-2" id="eventSection">
                             <label class="d-block text-center mb-4 fw-bold text-white" style="font-family: 'Orbitron'; font-size: 0.8rem;">SELECT EVENTS</label>
                             <div class="row g-3">
-                                <div class="col-6"><label class="event-card fly-left d-flex align-items-start" for="c1" style="animation-delay: 0.1s;"><input type="checkbox" class="event-check form-check-input me-3" value="Glow Craft" id="c1"><div><span class="event-title">Glow Craft</span><span class="event-desc">LED Arduino</span></div></label></div>
-                                <div class="col-6"><label class="event-card fly-right d-flex align-items-start" for="c2" style="animation-delay: 0.2s;"><input type="checkbox" class="event-check form-check-input me-3" value="Reverse X" id="c2"><div><span class="event-title">Reverse X</span><span class="event-desc">Hardware Decode</span></div></label></div>
-                                <div class="col-6"><label class="event-card fly-top d-flex align-items-start" for="c3" style="animation-delay: 0.3s;"><input type="checkbox" class="event-check form-check-input me-3" value="Trail Blaze" id="c3"><div><span class="event-title">Trail Blaze</span><span class="event-desc">Code Decode</span></div></label></div>
-                                <div class="col-6"><label class="event-card fly-bottom d-flex align-items-start" for="c4" style="animation-delay: 0.4s;"><input type="checkbox" class="event-check form-check-input me-3" value="Brain 2 Bot" id="c4"><div><span class="event-title">Brain 2 Bot</span><span class="event-desc">AI Prompting</span></div></label></div>
-                                <div class="col-6"><label class="event-card fly-left d-flex align-items-start" for="c5" style="animation-delay: 0.5s;"><input type="checkbox" class="event-check form-check-input me-3" value="The Titan Trials" id="c5"><div><span class="event-title">Titan Trials</span><span class="event-desc">Best Manager</span></div></label></div>
-                                <div class="col-6"><label class="event-card fly-right d-flex align-items-start" for="c6" style="animation-delay: 0.6s;"><input type="checkbox" class="event-check form-check-input me-3" value="Pixel Crash" id="c6"><div><span class="event-title">Pixel Crash</span><span class="event-desc">Poster Design</span></div></label></div>
-                                <div class="col-6"><label class="event-card fly-top d-flex align-items-start" for="c7" style="animation-delay: 0.7s;"><input type="checkbox" class="event-check form-check-input me-3" value="Innosense" id="c7"><div><span class="event-title">Innosense</span><span class="event-desc">Sensors Tech</span></div></label></div>
-                                <div class="col-6"><label class="event-card fly-bottom d-flex align-items-start" for="c8" style="animation-delay: 0.8s;"><input type="checkbox" class="event-check form-check-input me-3" value="Seminar Presentation" id="c8"><div><span class="event-title">Seminar</span><span class="event-desc">Showcase</span></div></label></div>
+                                <div class="col-6"><label class="event-card fly-left d-flex align-items-start" for="c1" style="animation-delay: 0.2s;"><input type="checkbox" class="event-check form-check-input me-3" value="Glow Craft" id="c1"><div><span class="event-title">Glow Craft</span><span class="event-desc">LED Arduino</span></div></label></div>
+                                <div class="col-6"><label class="event-card fly-right d-flex align-items-start" for="c2" style="animation-delay: 0.4s;"><input type="checkbox" class="event-check form-check-input me-3" value="Reverse X" id="c2"><div><span class="event-title">Reverse X</span><span class="event-desc">Hardware Decode</span></div></label></div>
+                                <div class="col-6"><label class="event-card fly-top d-flex align-items-start" for="c3" style="animation-delay: 0.6s;"><input type="checkbox" class="event-check form-check-input me-3" value="Trail Blaze" id="c3"><div><span class="event-title">Trail Blaze</span><span class="event-desc">Code Decode</span></div></label></div>
+                                <div class="col-6"><label class="event-card fly-bottom d-flex align-items-start" for="c4" style="animation-delay: 0.8s;"><input type="checkbox" class="event-check form-check-input me-3" value="Brain 2 Bot" id="c4"><div><span class="event-title">Brain 2 Bot</span><span class="event-desc">AI Prompting</span></div></label></div>
+                                <div class="col-6"><label class="event-card fly-left d-flex align-items-start" for="c5" style="animation-delay: 1.0s;"><input type="checkbox" class="event-check form-check-input me-3" value="The Titan Trials" id="c5"><div><span class="event-title">Titan Trials</span><span class="event-desc">Best Manager</span></div></label></div>
+                                <div class="col-6"><label class="event-card fly-right d-flex align-items-start" for="c6" style="animation-delay: 1.2s;"><input type="checkbox" class="event-check form-check-input me-3" value="Pixel Crash" id="c6"><div><span class="event-title">Pixel Crash</span><span class="event-desc">Poster Design</span></div></label></div>
+                                <div class="col-6"><label class="event-card fly-top d-flex align-items-start" for="c7" style="animation-delay: 1.4s;"><input type="checkbox" class="event-check form-check-input me-3" value="Innosense" id="c7"><div><span class="event-title">Innosense</span><span class="event-desc">Sensors Tech</span></div></label></div>
+                                <div class="col-6"><label class="event-card fly-bottom d-flex align-items-start" for="c8" style="animation-delay: 1.6s;"><input type="checkbox" class="event-check form-check-input me-3" value="Seminar Presentation" id="c8"><div><span class="event-title">Seminar</span><span class="event-desc">Showcase</span></div></label></div>
                             </div>
                         </div>
 
-                        <div class="terms-container animate__animated animate__fadeIn" style="animation-delay: 1s;">
+                        <div class="terms-container" id="termsSection">
                             <span class="terms-title">TERMS & CONDITIONS</span>
                             <ul class="terms-list">
                                 <li>Participate in multiple events; choose in case of time conflicts.</li>
                                 <li>One-time registration fee of <b>₹50</b> at the desk.</li>
                                 <li><b>Show QR code receipt at the registration desk.</b></li>
-                                <li>For group events, register individually.</li>
-                                <li>Obey all official rules and regulations.</li>
+                                <li>Participants must obey all official rules.</li>
                             </ul>
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="agreeCheck" required>
@@ -267,45 +257,47 @@
         const mobileInput = document.getElementById('mobile');
         const submitBtn = document.getElementById('submitBtn');
         const errorText = document.getElementById('mobileError');
-        const lengthError = document.getElementById('mobileLengthError');
         const spinner = document.getElementById('checkSpinner');
+
+        // Logic to trigger event animation after data entry
+        const checkInputs = document.querySelectorAll('.check-trigger');
+        checkInputs.forEach(input => {
+            input.addEventListener('blur', () => {
+                let allFilled = true;
+                checkInputs.forEach(i => { if(!i.value) allFilled = false; });
+                if(allFilled && mobileInput.value.length === 10 && !isDuplicate) {
+                    document.getElementById('eventSection').style.display = 'block';
+                    document.getElementById('termsSection').style.display = 'block';
+                    submitBtn.style.display = 'block';
+                }
+            });
+        });
 
         mobileInput.addEventListener('input', function() {
             isDuplicate = false;
             this.classList.remove('is-invalid-custom', 'is-valid-custom');
             errorText.style.display = 'none';
-            lengthError.style.display = 'none';
-            submitBtn.disabled = false;
-            submitBtn.style.opacity = '1';
         });
 
         mobileInput.addEventListener('blur', function() {
             const val = this.value;
-            if(val.length !== 10) {
-                if(val.length > 0) {
-                    this.classList.add('is-invalid-custom');
-                    lengthError.style.display = 'flex';
-                    submitBtn.disabled = true;
-                }
-                return;
+            if(val.length === 10) {
+                spinner.style.display = 'block';
+                fetch(`${scriptURL}?action=search&mobile=${val}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        spinner.style.display = 'none';
+                        if (data !== "NotFound") {
+                            isDuplicate = true;
+                            this.classList.add('is-invalid-custom');
+                            errorText.style.display = 'block';
+                        } else {
+                            isDuplicate = false;
+                            this.classList.add('is-valid-custom');
+                        }
+                    })
+                    .catch(() => { spinner.style.display = 'none'; });
             }
-            spinner.style.display = 'block';
-            fetch(`${scriptURL}?action=search&mobile=${val}`)
-                .then(res => res.json())
-                .then(data => {
-                    spinner.style.display = 'none';
-                    if (data !== "NotFound") {
-                        isDuplicate = true;
-                        this.classList.add('is-invalid-custom');
-                        errorText.style.display = 'flex';
-                        submitBtn.disabled = true;
-                        submitBtn.style.opacity = '0.5';
-                    } else {
-                        isDuplicate = false;
-                        this.classList.add('is-valid-custom');
-                    }
-                })
-                .catch(() => { spinner.style.display = 'none'; });
         });
 
         document.getElementById('regForm').addEventListener('submit', function(e) {
