@@ -150,24 +150,32 @@
         let displayList = [];
         
         masterData.forEach(p => {
-            if (cat === 'win' && p.winner) {
-                p.winner.split('|').forEach(w => { 
-                    if (scope === 'all' || w.trim().startsWith(scope + ":")) 
-                        displayList.push({ ...p, currentResult: w.trim(), eventGroup: w.split(':')[0].trim() }); 
+            const pWinner = p.winner ? String(p.winner) : "";
+            const pAttendance = p.attendance ? String(p.attendance) : "";
+            const pEvents = p.events ? String(p.events) : "";
+
+            if (cat === 'win' && pWinner) {
+                pWinner.split('|').forEach(w => { 
+                    const trimmedWin = w.trim();
+                    if (scope === 'all' || trimmedWin.startsWith(scope + ":")) 
+                        displayList.push({ ...p, currentResult: trimmedWin, eventGroup: trimmedWin.split(':')[0].trim() }); 
                 });
-            } else if (cat === 'att' && p.attendance && p.attendance !== "ABSENT") {
-                p.attendance.split('|').forEach(a => { 
-                    if (scope === 'all' || a.trim().startsWith(scope + ":")) 
-                        displayList.push({ ...p, currentResult: a.trim(), eventGroup: a.split(':')[0].trim() }); 
+            } else if (cat === 'att' && pAttendance && pAttendance !== "ABSENT") {
+                pAttendance.split('|').forEach(a => { 
+                    const trimmedAtt = a.trim();
+                    if (scope === 'all' || trimmedAtt.startsWith(scope + ":")) 
+                        displayList.push({ ...p, currentResult: trimmedAtt, eventGroup: trimmedAtt.split(':')[0].trim() }); 
                 });
-            } else if (scope === 'all' || p.events.includes(scope)) {
-                if (cat === 'paid' && p.payment !== "COMPLETED") return;
-                displayList.push({ ...p, currentResult: (cat === 'reg' ? 'REGISTERED' : p.payment), eventGroup: 'General List' });
+            } else if (cat === 'reg' || cat === 'paid') {
+                if (scope === 'all' || pEvents.includes(scope)) {
+                    if (cat === 'paid' && p.payment !== "COMPLETED") return;
+                    displayList.push({ ...p, currentResult: (cat === 'reg' ? 'REGISTERED' : p.payment), eventGroup: 'General List' });
+                }
             }
         });
 
-        // Grouping and sorting logic for event-wise PDF/UI separation
-        displayList.sort((a, b) => a.eventGroup.localeCompare(b.eventGroup));
+        // Sorting
+        displayList.sort((a, b) => (a.eventGroup || "").localeCompare(b.eventGroup || ""));
 
         document.getElementById('reportHead').innerHTML = `<tr><th>SL</th><th>Participant</th><th>College</th><th>Result</th></tr>`;
         let html = "", lastGroup = "";
