@@ -67,6 +67,24 @@
 
         .form-control::placeholder { color: rgba(255,255,255,0.4) !important; }
 
+        /* --- COUNTDOWN STYLES --- */
+        .countdown-container {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(31, 193, 209, 0.2);
+        }
+        .countdown-box { display: inline-flex; gap: 15px; }
+        .count-item { min-width: 60px; }
+        .count-number {
+            display: block; font-size: 1.8rem; font-weight: 900;
+            font-family: 'Orbitron', sans-serif; color: var(--poster-blue);
+        }
+        .count-label {
+            font-size: 0.6rem; text-transform: uppercase;
+            color: var(--poster-pink); font-family: 'Orbitron', sans-serif;
+        }
+
         /* ANIMATIONS */
         @keyframes flyInRight { from { opacity: 0; transform: translateX(500px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes flyInLeft { from { opacity: 0; transform: translateX(-500px); } to { opacity: 1; transform: translateX(0); } }
@@ -166,6 +184,16 @@
         <div class="row justify-content-center">
             <div class="col-lg-8">
                 <div class="card p-4 p-md-5 glass-panel">
+                    
+                    <div class="countdown-container animate__animated animate__fadeIn">
+                        <div class="countdown-box">
+                            <div class="count-item"><span class="count-number" id="days">00</span><span class="count-label">Days</span></div>
+                            <div class="count-item"><span class="count-number" id="hours">00</span><span class="count-label">Hrs</span></div>
+                            <div class="count-item"><span class="count-number" id="minutes">00</span><span class="count-label">Min</span></div>
+                            <div class="count-item"><span class="count-number" id="seconds">00</span><span class="count-label">Sec</span></div>
+                        </div>
+                    </div>
+
                     <form id="regForm">
                         <div id="regDataSection">
                             <h2>Registration</h2>
@@ -182,20 +210,20 @@
                             <div class="mb-4"><label class="form-label">College Name</label><input type="text" id="college" class="form-control check-trigger fly-right" style="animation-delay: 0.8s" required></div>
                             <div class="row">
                                 <div class="col-md-7 mb-4"><label class="form-label">Department</label><select id="department" class="form-select check-trigger fly-left" style="animation-delay: 1s" required><option value="" disabled selected>Select</option><option>Computer Engg</option><option>Electronics Engg</option><option>Instrumentation Engg</option><option>Mechanical Engg</option><option>CABM</option><option>Electrical Engg</option><option>Auto Mobile Engg</option><option>Management</option><option>Others</option></select></div>
-                                <div class="col-md-6 mb-4">
-        <label class="form-label">Semester / Year</label>
-        <select id="semester" class="form-select check-trigger fly-right" style="animation-delay: 1.2s" required>
-            <option value="" disabled selected>Select</option>
-            <option disabled>── Semesters ──</option>
-            <option>S1</option><option>S2</option><option>S3</option>
-            <option>S4</option><option>S5</option><option>S6</option>
-            <option disabled>── Years ──</option>
-            <option>1st Year</option>
-            <option>2nd Year</option>
-            <option>3rd Year</option>
-            <option>4th Year</option>
-        </select>
-    </div>
+                                <div class="col-md-5 mb-4">
+                                    <label class="form-label">Semester / Year</label>
+                                    <select id="semester" class="form-select check-trigger fly-right" style="animation-delay: 1.2s" required>
+                                        <option value="" disabled selected>Select</option>
+                                        <option disabled>── Semesters ──</option>
+                                        <option>S1</option><option>S2</option><option>S3</option>
+                                        <option>S4</option><option>S5</option><option>S6</option>
+                                        <option disabled>── Years ──</option>
+                                        <option>1st Year</option>
+                                        <option>2nd Year</option>
+                                        <option>3rd Year</option>
+                                        <option>4th Year</option>
+                                    </select>
+                                </div>
                             </div>
                             <button type="button" id="btnSelectEvents" class="btn-nav" onclick="showEvents()">SELECT EVENTS</button>
                         </div>
@@ -209,7 +237,7 @@
                                     <div class="col-6"><label class="event-card" for="c3" id="ec3"><input type="checkbox" class="event-check form-check-input me-2" value="Trail Blaze" id="c3"><div><span class="event-title">Trail Blaze</span><span class="event-desc">Decode the clues</span></div></label></div>
                                     <div class="col-6"><label class="event-card" for="c4" id="ec4"><input type="checkbox" class="event-check form-check-input me-2" value="Brain 2 Bot" id="c4"><div><span class="event-title">Brain 2 Bot</span><span class="event-desc">Smart AI prompt</span></div></label></div>
                                     <div class="col-6"><label class="event-card" for="c5" id="ec5"><input type="checkbox" class="event-check form-check-input me-2" value="Titan Trials" id="c5"><div><span class="event-title">Titan Trials</span><span class="event-desc">Best Management Team</span></div></label></div>
-                                    <div class="col-6"><label class="event-card" for="c6" id="ec6"><input type="checkbox" class="event-check form-check-input me-2" value="Pixel Clash" id="c6"><div><span class="event-title">Pixel Clash</span><span class="event-desc">Poster Designing</span></div></label></div>
+                                    <div class="col-6"><label class="event-card" for="c6" id="ec6"><input type="checkbox" class="event-check form-check-input me-2" value="Pixel Crash" id="c6"><div><span class="event-title">Pixel Crash</span><span class="event-desc">Poster Designing</span></div></label></div>
                                     <div class="col-6"><label class="event-card" for="c7" id="ec7"><input type="checkbox" class="event-check form-check-input me-2" value="Innosense" id="c7"><div><span class="event-title">Innosense</span><span class="event-desc">Sensors make the sense !</span></div></label></div>
                                     <div class="col-6"><label class="event-card" for="c8" id="ec8"><input type="checkbox" class="event-check form-check-input me-2" value="Seminar Presentation" id="c8"><div><span class="event-title">Seminar Presentation</span><span class="event-desc">showcase the tech</span></div></label></div>
                                     <div class="col-6"><label class="event-card" for="c9" id="ec9"><input type="checkbox" class="event-check form-check-input me-2" value="Play villa" id="c9"><div><span class="event-title">Play villa</span><span class="event-desc">let's play for vibe</span></div></label></div>
@@ -252,6 +280,22 @@
 
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script>
+        // COUNTDOWN LOGIC
+        const launchDate = new Date("March 17, 2026 09:00:00").getTime();
+        const timer = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = launchDate - now;
+            const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((distance % (1000 * 60)) / 1000);
+            document.getElementById("days").innerHTML = d.toString().padStart(2, '0');
+            document.getElementById("hours").innerHTML = h.toString().padStart(2, '0');
+            document.getElementById("minutes").innerHTML = m.toString().padStart(2, '0');
+            document.getElementById("seconds").innerHTML = s.toString().padStart(2, '0');
+            if (distance < 0) { clearInterval(timer); document.querySelector(".countdown-container").style.display = 'none'; }
+        }, 1000);
+
         particlesJS("particles-js", {
             "particles": {
                 "number": { "value": 60 },
@@ -286,13 +330,13 @@
             document.getElementById('regDataSection').style.display = 'none';
             document.getElementById('eventSection').style.display = 'block';
             
-            const dirs = ['fly-left', 'fly-right', 'fly-top', 'fly-bottom'];
+            const directions = ['fly-left', 'fly-right', 'fly-top', 'fly-bottom'];
             const eventCards = document.querySelectorAll('.event-card');
             
             eventCards.forEach((card, index) => {
-                const i = index + 1;
-                card.classList.add(dirs[index % 4]);
-                card.style.animationDelay = (i * 0.15) + 's';
+                const dir = directions[index % directions.length];
+                card.classList.add(dir);
+                card.style.animationDelay = (index * 0.4) + 's';
             });
         }
 
@@ -305,7 +349,7 @@
 
         const mobileInput = document.getElementById('mobile');
         mobileInput.addEventListener('input', function() {
-            isDuplicate = false;
+            isDuplicate = false; // Reset duplicate flag on typing
             this.classList.remove('is-invalid-custom', 'is-valid-custom');
             document.getElementById('mobileError').style.display = 'none';
             checkAllFields();
@@ -323,6 +367,7 @@
                             isDuplicate = true;
                             this.classList.add('is-invalid-custom');
                             document.getElementById('mobileError').style.display = 'block';
+                            document.getElementById('btnSelectEvents').style.display = 'none';
                         } else {
                             isDuplicate = false;
                             this.classList.add('is-valid-custom');
@@ -433,15 +478,11 @@
                 doc.setFont("helvetica", "normal");
                 doc.text("For any queries pls contact: 7994484172", 105, footerY + 8, { align: "center" });
 
-                // POWERED BY (Centered, Narrow Font Style, Different Color)
+                // POWERED BY
                 let brandY = footerY + 35; 
-                
-                // Using a different color: A Bright Neon Green/Cyan blend
                 doc.setTextColor(0, 255, 200); 
                 doc.setFontSize(13);
-                
-                // To simulate a "Narrow" font in standard jsPDF, we slightly compress character spacing
-                doc.setFont("courier", "bold"); // Courier is naturally narrower/monospaced
+                doc.setFont("courier", "bold");
                 doc.text("POWERED BY TEAM CT,GRWPC", 105, brandY, { 
                     align: "center",
                     charSpace: 0.4 
