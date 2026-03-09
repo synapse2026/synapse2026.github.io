@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SYNAPSE 2026 | Registration</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        :root {
+            --poster-pink: #d11fb7;
+            --poster-blue: #1fc1d1;
+            --poster-purple: #741fd1;
+            --background-dark: #07060f;
+        }
+
+        body { 
+            background-color: var(--background-dark);
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #particles-js {
+            position: fixed; width: 100%; height: 100%;
+            top: 0; left: 0; z-index: 1; pointer-events: none !important;
+        }
+
+        .glass-panel {
+            position: relative;
+            background: rgba(15, 12, 41, 0.4) !important;
+            border-radius: 25px;
+            border: 2px solid rgba(31, 193, 209, 0.4);
+            overflow: hidden;
+            z-index: 5;
+        }
+
+        .main-content { position: relative; z-index: 10; padding: 20px; }
+
+        h2 { color: var(--poster-blue); font-weight: 900; font-family: 'Orbitron', sans-serif; text-transform: uppercase; text-align: center; }
+
+        .form-label { 
+            color: #fff !important; font-weight: 800 !important; 
+            text-transform: uppercase; font-size: 0.85rem;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .form-control, .form-select { 
+            background: rgba(255, 255, 255, 0.05) !important; 
+            color: #fff !important;
+            font-weight: 700 !important; border: 1px solid rgba(255,255,255,0.2);
+            padding: 12px; border-radius: 10px;
+            opacity: 0;
+        }
+        
+        .form-select option {
+            background-color: #1a1a2e !important;
+            color: #fff !important;
+        }
+
+        .form-control::placeholder { color: rgba(255,255,255,0.4) !important; }
+
+        /* ANIMATIONS */
+        @keyframes flyInRight { from { opacity: 0; transform: translateX(500px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes flyInLeft { from { opacity: 0; transform: translateX(-500px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes flyInBottom { from { opacity: 0; transform: translateY(500px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes flyInTop { from { opacity: 0; transform: translateY(-500px); } to { opacity: 1; transform: translateY(0); } }
+
+        .fly-right { animation: flyInRight 0.8s forwards; }
+        .fly-left { animation: flyInLeft 0.8s forwards; }
+        .fly-bottom { animation: flyInBottom 0.8s forwards; }
+        .fly-top { animation: flyInTop 0.8s forwards; }
+
+        .spinner-loader {
+            position: absolute; right: 15px; top: 12px;
+            width: 20px; height: 20px;
+            border: 3px solid rgba(31, 193, 209, 0.3);
+            border-top: 3px solid var(--poster-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+            z-index: 20;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #eventSection, #termsSection { display: none; }
+
+        .event-grid { border: 2px solid var(--poster-pink); background: rgba(209, 31, 183, 0.05); border-radius: 20px; padding: 15px; }
+        
+        .event-card {
+            background: rgba(255, 255, 255, 0.03) !important; 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px; padding: 12px; height: 100%; 
+            animation-duration: 3s !important;
+            opacity: 0; cursor: pointer;
+            display: flex !important;
+            align-items: flex-start;
+            animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+
+        .event-check {
+            flex-shrink: 0;
+            width: 18px;
+            height: 18px;
+            margin-top: 4px;
+        }
+
+        .event-title { 
+            font-family: 'Orbitron', sans-serif; 
+            color: var(--poster-blue); 
+            font-weight: 900; 
+            font-size: 0.8rem; 
+            text-transform: uppercase; 
+            display: block; 
+            margin-bottom: 3px;
+            word-wrap: break-word;
+        }
+        
+        .event-desc { color: #eee; font-size: 0.7rem; line-height: 1.2; display: block; }
+
+        .terms-container { 
+            background: rgba(0, 0, 0, 0.3); 
+            border-radius: 15px; padding: 20px; 
+            border: 1px solid var(--poster-purple); 
+        }
+
+        .terms-list { font-size: 0.85rem; color: #fff; list-style-type: decimal; font-weight: 600; text-align: left; }
+
+        .btn-nav, .btn-submit { 
+            background: linear-gradient(135deg, var(--poster-blue), var(--poster-purple)); border: none; padding: 18px; 
+            font-weight: 900; font-family: 'Orbitron', sans-serif; letter-spacing: 1.5px;
+            display: none; width: 100%; margin-top: 20px; border-radius: 10px; color: #fff;
+        }
+
+        .btn-submit { background: linear-gradient(135deg, var(--poster-pink), #741fd1); display: block; }
+
+        #successWrapper {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: var(--background-dark); z-index: 999999;
+            display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px;
+        }
+
+        .success-card { background: rgba(15, 12, 41, 0.8); border: 2px solid var(--poster-blue); padding: 30px; border-radius: 20px; width: 100%; max-width: 450px; }
+        .is-invalid-custom { border-color: #ff4d4d !important; box-shadow: 0 0 10px rgba(255, 77, 77, 0.5) !important; }
+        .is-valid-custom { border-color: #2ecc71 !important; box-shadow: 0 0 10px rgba(46, 204, 113, 0.5) !important; }
+    </style>
+</head>
+<body>
+
+    <div id="particles-js"></div>
+    <div id="qrcode-hidden" style="display:none;"></div> 
+
+    <div class="main-content container my-4" id="mainUI">
+        <div class="poster-container animate__animated animate__fadeInDown">
+            <img src="synapse-poster.jpg" alt="Synapse 2026 Poster" class="poster-image" style="width:100%; height:auto; border-radius:10px;">
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card p-4 p-md-5 glass-panel">
+                    <form id="regForm">
+                        <div id="regDataSection">
+                            <h2>Registration</h2>
+                            <div class="mb-4"><label class="form-label">Full Name</label><input type="text" id="name" class="form-control check-trigger fly-left" style="animation-delay: 0.2s" required></div>
+                            <div class="mb-4">
+                                <label class="form-label">Mobile Number</label>
+                                <div class="mobile-wrapper" style="position: relative;">
+                                    <input type="tel" id="mobile" class="form-control check-trigger fly-right" style="animation-delay: 0.4s" placeholder="10 digits" maxlength="10" required>
+                                    <div id="checkSpinner" class="spinner-loader"></div>
+                                </div>
+                                <div id="mobileError" class="status-msg error-text" style="display:none; color: #ff4d4d; font-size: 0.8rem; margin-top: 5px; font-weight: bold;">⚠️ Already registered!</div>
+                            </div>
+                            <div class="mb-4"><label class="form-label">Email Address</label><input type="email" id="email" class="form-control check-trigger fly-left" style="animation-delay: 0.6s" required></div>
+                            <div class="mb-4"><label class="form-label">College Name</label><input type="text" id="college" class="form-control check-trigger fly-right" style="animation-delay: 0.8s" required></div>
+                            <div class="row">
+                                <div class="col-md-7 mb-4"><label class="form-label">Department</label><select id="department" class="form-select check-trigger fly-left" style="animation-delay: 1s" required><option value="" disabled selected>Select</option><option>Computer Engg</option><option>Electronics Engg</option><option>Instrumentation Engg</option><option>Mechanical Engg</option><option>CABM</option><option>Electrical Engg</option><option>Auto Mobile Engg</option><option>Others</option></select></div>
+                                <div class="col-md-5 mb-4"><label class="form-label">Semester</label><select id="semester" class="form-select check-trigger fly-right" style="animation-delay: 1.2s" required><option value="" disabled selected>Select</option><option>S1</option><option>S2</option><option>S3</option><option>S4</option><option>S5</option><option>S6</option></select></div>
+                            </div>
+                            <button type="button" id="btnSelectEvents" class="btn-nav" onclick="showEvents()">SELECT EVENTS</button>
+                        </div>
+
+                        <div id="eventSection">
+                            <h2>Choose Events</h2>
+                            <div class="event-grid">
+                                <div class="row g-2">
+                                    <div class="col-6"><label class="event-card" for="c1" id="ec1"><input type="checkbox" class="event-check form-check-input me-2" value="Glow Craft" id="c1"><div><span class="event-title">Glow Craft</span><span class="event-desc">LED patterns- Arduino</span></div></label></div>
+                                    <div class="col-6"><label class="event-card" for="c2" id="ec2"><input type="checkbox" class="event-check form-check-input me-2" value="Reverse X" id="c2"><div><span class="event-title">Reverse X</span><span class="event-desc">Hardware to circuit</span></div></label></div>
+                                    <div class="col-6"><label class="event-card" for="c3" id="ec3"><input type="checkbox" class="event-check form-check-input me-2" value="Trail Blaze" id="c3"><div><span class="event-title">Trail Blaze</span><span class="event-desc">Decode the clues</span></div></label></div>
+                                    <div class="col-6"><label class="event-card" for="c4" id="ec4"><input type="checkbox" class="event-check form-check-input me-2" value="Brain 2 Bot" id="c4"><div><span class="event-title">Brain 2 Bot</span><span class="event-desc">Smart AI prompt</span></div></label></div>
+                                    <div class="col-6"><label class="event-card" for="c5" id="ec5"><input type="checkbox" class="event-check form-check-input me-2" value="Titan Trials" id="c5"><div><span class="event-title">Titan Trials</span><span class="event-desc">Best Manager Team</span></div></label></div>
+                                    <div class="col-6"><label class="event-card" for="c6" id="ec6"><input type="checkbox" class="event-check form-check-input me-2" value="Pixel Crash" id="c6"><div><span class="event-title">Pixel Crash</span><span class="event-desc">Poster Designing</span></div></label></div>
+                                    <div class="col-6"><label class="event-card" for="c7" id="ec7"><input type="checkbox" class="event-check form-check-input me-2" value="Innosense" id="c7"><div><span class="event-title">Innosense</span><span class="event-desc">Sensors make the sense !</span></div></label></div>
+                                    <div class="col-6"><label class="event-card" for="c8" id="ec8"><input type="checkbox" class="event-check form-check-input me-2" value="Seminar Presentation" id="c8"><div><span class="event-title">Seminar Presentation</span><span class="event-desc">showcase the tech</span></div></label></div>
+                                    <div class="col-6"><label class="event-card" for="c9" id="ec9"><input type="checkbox" class="event-check form-check-input me-2" value="Play villa" id="c9"><div><span class="event-title">Play villa</span><span class="event-desc">let's play for vibe</span></div></label></div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-nav" style="display:block" onclick="showTerms()">View Terms & Conditions</button>
+                        </div>
+
+                        <div id="termsSection">
+                            <h2>Terms & Conditions</h2>
+                            <div class="terms-container">
+                                <ul class="terms-list">
+                                    <li>Students can participate in Multiple events.</li>
+                                    <li>One time Registration fee of Rs.50 to be paid at Registration Desk.</li>
+                                    <li>Ensure all registration details are correct, registration fee is non-refundable.</li>
+                                    <li>In case of event schedule conflicts, students need to pick any one.</li>
+                                    <li>In case of group events, each member has to register for that event.</li>
+                                    <li>All Decisions made by the organising committee will be final.</li>
+                                </ul>
+                                <div class="form-check text-center"><input class="form-check-input d-inline-block float-none" type="checkbox" id="agreeCheck" required><label class="form-check-label small text-white fw-bold ms-2" for="agreeCheck">I AGREE TO THE TERMS AND CONDITIONS</label></div>
+                            </div>
+                            <button type="submit" id="submitBtn" class="btn-submit">FINALIZE REGISTRATION</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="successWrapper">
+        <div class="success-card animate__animated animate__zoomIn">
+            <h2 style="text-align: center; font-size: 1.5rem; margin-bottom: 20px;">Success!</h2>
+            <div id="details" class="border-top border-secondary pt-3 mt-2 text-light" style="text-align: left; font-weight:600;"></div>
+            <div style="font-size: 0.8rem; color: #fff; margin-top: 15px; font-weight:bold; text-align: left;">⚠️ Bring this QR code on event day!</div>
+            <div style="font-size: 0.8rem; color: #1fc1d1; margin-top: 10px; font-weight: bold; text-align: left;">Queries: 7994484172</div>
+            <div style="color: var(--poster-pink); font-weight: bold; font-size: 0.85rem; margin-top: 20px; font-family: 'Orbitron'; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">POWERED BY TEAM CT GRWPC</div>
+            <button id="finalDownloadBtn" onclick="downloadPDF()" class="btn-nav" style="display:block; background:#1fc1d1; color:#000; margin-top: 25px; margin-left: auto; margin-right: auto;">📥 DOWNLOAD PDF</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script>
+        particlesJS("particles-js", {
+            "particles": {
+                "number": { "value": 60 },
+                "color": { "value": ["#d11fb7", "#1fc1d1", "#741fd1"] },
+                "shape": { "type": "circle" },
+                "opacity": { "value": 0.8 },
+                "size": { "value": 4 },
+                "line_linked": { "enable": true, "distance": 120, "color": "#741fd1", "opacity": 0.4, "width": 1 },
+                "move": { "enable": true, "speed": 2, "out_mode": "out" }
+            }
+        });
+
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbwKjrjjrV5hJUrqaP5nWjYAW2HW50y6EI3_k9bfzriS8ktMuAHpYe1i8K6IyPFV-jsndA/exec';
+        let registrationData = {};
+        let isDuplicate = false;
+
+        const triggers = document.querySelectorAll('.check-trigger');
+        triggers.forEach(el => { el.addEventListener('input', checkAllFields); });
+
+        function checkAllFields() {
+            let allFilled = true;
+            triggers.forEach(t => { if(!t.value) allFilled = false; });
+            if(allFilled && document.getElementById('mobile').value.length === 10 && !isDuplicate) {
+                document.getElementById('btnSelectEvents').style.display = 'block';
+                document.getElementById('btnSelectEvents').classList.add('fly-bottom');
+            } else {
+                document.getElementById('btnSelectEvents').style.display = 'none';
+            }
+        }
+
+        function showEvents() {
+            document.getElementById('regDataSection').style.display = 'none';
+            document.getElementById('eventSection').style.display = 'block';
+            
+            const dirs = ['fly-left', 'fly-right', 'fly-top', 'fly-bottom'];
+            const eventCards = document.querySelectorAll('.event-card');
+            
+            eventCards.forEach((card, index) => {
+                const i = index + 1;
+                card.classList.add(dirs[index % 4]);
+                card.style.animationDelay = (i * 0.15) + 's';
+            });
+        }
+
+        function showTerms() {
+            const selected = Array.from(document.querySelectorAll('.event-check:checked'));
+            if(selected.length === 0) { alert("Please select an event!"); return; }
+            document.getElementById('eventSection').style.display = 'none';
+            document.getElementById('termsSection').style.display = 'block';
+        }
+
+        const mobileInput = document.getElementById('mobile');
+        mobileInput.addEventListener('input', function() {
+            isDuplicate = false;
+            this.classList.remove('is-invalid-custom', 'is-valid-custom');
+            document.getElementById('mobileError').style.display = 'none';
+            checkAllFields();
+        });
+
+        mobileInput.addEventListener('blur', function() {
+            if(this.value.length === 10) {
+                const spin = document.getElementById('checkSpinner');
+                spin.style.display = 'block';
+                fetch(`${scriptURL}?action=search&mobile=${this.value}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        spin.style.display = 'none';
+                        if (data !== "NotFound") {
+                            isDuplicate = true;
+                            this.classList.add('is-invalid-custom');
+                            document.getElementById('mobileError').style.display = 'block';
+                        } else {
+                            isDuplicate = false;
+                            this.classList.add('is-valid-custom');
+                            checkAllFields();
+                        }
+                    })
+                    .catch(() => {
+                        spin.style.display = 'none';
+                        checkAllFields();
+                    });
+            }
+        });
+
+        document.getElementById('regForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true; btn.innerHTML = "WAIT...";
+            registrationData = {
+                name: document.getElementById('name').value,
+                mobile: document.getElementById('mobile').value,
+                email: document.getElementById('email').value,
+                college: document.getElementById('college').value,
+                department: document.getElementById('department').value,
+                semester: document.getElementById('semester').value,
+                events: Array.from(document.querySelectorAll('.event-check:checked')).map(c => c.value).join(", ")
+            };
+            fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(registrationData) });
+            setTimeout(() => {
+                document.getElementById('mainUI').style.display = 'none';
+                document.getElementById('successWrapper').style.display = 'flex';
+                document.getElementById('details').innerHTML = `Name: ${registrationData.name}<br>Phone: ${registrationData.mobile}`;
+                downloadPDF();
+            }, 1500);
+        });
+
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const qrContainer = document.createElement("div");
+            new QRCode(qrContainer, { text: registrationData.mobile, width: 256, height: 256 });
+            
+            setTimeout(() => {
+                const canvas = qrContainer.querySelector('canvas');
+                const qrImg = canvas.toDataURL("image/png");
+
+                // Background
+                doc.setFillColor(7, 6, 15); 
+                doc.rect(0, 0, 210, 297, 'F');
+
+                // Header Title
+                doc.setTextColor(31, 193, 209); 
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(26);
+                doc.text("SYNAPSE 2026", 105, 25, { align: "center" });
+
+                // QR Code Section
+                doc.setFillColor(255, 255, 255); 
+                doc.rect(75, 35, 60, 60, 'F');
+                doc.addImage(qrImg, 'PNG', 78, 38, 54, 54);
+
+                // Student Details Header
+                doc.setTextColor(209, 31, 183);
+                doc.setFontSize(14);
+                doc.text("REGISTRATION DETAILS", 20, 110);
+                doc.setDrawColor(209, 31, 183);
+                doc.line(20, 112, 85, 112); 
+
+                // Student Information
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(11);
+                
+                let yPos = 122;
+                const lineHeight = 8;
+                const details = [
+                    { label: "NAME:", value: registrationData.name },
+                    { label: "MOBILE:", value: registrationData.mobile },
+                    { label: "COLLEGE:", value: registrationData.college },
+                    { label: "DEPT:", value: registrationData.department },
+                    { label: "SEMESTER:", value: registrationData.semester }
+                ];
+
+                details.forEach(item => {
+                    doc.setFont("helvetica", "bold");
+                    doc.text(item.label, 20, yPos);
+                    doc.setFont("helvetica", "normal");
+                    doc.text(String(item.value).toUpperCase(), 70, yPos); 
+                    yPos += lineHeight;
+                });
+
+                // Events Registered
+                doc.setFont("helvetica", "bold");
+                doc.text("EVENTS REGISTERED:", 20, yPos);
+                doc.setFont("helvetica", "normal");
+                const splitEvents = doc.splitTextToSize(registrationData.events.toUpperCase(), 120);
+                doc.text(splitEvents, 70, yPos);
+
+                // --- FOOTER SECTION ---
+                let footerY = yPos + (splitEvents.length * 6) + 20;
+                
+                // Instructional & Contact Text
+                doc.setFontSize(11);
+                doc.setTextColor(31, 193, 209);
+                doc.setFont("helvetica", "bold");
+                doc.text("Show this QR code at the Registration Desk", 105, footerY, { align: "center" });
+                
+                doc.setFontSize(10);
+                doc.setTextColor(255, 255, 255);
+                doc.setFont("helvetica", "normal");
+                doc.text("For any queries pls contact: 7994484172", 105, footerY + 8, { align: "center" });
+
+                // POWERED BY (Centered, Narrow Font Style, Different Color)
+                let brandY = footerY + 35; 
+                
+                // Using a different color: A Bright Neon Green/Cyan blend
+                doc.setTextColor(0, 255, 200); 
+                doc.setFontSize(13);
+                
+                // To simulate a "Narrow" font in standard jsPDF, we slightly compress character spacing
+                doc.setFont("courier", "bold"); // Courier is naturally narrower/monospaced
+                doc.text("POWERED BY TEAM CT,GRWPC", 105, brandY, { 
+                    align: "center",
+                    charSpace: 0.4 
+                });
+
+                doc.save(`Synapse_${registrationData.name}.pdf`);
+            }, 400);
+        }
+    </script>
+</body>
+</html>
