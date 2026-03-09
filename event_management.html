@@ -273,7 +273,7 @@
                 rows.push([i+1, p.name, p.mobile, p.college, p.dept, p.semester, isPresentForEvent ? 'PRESENT' : 'ABSENT']);
             });
             doc.autoTable({ 
-                head: [['SL', 'Name', 'Mobile', 'College', 'Dept', 'Sem', 'Status']], 
+                head: [['SL', 'Name', 'Mobile', 'College', 'Dept', 'Sem/Year', 'Status']], 
                 body: rows, startY: 25, theme: 'grid',
                 headStyles: { fillColor: [31, 193, 209], textColor: [0, 0, 0] }
             });
@@ -282,12 +282,12 @@
                 if(p.winnerStatus) {
                     const specificWin = p.winnerStatus.split('|').find(w => w.trim().startsWith(event + ":"));
                     if(specificWin) {
-                        rows.push([rows.length + 1, specificWin.trim(), p.name, p.mobile, p.college, p.dept]);
+                        rows.push([rows.length + 1, specificWin.trim(), p.name, p.mobile, p.college, p.dept,p.semester]);
                     }
                 }
             });
             doc.autoTable({ 
-                head: [['SL', 'Position', 'Name', 'Mobile', 'College', 'Dept']], 
+                head: [['SL', 'Position', 'Name', 'Mobile', 'College', 'Dept','Sem/Year']], 
                 body: rows, startY: 25, theme: 'grid',
                 headStyles: { fillColor: [255, 193, 7], textColor: [0, 0, 0] }
             });
