@@ -44,6 +44,10 @@
             background: radial-gradient(circle at center, rgba(116, 31, 209, 0.15) 0%, transparent 70%);
         }
 
+        .glitch-title, #launch-notice {
+            visibility: hidden; 
+        }
+
         .glitch-title {
             font-family: 'Orbitron', sans-serif;
             font-size: 5rem;
@@ -52,7 +56,26 @@
             letter-spacing: 10px;
             color: var(--poster-blue);
             text-shadow: 0 0 20px var(--poster-blue);
-            margin-bottom: 10px;
+            margin-bottom: 5px;
+        }
+
+        #launch-notice {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            color: #fff;
+            letter-spacing: 2px;
+            margin-bottom: 50px; 
+            text-shadow: 0 0 10px var(--poster-purple);
+        }
+
+        .pulsate {
+            animation: pulse-animation 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse-animation {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
         }
 
         .subtitle {
@@ -61,6 +84,20 @@
             color: var(--poster-pink);
             letter-spacing: 5px;
             text-transform: uppercase;
+            min-height: 1.6em;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            background-color: var(--poster-pink);
+            margin-left: 5px;
+            animation: blink 0.7s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
         }
 
         .countdown-box {
@@ -71,20 +108,16 @@
             backdrop-filter: blur(10px);
             display: inline-flex;
             gap: 20px;
-            margin-top: 30px;
+            margin-top: 10px;
         }
 
-        .count-item {
-            min-width: 80px;
-        }
-
+        .count-item { min-width: 80px; }
         .count-number {
             display: block;
             font-size: 2.5rem;
             font-weight: 900;
             font-family: 'Orbitron', sans-serif;
         }
-
         .count-label {
             font-size: 0.7rem;
             text-transform: uppercase;
@@ -117,6 +150,7 @@
             .countdown-box { gap: 10px; padding: 10px; }
             .count-item { min-width: 60px; }
             .count-number { font-size: 1.5rem; }
+            #launch-notice { font-size: 0.85rem; margin-bottom: 30px; }
         }
     </style>
 </head>
@@ -126,39 +160,29 @@
 
     <div class="hero-section container">
         <div class="animate__animated animate__fadeIn">
-            <p class="subtitle">Connecting Ideas. Creating Innovation.</p>
-            <h1 class="glitch-title">SYNAPSE 2026</h1>
+            <p class="subtitle"><span id="typing-text"></span><span class="cursor">&nbsp;</span></p>
+            
+            <h1 id="main-heading" class="glitch-title">SYNAPSE 2026</h1>
+            
+            <div id="launch-notice">Official site will be launched soon</div>
+            
             <p class="lead">The ultimate Tech Fest is almost here. Get ready to innovate.</p>
 
             <div class="countdown-box animate__animated animate__zoomIn">
-                <div class="count-item">
-                    <span class="count-number" id="days">00</span>
-                    <span class="count-label">Days</span>
-                </div>
-                <div class="count-item">
-                    <span class="count-number" id="hours">00</span>
-                    <span class="count-label">Hours</span>
-                </div>
-                <div class="count-item">
-                    <span class="count-number" id="minutes">00</span>
-                    <span class="count-label">Mins</span>
-                </div>
-                <div class="count-item">
-                    <span class="count-number" id="seconds">00</span>
-                    <span class="count-label">Secs</span>
-                </div>
+                <div class="count-item"><span class="count-number" id="days">00</span><span class="count-label">Days</span></div>
+                <div class="count-item"><span class="count-number" id="hours">00</span><span class="count-label">Hours</span></div>
+                <div class="count-item"><span class="count-number" id="minutes">00</span><span class="count-label">Mins</span></div>
+                <div class="count-item"><span class="count-number" id="seconds">00</span><span class="count-label">Secs</span></div>
             </div>
 
             <br>
             <a href="https://synapse2026.github.io/registration.html" class="launch-btn">PRE-REGISTER NOW</a>
-            
             <p class="mt-5 text-secondary" style="font-size: 0.8rem;">POWERED BY TEAM CT, GRWPC</p>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script>
-        // Particles Background
         particlesJS("particles-js", {
             "particles": {
                 "number": { "value": 80 },
@@ -171,23 +195,66 @@
             }
         });
 
-        // Set Launch Date (March 17, 2026)
-        const launchDate = new Date("March 17, 2026 09:00:00").getTime();
+        // --- DYNAMIC TYPING & EARLY HEADING LOAD ---
+        const fullText = "Connecting Ideas. Creating Innovation.";
+        const triggerPhrase = "Connecting Ideas."; // Trigger load after this
+        const typingElement = document.getElementById("typing-text");
+        const headingElement = document.getElementById("main-heading");
+        const launchNotice = document.getElementById("launch-notice");
+        
+        let isDeleting = false;
+        let charIndex = 0;
+        let hasHeadingLoaded = false;
 
+        function typeLoop() {
+            const currentDisplay = isDeleting 
+                ? fullText.substring(0, charIndex - 1) 
+                : fullText.substring(0, charIndex + 1);
+
+            typingElement.innerHTML = currentDisplay;
+            charIndex = isDeleting ? charIndex - 1 : charIndex + 1;
+
+            // CHECKPOINT: Load heading once "Connecting Ideas." is typed
+            if (!isDeleting && currentDisplay.includes(triggerPhrase) && !hasHeadingLoaded) {
+                headingElement.style.visibility = "visible";
+                headingElement.classList.add("animate__animated", "animate__backInDown");
+                
+                setTimeout(() => {
+                    launchNotice.style.visibility = "visible";
+                    launchNotice.classList.add("animate__animated", "animate__fadeInUp", "pulsate");
+                }, 400);
+
+                hasHeadingLoaded = true;
+            }
+
+            let typeSpeed = isDeleting ? 40 : 80;
+
+            if (!isDeleting && charIndex === fullText.length) {
+                isDeleting = true;
+                typeSpeed = 1500; 
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                typeSpeed = 500;
+            }
+
+            setTimeout(typeLoop, typeSpeed);
+        }
+
+        window.onload = () => setTimeout(typeLoop, 800);
+
+        // Countdown Timer
+        const launchDate = new Date("March 17, 2026 09:00:00").getTime();
         const timer = setInterval(function() {
             const now = new Date().getTime();
             const distance = launchDate - now;
-
             const d = Math.floor(distance / (1000 * 60 * 60 * 24));
             const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const s = Math.floor((distance % (1000 * 60)) / 1000);
-
             document.getElementById("days").innerHTML = d.toString().padStart(2, '0');
             document.getElementById("hours").innerHTML = h.toString().padStart(2, '0');
             document.getElementById("minutes").innerHTML = m.toString().padStart(2, '0');
             document.getElementById("seconds").innerHTML = s.toString().padStart(2, '0');
-
             if (distance < 0) {
                 clearInterval(timer);
                 document.querySelector(".countdown-box").innerHTML = "<h3>LIT UP!</h3>";
