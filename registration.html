@@ -181,8 +181,21 @@
                             <div class="mb-4"><label class="form-label">Email Address</label><input type="email" id="email" class="form-control check-trigger fly-left" style="animation-delay: 0.6s" required></div>
                             <div class="mb-4"><label class="form-label">College Name</label><input type="text" id="college" class="form-control check-trigger fly-right" style="animation-delay: 0.8s" required></div>
                             <div class="row">
-                                <div class="col-md-7 mb-4"><label class="form-label">Department</label><select id="department" class="form-select check-trigger fly-left" style="animation-delay: 1s" required><option value="" disabled selected>Select</option><option>Computer Engg</option><option>Electronics Engg</option><option>Instrumentation Engg</option><option>Mechanical Engg</option><option>CABM</option><option>Electrical Engg</option><option>Auto Mobile Engg</option><option>Others</option></select></div>
-                                <div class="col-md-5 mb-4"><label class="form-label">Semester</label><select id="semester" class="form-select check-trigger fly-right" style="animation-delay: 1.2s" required><option value="" disabled selected>Select</option><option>S1</option><option>S2</option><option>S3</option><option>S4</option><option>S5</option><option>S6</option></select></div>
+                                <div class="col-md-7 mb-4"><label class="form-label">Department</label><select id="department" class="form-select check-trigger fly-left" style="animation-delay: 1s" required><option value="" disabled selected>Select</option><option>Computer Engg</option><option>Electronics Engg</option><option>Instrumentation Engg</option><option>Mechanical Engg</option><option>CABM</option><option>Electrical Engg</option><option>Auto Mobile Engg</option><option>Management</option><option>Others</option></select></div>
+                                <div class="col-md-6 mb-4">
+        <label class="form-label">Semester / Year</label>
+        <select id="semester" class="form-select check-trigger fly-right" style="animation-delay: 1.2s" required>
+            <option value="" disabled selected>Select</option>
+            <option disabled>── Semesters ──</option>
+            <option>S1</option><option>S2</option><option>S3</option>
+            <option>S4</option><option>S5</option><option>S6</option>
+            <option disabled>── Years ──</option>
+            <option>1st Year</option>
+            <option>2nd Year</option>
+            <option>3rd Year</option>
+            <option>4th Year</option>
+        </select>
+    </div>
                             </div>
                             <button type="button" id="btnSelectEvents" class="btn-nav" onclick="showEvents()">SELECT EVENTS</button>
                         </div>
@@ -388,7 +401,7 @@
                     { label: "MOBILE:", value: registrationData.mobile },
                     { label: "COLLEGE:", value: registrationData.college },
                     { label: "DEPT:", value: registrationData.department },
-                    { label: "SEMESTER:", value: registrationData.semester }
+                    { label: "SEMESTER/YEAR:", value: registrationData.semester }
                 ];
 
                 details.forEach(item => {
