@@ -145,55 +145,83 @@
             color: white;
         }
 
-        /* --- SPONSOR SECTION STYLES --- */
+        /* --- UPDATED SPONSOR SECTION --- */
         .sponsor-section {
-            margin-top: 60px;
+            margin-top: 80px;
             padding: 20px 0;
         }
 
         .sponsor-label {
             font-family: 'Orbitron', sans-serif;
-            font-size: 0.7rem;
-            letter-spacing: 4px;
+            font-size: 0.75rem;
+            letter-spacing: 5px;
             color: var(--poster-pink);
             text-transform: uppercase;
-            margin-bottom: 20px;
-            opacity: 0.8;
+            margin-bottom: 25px;
+            font-weight: bold;
         }
 
-        .official-sponsor-card {
+        /* The beautiful frame */
+        .official-sponsor-container {
+            position: relative;
             display: inline-block;
-            padding: 15px 30px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--poster-blue);
-            border-radius: 12px;
-            box-shadow: 0 0 15px rgba(31, 193, 209, 0.2);
-            transition: 0.4s ease;
-            margin-bottom: 40px;
+            padding: 3px; /* Gap for the glowing border */
+            background: linear-gradient(45deg, var(--poster-blue), transparent, var(--poster-purple));
+            border-radius: 20px;
+            margin-bottom: 50px;
+            overflow: hidden;
         }
 
-        .official-sponsor-card:hover {
-            box-shadow: 0 0 30px var(--poster-blue);
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.07);
+        .official-sponsor-inner {
+            background: rgba(7, 6, 15, 0.8); /* Matches body background */
+            backdrop-filter: blur(10px);
+            padding: 30px 50px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
         }
 
+        /* Blend mode trick to hide the black background of your jpg/png */
         .official-logo {
-            max-width: 200px;
+            max-width: 220px;
             height: auto;
-            filter: drop-shadow(0 0 5px white);
+            mix-blend-mode: screen; /* THIS IS THE MAGIC: It makes black parts transparent */
+            filter: brightness(1.2) drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+            transition: 0.5s ease;
         }
 
-        /* Text-Based Co-Sponsor Marquee */
+        .official-sponsor-container:hover .official-logo {
+            transform: scale(1.1);
+            filter: brightness(1.5) drop-shadow(0 0 20px var(--poster-blue));
+        }
+
+        /* Animated Scanline effect */
+        .official-sponsor-inner::after {
+            content: "";
+            position: absolute;
+            top: -100%;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent, rgba(31, 193, 209, 0.1), transparent);
+            animation: scanline 4s infinite linear;
+        }
+
+        @keyframes scanline {
+            0% { top: -100%; }
+            100% { top: 100%; }
+        }
+
+        /* Co-Sponsor Marquee */
         .marquee-container {
             width: 100%;
             overflow: hidden;
             white-space: nowrap;
             position: relative;
-            padding: 20px 0;
-            background: rgba(116, 31, 209, 0.05);
-            border-top: 1px solid rgba(209, 31, 183, 0.1);
-            border-bottom: 1px solid rgba(209, 31, 183, 0.1);
+            padding: 25px 0;
+            background: rgba(255, 255, 255, 0.02);
         }
 
         .marquee-content {
@@ -203,20 +231,18 @@
 
         .co-sponsor-text {
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 700;
-            color: rgba(255, 255, 255, 0.3);
-            margin: 0 50px;
-            letter-spacing: 5px;
+            color: rgba(255, 255, 255, 0.2);
+            margin: 0 60px;
+            letter-spacing: 6px;
             text-transform: uppercase;
-            transition: 0.3s;
-            cursor: default;
+            transition: 0.4s;
         }
 
         .co-sponsor-text:hover {
-            color: var(--poster-pink);
-            text-shadow: 0 0 15px var(--poster-pink);
-            transform: skewX(-10deg);
+            color: var(--poster-blue);
+            text-shadow: 0 0 15px var(--poster-blue);
         }
 
         @keyframes scroll {
@@ -224,24 +250,10 @@
             to { transform: translateX(-50%); }
         }
 
-        /* Edge Fading for Marquee */
-        .marquee-container::before, .marquee-container::after {
-            content: "";
-            position: absolute;
-            top: 0; width: 15%; height: 100%; z-index: 2;
-        }
-        .marquee-container::before { left: 0; background: linear-gradient(to right, var(--background-dark), transparent); }
-        .marquee-container::after { right: 0; background: linear-gradient(to left, var(--background-dark), transparent); }
-
         @media (max-width: 768px) {
-            .glitch-title { font-size: 2.5rem; letter-spacing: 5px; }
-            .subtitle { font-size: 1rem; }
-            .countdown-box { gap: 10px; padding: 10px; }
-            .count-item { min-width: 60px; }
-            .count-number { font-size: 1.5rem; }
-            #launch-notice { font-size: 0.85rem; margin-bottom: 30px; }
-            .official-logo { max-width: 150px; }
-            .co-sponsor-text { font-size: 1rem; margin: 0 30px; }
+            .glitch-title { font-size: 2.5rem; }
+            .official-logo { max-width: 160px; }
+            .official-sponsor-inner { padding: 20px 30px; }
         }
     </style>
 </head>
@@ -257,8 +269,6 @@
             
             <div id="launch-notice">Official site will be launched soon</div>
             
-            <p class="lead"> Get ready to innovate.</p>
-
             <div class="countdown-box animate__animated animate__zoomIn">
                 <div class="count-item"><span class="count-number" id="days">00</span><span class="count-label">Days</span></div>
                 <div class="count-item"><span class="count-number" id="hours">00</span><span class="count-label">Hours</span></div>
@@ -270,26 +280,25 @@
             <a href="https://synapse2026.github.io/registration.html" class="launch-btn">PRE-REGISTER NOW</a>
 
             <div class="sponsor-section">
-                <div class="section-block">
-                    <p class="sponsor-label">Official Sponsor</p>
-                    <div class="official-sponsor-card">
-                        <img src="sponser.png" alt="Official Sponsor" class="official-logo">
+                <p class="sponsor-label">Official Sponsor</p>
+                
+                <div class="official-sponsor-container animate__animated animate__fadeInUp">
+                    <div class="official-sponsor-inner">
+                        <img src="sponser.png" alt="Lami Logo" class="official-logo">
                     </div>
                 </div>
 
-                <div class="section-block">
-                    <p class="sponsor-label">Co-Sponsors</p>
-                    <div class="marquee-container">
-                        <div class="marquee-content">
-                            <span class="co-sponsor-text">Coming Soon</span>
-                            <span class="co-sponsor-text">Announcing Soon</span>
-                            <span class="co-sponsor-text">Partner with Us</span>
-                            <span class="co-sponsor-text">Future Innovators</span>
-                            <span class="co-sponsor-text">Coming Soon</span>
-                            <span class="co-sponsor-text">Announcing Soon</span>
-                            <span class="co-sponsor-text">Partner with Us</span>
-                            <span class="co-sponsor-text">Future Innovators</span>
-                        </div>
+                <p class="sponsor-label">Co-Sponsors</p>
+                <div class="marquee-container">
+                    <div class="marquee-content">
+                        <span class="co-sponsor-text">Coming Soon</span>
+                        <span class="co-sponsor-text">Announcing Soon</span>
+                        <span class="co-sponsor-text">Partner with Us</span>
+                        <span class="co-sponsor-text">Future Innovators</span>
+                        <span class="co-sponsor-text">Coming Soon</span>
+                        <span class="co-sponsor-text">Announcing Soon</span>
+                        <span class="co-sponsor-text">Partner with Us</span>
+                        <span class="co-sponsor-text">Future Innovators</span>
                     </div>
                 </div>
             </div>
