@@ -149,7 +149,7 @@
             color: white;
         }
 
-        /* --- UPDATED SPONSOR SECTION --- */
+        /* --- SPONSOR SECTION --- */
         .sponsor-section {
             margin-top: 60px;
             width: 100%;
@@ -184,7 +184,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
         }
 
         .official-logo {
@@ -195,48 +194,66 @@
             filter: brightness(1.1);
         }
 
-        /* Co-Sponsor Marquee Logic */
+        /* Scrolling Marquee */
         .marquee-container {
             width: 100%;
             overflow: hidden;
             white-space: nowrap;
             position: relative;
             padding: 25px 0;
-            background: rgba(255, 255, 255, 0.02);
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.03);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .marquee-content {
             display: inline-flex;
-            animation: scroll 20s linear infinite;
+            align-items: center;
+            animation: scroll 30s linear infinite;
         }
 
-        .co-sponsor-item {
+        .co-sponsor-card {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin: 0 80px;
+            text-align: left;
+        }
+
+        .co-sponsor-logo {
+            height: clamp(50px, 10vw, 70px);
+            width: auto;
+            border-radius: 5px;
+            filter: drop-shadow(0 0 5px var(--poster-blue));
+        }
+
+        .co-sponsor-caption-box {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            margin: 0 60px;
-            text-align: center;
-        }
-
-        .co-sponsor-name {
             font-family: 'Orbitron', sans-serif;
-            font-size: clamp(1rem, 5vw, 1.6rem);
-            font-weight: 900;
-            color: var(--poster-blue);
-            text-shadow: 0 0 10px rgba(31, 193, 209, 0.5);
-            text-transform: uppercase;
-            letter-spacing: 3px;
+            line-height: 1.3;
         }
 
-        .co-sponsor-caption {
-            font-family: 'Segoe UI', sans-serif;
-            font-size: clamp(0.6rem, 2.5vw, 0.8rem);
+        .cap-main {
+            color: var(--poster-blue);
+            font-size: clamp(0.8rem, 3vw, 1rem);
+            font-weight: 800;
+        }
+
+        .cap-sub {
             color: var(--poster-pink);
-            letter-spacing: 2px;
-            margin-top: 5px;
-            font-weight: bold;
+            font-size: clamp(0.65rem, 2.5vw, 0.85rem);
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .placeholder-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1rem, 4vw, 1.4rem);
+            color: rgba(255, 255, 255, 0.1);
+            letter-spacing: 5px;
+            margin: 0 80px;
+            text-transform: uppercase;
         }
 
         @keyframes scroll {
@@ -282,25 +299,27 @@
                     </div>
                 </div>
 
-                <p class="sponsor-label">Co-Sponsor</p>
+                <p class="sponsor-label">Co-Sponsors</p>
                 <div class="marquee-container">
                     <div class="marquee-content">
-                        <div class="co-sponsor-item">
-                            <span class="co-sponsor-name">TechCake</span>
-                            <span class="co-sponsor-caption">Baking Future DevOps</span>
+                        <div class="co-sponsor-card">
+                            <img src="C1.jpeg" alt="TechCake" class="co-sponsor-logo">
+                            <div class="co-sponsor-caption-box">
+                                <span class="cap-main">DevOps, AWS Cloud & Linux</span>
+                                <span class="cap-sub">Learn, Build & Get Hired</span>
+                            </div>
                         </div>
-                        <div class="co-sponsor-item">
-                            <span class="co-sponsor-name">TechCake</span>
-                            <span class="co-sponsor-caption">Baking Future DevOps</span>
+
+                        <span class="placeholder-text">More Sponsors Joining Soon</span>
+
+                        <div class="co-sponsor-card">
+                            <img src="C1.jpeg" alt="TechCake" class="co-sponsor-logo">
+                            <div class="co-sponsor-caption-box">
+                                <span class="cap-main">DevOps, AWS Cloud & Linux</span>
+                                <span class="cap-sub">Learn, Build & Get Hired</span>
+                            </div>
                         </div>
-                        <div class="co-sponsor-item">
-                            <span class="co-sponsor-name">TechCake</span>
-                            <span class="co-sponsor-caption">Baking Future DevOps</span>
-                        </div>
-                        <div class="co-sponsor-item">
-                            <span class="co-sponsor-name">TechCake</span>
-                            <span class="co-sponsor-caption">Baking Future DevOps</span>
-                        </div>
+                        <span class="placeholder-text">More Sponsors Joining Soon</span>
                     </div>
                 </div>
             </div>
