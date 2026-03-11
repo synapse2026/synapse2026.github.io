@@ -23,7 +23,7 @@
             background-color: var(--background-dark);
             color: white;
             font-family: 'Segoe UI', sans-serif;
-            overflow: hidden;
+            overflow-x: hidden; /* Prevents horizontal scroll */
         }
 
         #particles-js {
@@ -35,12 +35,13 @@
 
         .hero-section {
             position: relative;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 10;
             text-align: center;
+            padding: 40px 15px; /* Added side padding for mobile */
             background: radial-gradient(circle at center, rgba(116, 31, 209, 0.15) 0%, transparent 70%);
         }
 
@@ -48,23 +49,26 @@
             visibility: hidden; 
         }
 
+        /* Fluid Typography for Title */
         .glitch-title {
             font-family: 'Orbitron', sans-serif;
-            font-size: 5rem;
+            font-size: clamp(2rem, 10vw, 5rem); 
             font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 10px;
+            letter-spacing: clamp(2px, 2vw, 10px);
             color: var(--poster-blue);
             text-shadow: 0 0 20px var(--poster-blue);
             margin-bottom: 5px;
+            width: 100%;
+            word-wrap: break-word;
         }
 
         #launch-notice {
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.1rem;
+            font-size: clamp(0.8rem, 3vw, 1.1rem);
             color: #fff;
             letter-spacing: 2px;
-            margin-bottom: 50px; 
+            margin-bottom: 30px; 
             text-shadow: 0 0 10px var(--poster-purple);
         }
 
@@ -80,16 +84,17 @@
 
         .subtitle {
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
+            font-size: clamp(0.9rem, 4vw, 1.5rem);
             color: var(--poster-pink);
-            letter-spacing: 5px;
+            letter-spacing: clamp(1px, 1vw, 5px);
             text-transform: uppercase;
             min-height: 1.6em;
+            margin-bottom: 10px;
         }
 
         .cursor {
             display: inline-block;
-            width: 10px;
+            width: 8px;
             background-color: var(--poster-pink);
             margin-left: 5px;
             animation: blink 0.7s infinite;
@@ -100,26 +105,28 @@
             50% { opacity: 1; }
         }
 
+        /* Responsive Countdown Box */
         .countdown-box {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(31, 193, 209, 0.3);
             border-radius: 15px;
-            padding: 20px;
+            padding: clamp(10px, 3vw, 20px);
             backdrop-filter: blur(10px);
             display: inline-flex;
-            gap: 20px;
+            gap: clamp(10px, 3vw, 20px);
             margin-top: 10px;
+            max-width: 100%;
         }
 
-        .count-item { min-width: 80px; }
+        .count-item { min-width: clamp(50px, 15vw, 80px); }
         .count-number {
             display: block;
-            font-size: 2.5rem;
+            font-size: clamp(1.2rem, 6vw, 2.5rem);
             font-weight: 900;
             font-family: 'Orbitron', sans-serif;
         }
         .count-label {
-            font-size: 0.7rem;
+            font-size: clamp(0.5rem, 2vw, 0.7rem);
             text-transform: uppercase;
             color: var(--poster-pink);
         }
@@ -127,12 +134,13 @@
         .launch-btn {
             background: linear-gradient(135deg, var(--poster-blue), var(--poster-purple));
             border: none;
-            padding: 15px 40px;
+            padding: clamp(10px, 3vw, 15px) clamp(25px, 6vw, 40px);
             color: white;
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
+            font-size: clamp(0.8rem, 3vw, 1rem);
             border-radius: 50px;
-            margin-top: 40px;
+            margin-top: 30px;
             transition: 0.3s;
             text-decoration: none;
             display: inline-block;
@@ -144,13 +152,85 @@
             color: white;
         }
 
-        @media (max-width: 768px) {
-            .glitch-title { font-size: 2.5rem; letter-spacing: 5px; }
-            .subtitle { font-size: 1rem; }
-            .countdown-box { gap: 10px; padding: 10px; }
-            .count-item { min-width: 60px; }
-            .count-number { font-size: 1.5rem; }
-            #launch-notice { font-size: 0.85rem; margin-bottom: 30px; }
+        .sponsor-section {
+            margin-top: 60px;
+            padding: 20px 0;
+            width: 100%;
+        }
+
+        .sponsor-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 5px;
+            color: var(--poster-pink);
+            text-transform: uppercase;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+
+        .official-sponsor-container {
+            position: relative;
+            display: inline-block;
+            padding: 3px;
+            background: linear-gradient(45deg, var(--poster-blue), transparent, var(--poster-purple));
+            border-radius: 20px;
+            margin-bottom: 30px;
+            overflow: hidden;
+            max-width: 90%;
+        }
+
+        .official-sponsor-inner {
+            background: rgba(7, 6, 15, 0.8);
+            backdrop-filter: blur(10px);
+            padding: clamp(15px, 5vw, 30px) clamp(20px, 8vw, 50px);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .official-logo {
+            max-width: 100%;
+            height: auto;
+            width: clamp(180px, 50vw, 220px);
+            mix-blend-mode: screen;
+            filter: brightness(1.2);
+        }
+
+        .marquee-container {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+            padding: 20px 0;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .marquee-content {
+            display: inline-flex;
+            animation: scroll 30s linear infinite;
+        }
+
+        .co-sponsor-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(0.9rem, 4vw, 1.4rem);
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.2);
+            margin: 0 30px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        @keyframes scroll {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+
+        /* Extra small devices fix */
+        @media (max-width: 400px) {
+            .hero-section { padding: 20px 10px; }
+            .countdown-box { gap: 5px; }
+            .count-item { min-width: 45px; }
         }
     </style>
 </head>
@@ -159,15 +239,13 @@
     <div id="particles-js"></div>
 
     <div class="hero-section container">
-        <div class="animate__animated animate__fadeIn">
+        <div class="animate__animated animate__fadeIn w-100">
             <p class="subtitle"><span id="typing-text"></span><span class="cursor">&nbsp;</span></p>
             
             <h1 id="main-heading" class="glitch-title">SYNAPSE 2026</h1>
             
             <div id="launch-notice">Official site will be launched soon</div>
             
-            <p class="lead"> Get ready to innovate.</p>
-
             <div class="countdown-box animate__animated animate__zoomIn">
                 <div class="count-item"><span class="count-number" id="days">00</span><span class="count-label">Days</span></div>
                 <div class="count-item"><span class="count-number" id="hours">00</span><span class="count-label">Hours</span></div>
@@ -177,7 +255,31 @@
 
             <br>
             <a href="https://synapse2026.github.io/registration.html" class="launch-btn">PRE-REGISTER NOW</a>
-            <p class="mt-5 text-secondary" style="font-size: 0.8rem;">WEBSITE POWERED BY TEAM CT, GRWPC</p>
+
+            <div class="sponsor-section">
+                <p class="sponsor-label">Official Sponsor</p>
+                <div class="official-sponsor-container animate__animated animate__fadeInUp">
+                    <div class="official-sponsor-inner">
+                        <img src="sponser.png" alt="Sponsor Logo" class="official-logo">
+                    </div>
+                </div>
+
+                <p class="sponsor-label">Co-Sponsors</p>
+                <div class="marquee-container">
+                    <div class="marquee-content">
+                        <span class="co-sponsor-text">Coming Soon</span>
+                        <span class="co-sponsor-text">Announcing Soon</span>
+                        <span class="co-sponsor-text">Partner with Us</span>
+                        <span class="co-sponsor-text">Future Innovators</span>
+                        <span class="co-sponsor-text">Coming Soon</span>
+                        <span class="co-sponsor-text">Announcing Soon</span>
+                        <span class="co-sponsor-text">Partner with Us</span>
+                        <span class="co-sponsor-text">Future Innovators</span>
+                    </div>
+                </div>
+            </div>
+
+            <p class="mt-5 text-secondary" style="font-size: 0.7rem;">WEBSITE POWERED BY TEAM CT, GRWPC</p>
         </div>
     </div>
 
@@ -185,19 +287,18 @@
     <script>
         particlesJS("particles-js", {
             "particles": {
-                "number": { "value": 80 },
+                "number": { "value": 50 },
                 "color": { "value": ["#d11fb7", "#1fc1d1"] },
                 "shape": { "type": "circle" },
                 "opacity": { "value": 0.5 },
                 "size": { "value": 3 },
-                "line_linked": { "enable": true, "distance": 150, "color": "#741fd1", "opacity": 0.4, "width": 1 },
-                "move": { "enable": true, "speed": 3 }
+                "line_linked": { "enable": true, "distance": 120, "color": "#741fd1", "opacity": 0.3, "width": 1 },
+                "move": { "enable": true, "speed": 2 }
             }
         });
 
-        // --- DYNAMIC TYPING & EARLY HEADING LOAD ---
         const fullText = "Connecting Ideas. Creating Innovation.";
-        const triggerPhrase = "Connecting Ideas."; // Trigger load after this
+        const triggerPhrase = "Connecting Ideas."; 
         const typingElement = document.getElementById("typing-text");
         const headingElement = document.getElementById("main-heading");
         const launchNotice = document.getElementById("launch-notice");
@@ -214,7 +315,6 @@
             typingElement.innerHTML = currentDisplay;
             charIndex = isDeleting ? charIndex - 1 : charIndex + 1;
 
-            // CHECKPOINT: Load heading once "Connecting Ideas." is typed
             if (!isDeleting && currentDisplay.includes(triggerPhrase) && !hasHeadingLoaded) {
                 headingElement.style.visibility = "visible";
                 headingElement.classList.add("animate__animated", "animate__backInDown");
@@ -228,21 +328,13 @@
             }
 
             let typeSpeed = isDeleting ? 40 : 80;
-
-            if (!isDeleting && charIndex === fullText.length) {
-                isDeleting = true;
-                typeSpeed = 1500; 
-            } else if (isDeleting && charIndex === 0) {
-                isDeleting = false;
-                typeSpeed = 500;
-            }
-
+            if (!isDeleting && charIndex === fullText.length) { isDeleting = true; typeSpeed = 2000; } 
+            else if (isDeleting && charIndex === 0) { isDeleting = false; typeSpeed = 500; }
             setTimeout(typeLoop, typeSpeed);
         }
 
         window.onload = () => setTimeout(typeLoop, 800);
 
-        // Countdown Timer
         const launchDate = new Date("March 17, 2026 09:00:00").getTime();
         const timer = setInterval(function() {
             const now = new Date().getTime();
@@ -255,10 +347,6 @@
             document.getElementById("hours").innerHTML = h.toString().padStart(2, '0');
             document.getElementById("minutes").innerHTML = m.toString().padStart(2, '0');
             document.getElementById("seconds").innerHTML = s.toString().padStart(2, '0');
-            if (distance < 0) {
-                clearInterval(timer);
-                document.querySelector(".countdown-box").innerHTML = "<h3>LIT UP!</h3>";
-            }
         }, 1000);
     </script>
 </body>
