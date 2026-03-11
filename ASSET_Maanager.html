@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asset Manager | SYNAPSE 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root { --neon-blue: #1fc1d1; --neon-pink: #ff0055; --dark-bg: #0a0a0f; }
+        body { background: var(--dark-bg); color: #fff; font-family: 'Rajdhani', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .manager-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--neon-blue);
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 0 40px rgba(31, 193, 209, 0.2);
+        }
+        h3 { font-family: 'Orbitron'; color: var(--neon-blue); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; text-align: center; }
+        .label-cyber { color: var(--neon-blue); font-size: 0.8rem; font-family: 'Orbitron'; margin-bottom: 8px; display: block; }
+        .form-control, .form-select {
+            background: rgba(0,0,0,0.7) !important;
+            border: 1px solid #333;
+            color: #fff !important;
+            margin-bottom: 20px;
+        }
+        .progress { height: 10px; background-color: #222; border-radius: 5px; margin-bottom: 20px; display: none; }
+        .progress-bar { background-color: var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue); width: 0%; transition: width 0.3s; }
+        .btn-cyber {
+            background: transparent;
+            border: 2px solid var(--neon-pink);
+            color: var(--neon-pink);
+            font-family: 'Orbitron';
+            font-weight: 700;
+            width: 100%;
+            padding: 12px;
+            transition: 0.3s;
+            letter-spacing: 1px;
+        }
+        .btn-cyber:hover:not(:disabled) {
+            background: var(--neon-pink);
+            color: #fff;
+            box-shadow: 0 0 25px var(--neon-pink);
+        }
+        .btn-cyber:disabled { opacity: 0.5; cursor: not-allowed; border-color: #555; color: #555; }
+        #statusMsg { font-size: 0.9rem; text-align: center; margin-top: 15px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="manager-card">
+    <h3>Asset Manager</h3>
+    
+    <span class="label-cyber">1. Target System</span>
+    <select id="assetType" class="form-select shadow-none">
+        <option value="PHOTO">Event Photo (Slideshow)</option>
+        <option value="SPONSOR">Sponsor Logo (Footer Scroller)</option>
+    </select>
+
+    <span class="label-cyber">2. Select Local File</span>
+    <input type="file" id="fileInput" class="form-control shadow-none" accept="image/*">
+    
+    <div class="progress" id="progressContainer">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <button onclick="handleFileUpload()" class="btn-cyber" id="submitBtn">UPLOAD TO LIVE TV</button>
+    
+    <div id="statusMsg">READY FOR UPLINK...</div>
+
+    <hr style="border-color: rgba(255,255,255,0.1); margin: 25px 0;">
+    <div class="text-center">
+        <a href="live.html" style="color: var(--neon-blue); text-decoration: none; font-size: 0.75rem; font-family: 'Orbitron';">[ BACK TO LIVE FEED ]</a>
+    </div>
+</div>
+
+<script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzb97bG3GTT1wMH7M9j8RDXkoqoFD_MWXFkUZS0przdUO51s-7Zyutn0FbRSRnjjH8X5A/exec';
+
+    function handleFileUpload() {
+        const fileInput = document.getElementById('fileInput');
+        const type = document.getElementById('assetType').value;
+        const btn = document.getElementById('submitBtn');
+        const status = document.getElementById('statusMsg');
+        const progCont = document.getElementById('progressContainer');
+        const progBar = document.getElementById('progressBar');
+
+        if (fileInput.files.length === 0) return alert("Please select a file!");
+
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+
+        btn.disabled = true;
+        progCont.style.display = 'flex';
+        progBar.style.width = '10%';
+        status.innerText = "CONVERTING ASSET...";
+        status.style.color = "var(--neon-blue)";
+
+        reader.onload = function(e) {
+            progBar.style.width = '30%';
+            const rawData = e.target.result.split(',')[1];
+            
+            status.innerText = "UPLOADING TO DRIVE...";
+            progBar.style.width = '60%';
+
+            // --- FIXED: Using POST instead of GET to handle large file data ---
+            fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors', // Required for Google Apps Script POST
+                cache: 'no-cache',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: "uploadAsset",
+                    type: type,
+                    fileName: file.name,
+                    fileData: rawData
+                })
+            })
+            .then(() => {
+                // Note: 'no-cors' mode won't return a readable response, 
+                // so we assume success if the promise resolves.
+                progBar.style.width = '100%';
+                status.innerText = "SUCCESS: BROADCASTING LIVE";
+                status.style.color = "#2ed573";
+                fileInput.value = "";
+                setTimeout(() => {
+                    btn.disabled = false;
+                    progCont.style.display = 'none';
+                    progBar.style.width = '0%';
+                }, 2000);
+            })
+            .catch(err => {
+                status.innerText = "ERROR: UPLINK FAILED";
+                status.style.color = "var(--neon-pink)";
+                btn.disabled = false;
+            });
+        };
+
+        reader.readAsDataURL(file);
+    }
+</script>
+</body>
+</html>

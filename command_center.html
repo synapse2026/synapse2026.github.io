@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Command Center | SYNAPSE 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root { 
+            --neon-blue: #1fc1d1; 
+            --neon-pink: #ff0055; 
+            --neon-green: #00ff99;
+            --neon-gold: #ffcc00;
+            --dark-bg: #0a0a0f; 
+        }
+        
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background: var(--dark-bg); color: #fff; 
+            font-family: 'Rajdhani', sans-serif; 
+            overflow: hidden;
+        }
+
+        #neuralCanvas {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0; opacity: 0.6;
+        }
+
+        .portal-wrapper {
+            position: relative; z-index: 10;
+            height: 100vh; display: flex;
+            align-items: center; justify-content: center;
+        }
+
+        .portal-container { max-width: 450px; width: 90%; text-align: center; }
+        h2 { font-family: 'Orbitron', sans-serif; text-transform: uppercase; letter-spacing: 4px; color: var(--neon-blue); text-shadow: 0 0 15px rgba(31, 193, 209, 0.5); }
+
+        .login-card {
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(31, 193, 209, 0.3);
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 0 40px rgba(0,0,0,0.8);
+        }
+
+        .nav-grid { display: none; }
+        .nav-tile {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 15px;
+            text-decoration: none !important;
+            display: block;
+            transition: 0.3s all ease;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Distinct Colors for Tiles */
+        .tile-spot { border-color: rgba(255, 0, 85, 0.3); }
+        .tile-spot:hover { border-color: var(--neon-pink); background: rgba(255, 0, 85, 0.1); box-shadow: 0 0 20px rgba(255, 0, 85, 0.3); transform: scale(1.03); }
+        .tile-spot .tile-title { color: var(--neon-pink); }
+
+        .tile-gate { border-color: rgba(0, 255, 153, 0.3); }
+        .tile-gate:hover { border-color: var(--neon-green); background: rgba(0, 255, 153, 0.1); box-shadow: 0 0 20px rgba(0, 255, 153, 0.3); transform: scale(1.03); }
+        .tile-gate .tile-title { color: var(--neon-green); }
+
+        .tile-event { border-color: rgba(255, 204, 0, 0.3); }
+        .tile-event:hover { border-color: var(--neon-gold); background: rgba(255, 204, 0, 0.1); box-shadow: 0 0 20px rgba(255, 204, 0, 0.3); transform: scale(1.03); }
+        .tile-event .tile-title { color: var(--neon-gold); }
+
+        .tile-data { border-color: rgba(31, 193, 209, 0.3); }
+        .tile-data:hover { border-color: var(--neon-blue); background: rgba(31, 193, 209, 0.1); box-shadow: 0 0 20px rgba(31, 193, 209, 0.3); transform: scale(1.03); }
+        .tile-data .tile-title { color: var(--neon-blue); }
+
+        .tile-title { font-family: 'Orbitron'; font-size: 1rem; text-transform: uppercase; }
+        .tile-desc { color: #888; font-size: 0.8rem; margin-top: 4px; font-weight: 500; }
+
+        .form-control {
+            background: rgba(0,0,0,0.7) !important;
+            border: 1px solid #333;
+            color: #fff !important;
+            font-family: 'Orbitron';
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .btn-cyber {
+            background: transparent;
+            border: 2px solid var(--neon-blue);
+            color: var(--neon-blue);
+            font-family: 'Orbitron';
+            font-weight: 700;
+            padding: 12px;
+            width: 100%;
+            margin-top: 10px;
+            transition: 0.3s;
+            letter-spacing: 2px;
+        }
+
+        .btn-cyber:hover {
+            background: var(--neon-blue);
+            color: #000;
+            box-shadow: 0 0 30px var(--neon-blue);
+        }
+
+        .error-msg { color: var(--neon-pink); font-size: 0.8rem; margin-top: 15px; display: none; font-weight: bold; font-family: 'Orbitron'; }
+    </style>
+</head>
+<body>
+
+<canvas id="neuralCanvas"></canvas>
+
+<div class="portal-wrapper">
+    <div class="portal-container">
+        <div class="mb-5">
+            <h2>SYNAPSE 2026</h2>
+            <p class="text-white-50 small" style="letter-spacing: 2px;">MANAGEMENT INTERFACE</p>
+        </div>
+
+        <div class="login-card" id="loginCard">
+            <h4 class="mb-4 small text-uppercase" style="font-family: 'Orbitron'; color: #888;">Security Clearance Required</h4>
+            <input type="password" id="passKey" class="form-control mb-3" placeholder="PASSKEY">
+            <button onclick="checkAccess()" class="btn-cyber">LOGIN</button>
+            <p id="errorMsg" class="error-msg">!! ACCESS DENIED !!</p>
+        </div>
+
+        <div id="navGrid" class="nav-grid">
+            <a href="https://synapse2026.github.io/spot_registration.html" class="nav-tile tile-spot">
+                <div class="tile-title">SPOT REGISTRATION</div>
+                <div class="tile-desc">New participant on-site entry</div>
+            </a>
+
+            <a href="https://synapse2026.github.io/scanner.html" class="nav-tile tile-gate">
+                <div class="tile-title">GATE CONTROL</div>
+                <div class="tile-desc">Payment & QR Verification</div>
+            </a>
+            
+            <a href="https://synapse2026.github.io/event_management.html" class="nav-tile tile-event">
+                <div class="tile-title">EVENT HUB</div>
+                <div class="tile-desc">Attendance & Winner Selection</div>
+            </a>
+            
+            <a href="https://synapse2026.github.io/dashboard.html" class="nav-tile tile-data">
+                <div class="tile-title">REAL-TIME DATA</div>
+                <div class="tile-desc">Live Stats & Registrations</div>
+            </a>
+
+            <button onclick="logout()" class="btn btn-link btn-sm mt-3" style="color: #666; text-decoration: none; font-family: 'Orbitron'; font-size: 0.65rem;">[ TERMINATE SESSION ]</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const ACCESS_KEY = "SYNAPSE@2026"; 
+
+    function checkAccess() {
+        const input = document.getElementById('passKey').value;
+        if(input === ACCESS_KEY) {
+            sessionStorage.setItem('synapse_auth', 'true');
+            showPortal();
+        } else {
+            document.getElementById('errorMsg').style.display = 'block';
+            document.getElementById('passKey').value = "";
+        }
+    }
+
+    function showPortal() {
+        document.getElementById('loginCard').style.display = 'none';
+        document.getElementById('navGrid').style.display = 'block';
+    }
+
+    function logout() {
+        sessionStorage.removeItem('synapse_auth');
+        location.reload();
+    }
+
+    window.onload = () => {
+        if(sessionStorage.getItem('synapse_auth') === 'true') showPortal();
+    }
+
+    // Neural Network Animation
+    const canvas = document.getElementById('neuralCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function initCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    class Particle {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.speedX = (Math.random() - 0.5) * 0.8;
+            this.speedY = (Math.random() - 0.5) * 0.8;
+            this.radius = 1.5;
+        }
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+            if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
+            if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
+        }
+        draw() {
+            ctx.fillStyle = '#1fc1d1';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    function createNetwork() {
+        particles = [];
+        for (let i = 0; i < 70; i++) particles.push(new Particle());
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let i = 0; i < particles.length; i++) {
+            particles[i].update();
+            particles[i].draw();
+            for (let j = i; j < particles.length; j++) {
+                const dx = particles[i].x - particles[j].x;
+                const dy = particles[i].y - particles[j].y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < 150) {
+                    ctx.strokeStyle = `rgba(31, 193, 209, ${1 - distance / 150})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.beginPath();
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    ctx.stroke();
+                }
+            }
+        }
+        requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', () => { initCanvas(); createNetwork(); });
+    initCanvas();
+    createNetwork();
+    animate();
+
+    document.getElementById('passKey').addEventListener("keypress", (e) => { if (e.key === "Enter") checkAccess(); });
+</script>
+</body>
+</html>

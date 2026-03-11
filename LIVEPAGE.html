@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LIVE | SYNAPSE 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root { --neon-blue: #1fc1d1; --neon-pink: #ff0055; --dark-bg: #050508; }
+        body { background: var(--dark-bg); color: #fff; font-family: 'Rajdhani', sans-serif; overflow: hidden; height: 100vh; margin: 0; }
+        
+        canvas#neuralNet { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.4; }
+
+        /* Layout */
+        .live-wrapper { display: flex; flex-direction: column; height: 100vh; background: rgba(0,0,0,0.6); }
+        
+        .header { height: 12vh; display: flex; align-items: center; justify-content: space-between; padding: 0 50px; border-bottom: 2px solid var(--neon-blue); box-shadow: 0 0 20px var(--neon-blue); }
+        .logo { font-family: 'Orbitron'; font-weight: 900; font-size: 3rem; letter-spacing: 8px; color: var(--neon-blue); }
+        
+        .main-content { display: grid; grid-template-columns: 30% 70%; flex-grow: 1; overflow: hidden; }
+
+        /* Stats Section */
+        .stats-area { padding: 40px; background: rgba(255,255,255,0.02); display: flex; flex-direction: column; justify-content: center; }
+        .stat-box { margin-bottom: 40px; padding: 20px; border-left: 8px solid var(--neon-pink); background: rgba(255,0,85,0.05); }
+        .stat-val { font-family: 'Orbitron'; font-size: 5rem; line-height: 1; color: #fff; text-shadow: 0 0 15px var(--neon-pink); }
+        .stat-label { font-size: 1.2rem; text-transform: uppercase; letter-spacing: 3px; color: var(--neon-pink); }
+
+        /* Gallery Section */
+        .gallery-area { position: relative; border-left: 1px solid rgba(255,255,255,0.1); }
+        .slide { position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 2s ease-in-out; }
+        .slide.active { opacity: 1; }
+
+        /* Footer Sponsor Scroller */
+        .footer { height: 15vh; background: #000; border-top: 1px solid rgba(31,193,209,0.3); display: flex; align-items: center; overflow: hidden; }
+        .scroller { display: flex; white-space: nowrap; animation: scroll 40s linear infinite; }
+        .scroller img { height: 70px; margin: 0 60px; filter: brightness(0) invert(1); opacity: 0.7; }
+
+        @keyframes scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+        /* Admin Trigger */
+        .login-trigger { position: fixed; top: 10px; right: 10px; width: 30px; height: 30px; background: transparent; border: none; cursor: pointer; z-index: 100; }
+    </style>
+</head>
+<body>
+
+<canvas id="neuralNet"></canvas>
+<button class="login-trigger" onclick="location.href='portal.html'"></button>
+
+<div class="live-wrapper">
+    <div class="header">
+        <div class="logo">SYNAPSE '26</div>
+        <div id="clock" style="font-family: 'Orbitron'; font-size: 2rem; color: var(--neon-blue);">12:00:00 PM</div>
+    </div>
+
+    <div class="main-content">
+        <div class="stats-area">
+            <div class="stat-box">
+                <div class="stat-val" id="paidCount">0</div>
+                <div class="stat-label">Registrations</div>
+            </div>
+            <div class="stat-box" style="border-color: var(--neon-blue);">
+                <div class="stat-val" id="winCount" style="text-shadow: 0 0 15px var(--neon-blue);">0</div>
+                <div class="stat-label" style="color: var(--neon-blue);">Winners</div>
+            </div>
+            <div id="eventTicker" style="margin-top:20px; font-family:'Orbitron'; color:#555; font-size: 0.9rem;">
+                SYNCING LIVE DATA...
+            </div>
+        </div>
+
+        <div class="gallery-area" id="gallery">
+            <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1500" class="slide active">
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="scroller" id="sponsorScroller">
+            </div>
+    </div>
+</div>
+
+<script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbwKjrjjrV5hJUrqaP5nWjYAW2HW50y6EI3_k9bfzriS8ktMuAHpYe1i8K6IyPFV-jsndA/exec'; // Replace with your URL
+
+    function updateTime() {
+        document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+    }
+    setInterval(updateTime, 1000);
+
+    function fetchLiveData() {
+        fetch(`${scriptURL}?action=getLiveTVData`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('paidCount').innerText = data.stats.paid;
+                document.getElementById('winCount').innerText = data.stats.winners;
+                
+                // Update Gallery
+                if(data.photos && data.photos.length > 0) {
+                    const gallery = document.getElementById('gallery');
+                    gallery.innerHTML = data.photos.map((url, i) => `<img src="${url}" class="slide ${i===0?'active':''}">`).join('');
+                    startCarousel();
+                }
+
+                // Update Sponsors
+                if(data.sponsors && data.sponsors.length > 0) {
+                    const scroller = document.getElementById('sponsorScroller');
+                    const imgHtml = data.sponsors.map(url => `<img src="${url}">`).join('');
+                    scroller.innerHTML = imgHtml + imgHtml; // Duplicate for smooth loop
+                }
+            });
+    }
+
+    function startCarousel() {
+        let current = 0;
+        const slides = document.querySelectorAll('.slide');
+        setInterval(() => {
+            slides[current].classList.remove('active');
+            current = (current + 1) % slides.length;
+            slides[current].classList.add('active');
+        }, 8000); // 8 seconds per photo
+    }
+
+    // Neural Net Background
+    const canvas = document.getElementById('neuralNet');
+    const ctx = canvas.getContext('2d');
+    let pts = [];
+    function init() {
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        pts = Array.from({length: 60}, () => ({
+            x: Math.random()*canvas.width, y: Math.random()*canvas.height,
+            vx: (Math.random()-0.5)*0.5, vy: (Math.random()-0.5)*0.5
+        }));
+    }
+    function draw() {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = "#1fc1d1";
+        pts.forEach(p => {
+            p.x += p.vx; p.y += p.vy;
+            if(p.x<0 || p.x>canvas.width) p.vx*=-1;
+            if(p.y<0 || p.y>canvas.height) p.vy*=-1;
+            ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, Math.PI*2); ctx.fill();
+        });
+        requestAnimationFrame(draw);
+    }
+    window.onresize = init; init(); draw();
+
+    // Initial Fetch & Auto Refresh every 60 seconds
+    fetchLiveData();
+    setInterval(fetchLiveData, 60000);
+</script>
+</body>
+</html>
