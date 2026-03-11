@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYNAPSE 2026 | Launching Soon</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+    <style>
+        :root {
+            --poster-pink: #d11fb7;
+            --poster-blue: #1fc1d1;
+            --poster-purple: #741fd1;
+            --background-dark: #07060f;
+        }
+
+        body, html {
+            height: 100%;
+            margin: 0;
+            background-color: var(--background-dark);
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            overflow-x: hidden;
+        }
+
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .hero-section {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            text-align: center;
+            padding: 50px 0;
+            background: radial-gradient(circle at center, rgba(116, 31, 209, 0.15) 0%, transparent 70%);
+        }
+
+        .glitch-title, #launch-notice {
+            visibility: hidden; 
+        }
+
+        .glitch-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 10px;
+            color: var(--poster-blue);
+            text-shadow: 0 0 20px var(--poster-blue);
+            margin-bottom: 5px;
+        }
+
+        #launch-notice {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            color: #fff;
+            letter-spacing: 2px;
+            margin-bottom: 30px; 
+            text-shadow: 0 0 10px var(--poster-purple);
+        }
+
+        .pulsate {
+            animation: pulse-animation 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse-animation {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        .subtitle {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--poster-pink);
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            min-height: 1.6em;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            background-color: var(--poster-pink);
+            margin-left: 5px;
+            animation: blink 0.7s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        .countdown-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(31, 193, 209, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            display: inline-flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .count-item { min-width: 80px; }
+        .count-number {
+            display: block;
+            font-size: 2.5rem;
+            font-weight: 900;
+            font-family: 'Orbitron', sans-serif;
+        }
+        .count-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--poster-pink);
+        }
+
+        .launch-btn {
+            background: linear-gradient(135deg, var(--poster-blue), var(--poster-purple));
+            border: none;
+            padding: 15px 40px;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            border-radius: 50px;
+            margin-top: 40px;
+            transition: 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .launch-btn:hover {
+            box-shadow: 0 0 30px var(--poster-purple);
+            transform: scale(1.05);
+            color: white;
+        }
+
+        /* --- SPONSOR SECTION STYLES --- */
+        .sponsor-section {
+            margin-top: 60px;
+            padding: 20px 0;
+        }
+
+        .sponsor-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 4px;
+            color: var(--poster-pink);
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+
+        .official-sponsor-card {
+            display: inline-block;
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--poster-blue);
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(31, 193, 209, 0.2);
+            transition: 0.4s ease;
+            margin-bottom: 40px;
+        }
+
+        .official-sponsor-card:hover {
+            box-shadow: 0 0 30px var(--poster-blue);
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .official-logo {
+            max-width: 200px;
+            height: auto;
+            filter: drop-shadow(0 0 5px white);
+        }
+
+        /* Text-Based Co-Sponsor Marquee */
+        .marquee-container {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+            padding: 20px 0;
+            background: rgba(116, 31, 209, 0.05);
+            border-top: 1px solid rgba(209, 31, 183, 0.1);
+            border-bottom: 1px solid rgba(209, 31, 183, 0.1);
+        }
+
+        .marquee-content {
+            display: inline-flex;
+            animation: scroll 30s linear infinite;
+        }
+
+        .co-sponsor-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.3);
+            margin: 0 50px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            transition: 0.3s;
+            cursor: default;
+        }
+
+        .co-sponsor-text:hover {
+            color: var(--poster-pink);
+            text-shadow: 0 0 15px var(--poster-pink);
+            transform: skewX(-10deg);
+        }
+
+        @keyframes scroll {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+
+        /* Edge Fading for Marquee */
+        .marquee-container::before, .marquee-container::after {
+            content: "";
+            position: absolute;
+            top: 0; width: 15%; height: 100%; z-index: 2;
+        }
+        .marquee-container::before { left: 0; background: linear-gradient(to right, var(--background-dark), transparent); }
+        .marquee-container::after { right: 0; background: linear-gradient(to left, var(--background-dark), transparent); }
+
+        @media (max-width: 768px) {
+            .glitch-title { font-size: 2.5rem; letter-spacing: 5px; }
+            .subtitle { font-size: 1rem; }
+            .countdown-box { gap: 10px; padding: 10px; }
+            .count-item { min-width: 60px; }
+            .count-number { font-size: 1.5rem; }
+            #launch-notice { font-size: 0.85rem; margin-bottom: 30px; }
+            .official-logo { max-width: 150px; }
+            .co-sponsor-text { font-size: 1rem; margin: 0 30px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="particles-js"></div>
+
+    <div class="hero-section container">
+        <div class="animate__animated animate__fadeIn">
+            <p class="subtitle"><span id="typing-text"></span><span class="cursor">&nbsp;</span></p>
+            
+            <h1 id="main-heading" class="glitch-title">SYNAPSE 2026</h1>
+            
+            <div id="launch-notice">Official site will be launched soon</div>
+            
+            <p class="lead"> Get ready to innovate.</p>
+
+            <div class="countdown-box animate__animated animate__zoomIn">
+                <div class="count-item"><span class="count-number" id="days">00</span><span class="count-label">Days</span></div>
+                <div class="count-item"><span class="count-number" id="hours">00</span><span class="count-label">Hours</span></div>
+                <div class="count-item"><span class="count-number" id="minutes">00</span><span class="count-label">Mins</span></div>
+                <div class="count-item"><span class="count-number" id="seconds">00</span><span class="count-label">Secs</span></div>
+            </div>
+
+            <br>
+            <a href="https://synapse2026.github.io/registration.html" class="launch-btn">PRE-REGISTER NOW</a>
+
+            <div class="sponsor-section">
+                <div class="section-block">
+                    <p class="sponsor-label">Official Sponsor</p>
+                    <div class="official-sponsor-card">
+                        <img src="sponser.png" alt="Official Sponsor" class="official-logo">
+                    </div>
+                </div>
+
+                <div class="section-block">
+                    <p class="sponsor-label">Co-Sponsors</p>
+                    <div class="marquee-container">
+                        <div class="marquee-content">
+                            <span class="co-sponsor-text">Coming Soon</span>
+                            <span class="co-sponsor-text">Announcing Soon</span>
+                            <span class="co-sponsor-text">Partner with Us</span>
+                            <span class="co-sponsor-text">Future Innovators</span>
+                            <span class="co-sponsor-text">Coming Soon</span>
+                            <span class="co-sponsor-text">Announcing Soon</span>
+                            <span class="co-sponsor-text">Partner with Us</span>
+                            <span class="co-sponsor-text">Future Innovators</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="mt-5 text-secondary" style="font-size: 0.8rem;">WEBSITE POWERED BY TEAM CT, GRWPC</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script>
+        particlesJS("particles-js", {
+            "particles": {
+                "number": { "value": 80 },
+                "color": { "value": ["#d11fb7", "#1fc1d1"] },
+                "shape": { "type": "circle" },
+                "opacity": { "value": 0.5 },
+                "size": { "value": 3 },
+                "line_linked": { "enable": true, "distance": 150, "color": "#741fd1", "opacity": 0.4, "width": 1 },
+                "move": { "enable": true, "speed": 3 }
+            }
+        });
+
+        const fullText = "Connecting Ideas. Creating Innovation.";
+        const triggerPhrase = "Connecting Ideas."; 
+        const typingElement = document.getElementById("typing-text");
+        const headingElement = document.getElementById("main-heading");
+        const launchNotice = document.getElementById("launch-notice");
+        
+        let isDeleting = false;
+        let charIndex = 0;
+        let hasHeadingLoaded = false;
+
+        function typeLoop() {
+            const currentDisplay = isDeleting 
+                ? fullText.substring(0, charIndex - 1) 
+                : fullText.substring(0, charIndex + 1);
+
+            typingElement.innerHTML = currentDisplay;
+            charIndex = isDeleting ? charIndex - 1 : charIndex + 1;
+
+            if (!isDeleting && currentDisplay.includes(triggerPhrase) && !hasHeadingLoaded) {
+                headingElement.style.visibility = "visible";
+                headingElement.classList.add("animate__animated", "animate__backInDown");
+                
+                setTimeout(() => {
+                    launchNotice.style.visibility = "visible";
+                    launchNotice.classList.add("animate__animated", "animate__fadeInUp", "pulsate");
+                }, 400);
+
+                hasHeadingLoaded = true;
+            }
+
+            let typeSpeed = isDeleting ? 40 : 80;
+
+            if (!isDeleting && charIndex === fullText.length) {
+                isDeleting = true;
+                typeSpeed = 1500; 
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                typeSpeed = 500;
+            }
+
+            setTimeout(typeLoop, typeSpeed);
+        }
+
+        window.onload = () => setTimeout(typeLoop, 800);
+
+        const launchDate = new Date("March 17, 2026 09:00:00").getTime();
+        const timer = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = launchDate - now;
+            const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((distance % (1000 * 60)) / 1000);
+            document.getElementById("days").innerHTML = d.toString().padStart(2, '0');
+            document.getElementById("hours").innerHTML = h.toString().padStart(2, '0');
+            document.getElementById("minutes").innerHTML = m.toString().padStart(2, '0');
+            document.getElementById("seconds").innerHTML = s.toString().padStart(2, '0');
+            if (distance < 0) {
+                clearInterval(timer);
+                document.querySelector(".countdown-box").innerHTML = "<h3>LIT UP!</h3>";
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
