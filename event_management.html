@@ -14,30 +14,11 @@
         :root { --neon-blue: #1fc1d1; --neon-pink: #d11fb7; --dark-bg: #0a0a0f; --warning-gold: #ffc107; }
         body { background: var(--dark-bg); color: #fff; font-family: 'Rajdhani', sans-serif; min-height: 100vh; }
         .container { max-width: 500px; padding: 15px; margin: auto; }
-        
         h3, h5 { font-family: 'Orbitron', sans-serif; letter-spacing: 2px; color: var(--neon-blue); text-shadow: 0 0 10px rgba(31, 193, 209, 0.3); text-transform: uppercase; }
         .section-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 15px; margin-bottom: 20px; }
         .form-select, .form-control { background: rgba(0,0,0,0.5) !important; color: #fff !important; border: 1px solid #444; }
-        
-        .scrollable-container { 
-            max-height: 350px; 
-            overflow-y: auto; 
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
-            margin-bottom: 10px; 
-            -webkit-overflow-scrolling: touch; 
-        }
-        
-        .table thead th { 
-            position: sticky; 
-            top: 0; 
-            background: #0d1117; 
-            z-index: 2; 
-            color: var(--neon-blue); 
-            font-family: 'Orbitron'; 
-            font-size: 0.7rem; 
-            border-bottom: 2px solid var(--neon-blue);
-        }
-
+        .scrollable-container { max-height: 350px; overflow-y: auto; border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 10px; }
+        .table thead th { position: sticky; top: 0; background: #0d1117; z-index: 2; color: var(--neon-blue); font-family: 'Orbitron'; font-size: 0.7rem; border-bottom: 2px solid var(--neon-blue); }
         .table { color: #fff; border-color: rgba(255,255,255,0.1); font-size: 0.85rem; }
         .bg-present { background: rgba(46, 213, 115, 0.2); color: #2ed573; border: 1px solid #2ed573; padding: 2px 5px; border-radius: 4px; font-weight: 700; font-size: 0.65rem; }
         .label-cyber { color: var(--neon-blue); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; display: block; }
@@ -63,8 +44,7 @@
     </div>
 
     <div class="section-card d-none" id="attendanceSection">
-        <h5 class="mb-3" style="font-size: 0.9rem;">Paid Attendees</h5>
-        
+        <h5 class="mb-3" id="eventTitle" style="font-size: 0.9rem;">Paid Attendees</h5>
         <input type="text" id="attendeeSearch" class="form-control mb-3 shadow-none" placeholder="🔍 Search Name or Mobile..." onkeyup="filterTable()">
 
         <div class="scrollable-container">
@@ -99,11 +79,21 @@
                     <option value="3rd Place">3rd Place</option>
                 </select>
             </div>
-            <div class="col-6">
-                <button onclick="startWinnerScan()" class="btn btn-warning w-100 btn-cyber py-2">📸 SCAN</button>
-            </div>
-            <div class="col-6">
-                <button onclick="handleWinnerManualPrompt()" class="btn btn-outline-warning w-100 btn-cyber py-2">⌨ MANUAL</button>
+            
+            <div id="winnerInputArea" class="col-12">
+                <div class="row g-2" id="individualWinnerBtns">
+                    <div class="col-6">
+                        <button onclick="startWinnerScan()" class="btn btn-warning w-100 btn-cyber py-2">📸 SCAN</button>
+                    </div>
+                    <div class="col-6">
+                        <button onclick="handleWinnerManualPrompt()" class="btn btn-outline-warning w-100 btn-cyber py-2">⌨ MANUAL</button>
+                    </div>
+                </div>
+                <div id="teamWinnerArea" class="d-none">
+                    <span class="label-cyber">SELECT WINNING TEAM</span>
+                    <select id="teamWinnerSelector" class="form-select border-warning mb-2 shadow-none"></select>
+                    <button onclick="submitTeamWinner()" class="btn btn-warning w-100 btn-cyber py-2">🏆 MARK TEAM AS WINNER</button>
+                </div>
             </div>
         </div>
     </div>
@@ -124,20 +114,20 @@
 
 <script>
     const scriptURL = 'https://script.google.com/macros/s/AKfycbwKjrjjrV5hJUrqaP5nWjYAW2HW50y6EI3_k9bfzriS8ktMuAHpYe1i8K6IyPFV-jsndA/exec';
+    
+    // Hardcoded events for instant loading
+    const allEvents = ["Glow Craft", "Reverse X", "Trail Blaze", "Brain 2 Bot", "Titan Trials", "Pixel Clash", "Innosense", "Seminar Presentation", "Play villa"];
+    const groupEvents = ["Trail Blaze", "Titan Trials", "Innosense"];
+    
     const html5QrCode = new Html5Qrcode("reader");
     let currentData = [];
 
     window.onload = () => {
-        fetch(`${scriptURL}?action=getUniqueEvents`)
-            .then(res => res.json())
-            .then(events => {
-                const selector = document.getElementById('eventSelector');
-                selector.innerHTML = '<option selected disabled>Choose Event...</option>';
-                events.forEach(evt => {
-                    selector.innerHTML += `<option value="${evt}">${evt}</option>`;
-                });
-            })
-            .catch(err => console.error("Event load failed"));
+        const selector = document.getElementById('eventSelector');
+        selector.innerHTML = '<option selected disabled>Choose Event...</option>';
+        allEvents.forEach(evt => {
+            selector.innerHTML += `<option value="${evt}">${evt}</option>`;
+        });
     };
 
     function fetchParticipants() {
@@ -147,38 +137,46 @@
         
         loader.classList.remove('d-none');
         body.innerHTML = "";
-        document.getElementById('attendanceSection').classList.add('d-none');
+        
+        if(groupEvents.includes(event)) {
+            document.getElementById('individualWinnerBtns').classList.add('d-none');
+            document.getElementById('teamWinnerArea').classList.remove('d-none');
+        } else {
+            document.getElementById('individualWinnerBtns').classList.remove('d-none');
+            document.getElementById('teamWinnerArea').classList.add('d-none');
+        }
 
         fetch(`${scriptURL}?action=getEventList&event=${event}`)
             .then(res => res.json())
             .then(data => {
                 currentData = data;
                 loader.classList.add('d-none');
-                document.getElementById('winnerBody').innerHTML = "";
                 document.getElementById('attendanceSection').classList.remove('d-none');
                 document.getElementById('winnerSection').classList.remove('d-none');
+                document.getElementById('winnerBody').innerHTML = "";
+
+                const teamSet = new Set();
 
                 data.forEach((p, index) => {
-                    // CORRECTED ATTENDANCE DISPLAY LOGIC: Check for specific "Event: PRESENT" in string
                     const allAtt = (p.eventStatus || "").split('|');
                     const isPresentForEvent = allAtt.some(a => a.trim() === event + ": PRESENT");
                     
+                    if(isPresentForEvent && p.teamName) teamSet.add(p.teamName);
+
                     body.innerHTML += `
                         <tr>
                             <td>${index + 1}</td>
-                            <td><input type="checkbox" class="user-check form-check-input" value="${p.mobile}" ${isPresentForEvent ? 'disabled' : ''}></td>
+                            <td><input type="checkbox" class="user-check form-check-input" value="${p.mobile}" data-name="${p.name}" ${isPresentForEvent ? 'disabled' : ''}></td>
                             <td>
-                                <strong>${p.name}</strong>
+                                <strong>${p.name}</strong> ${p.teamName ? `<br><small class="text-warning">[${p.teamName}]</small>` : ''}
                                 <span class="info-sub">${p.mobile} | ${p.dept}</span>
                                 <span class="info-sub" style="color: var(--neon-blue)">${p.college}</span>
                             </td>
                             <td><span class="${isPresentForEvent ? 'bg-present' : 'text-white-50 small'}">${isPresentForEvent ? 'PRESENT' : 'ABSENT'}</span></td>
                         </tr>`;
                     
-                    if(p.winnerStatus && p.winnerStatus !== "") {
-                        const allWins = p.winnerStatus.split('|');
-                        const specificWin = allWins.find(win => win.trim().startsWith(event + ":"));
-                        
+                    if(p.winnerStatus) {
+                        const specificWin = p.winnerStatus.split('|').find(win => win.trim().startsWith(event + ":"));
                         if (specificWin) {
                             document.getElementById('winnerBody').innerHTML += `
                                 <tr>
@@ -186,11 +184,16 @@
                                     <td>
                                         <strong>${p.name}</strong>
                                         <span class="info-sub">${p.mobile} | ${p.dept}</span>
-                                        <span class="info-sub" style="color: var(--neon-blue)">${p.college}</span>
                                     </td>
                                 </tr>`;
                         }
                     }
+                });
+
+                const teamSelect = document.getElementById('teamWinnerSelector');
+                teamSelect.innerHTML = '<option disabled selected>Select Winning Team...</option>';
+                teamSet.forEach(t => {
+                    teamSelect.innerHTML += `<option value="${t}">${t}</option>`;
                 });
             });
     }
@@ -206,15 +209,47 @@
 
     function toggleAll(source) { document.querySelectorAll('.user-check:not([disabled])').forEach(c => c.checked = source.checked); }
 
-    function submitBulkAttendance() {
-        const event = document.getElementById('eventSelector').value; // Get selected event
-        const selected = Array.from(document.querySelectorAll('.user-check:checked')).map(c => c.value);
-        if(selected.length === 0) return alert("Select students!");
-        if(!confirm(`Mark ${selected.length} as PRESENT for ${event}?`)) return;
-        
-        // CORRECTED: Passing 'event' parameter to ensure event-specific attendance marking in Sheet
-        const promises = selected.map(mob => fetch(`${scriptURL}?action=markEventAttendance&mobile=${mob}&event=${event}`));
-        Promise.all(promises).then(() => { alert("Attendance Updated!"); fetchParticipants(); });
+    // In your HTML script section, update this function:
+function submitBulkAttendance() {
+    const event = document.getElementById('eventSelector').value;
+    const selectedElements = Array.from(document.querySelectorAll('.user-check:checked'));
+    const mobiles = selectedElements.map(c => c.value);
+    const names = selectedElements.map(c => c.getAttribute('data-name'));
+
+    if(mobiles.length === 0) return alert("Select students!");
+
+    let teamName = "";
+    if(groupEvents.includes(event)) {
+        // Updated prompt to be more specific
+        teamName = prompt(`Assign team for ${event}.\nSelected: ${names.join(", ")}`);
+        if(!teamName) return alert("A team name is required for group events.");
+    }
+
+    if(!confirm(`Mark ${mobiles.length} participants as PRESENT for ${event}?`)) return;
+    
+    const url = `${scriptURL}?action=bulkMarkAttendanceWithTeam&mobiles=${mobiles.join(",")}&event=${event}&team=${encodeURIComponent(teamName)}`;
+    
+    fetch(url)
+        .then(r => r.text())
+        .then(res => {
+            alert(`SUCCESS!\n${event} Attendance Marked.\n${teamName ? 'Team: ' + teamName : ''}`);
+            fetchParticipants();
+        });
+}
+    function submitTeamWinner() {
+        const team = document.getElementById('teamWinnerSelector').value;
+        const pos = document.getElementById('winnerPosition').value;
+        const event = document.getElementById('eventSelector').value;
+
+        if(!team || team.includes("Select")) return alert("Please select a valid team!");
+        if(!confirm(`Mark Team ${team} as ${pos} winner?`)) return;
+
+        fetch(`${scriptURL}?action=markTeamWinner&team=${encodeURIComponent(team)}&position=${pos}&event=${event}`)
+            .then(r => r.text())
+            .then(res => {
+                alert(`🏆 WINNER MARKED\n${pos}: Team ${team}`);
+                fetchParticipants();
+            });
     }
 
     function startWinnerScan() {
@@ -233,26 +268,10 @@
     function processWinnerUpdate(mobile) {
         const pos = document.getElementById('winnerPosition').value;
         const event = document.getElementById('eventSelector').value;
-        const student = currentData.find(p => p.mobile.toString() === mobile.toString());
-
-        if (!student) {
-            alert(`⚠️ ERROR: Participant not registered for ${event}.`);
-            return;
-        }
-
-        // CORRECTED: Validation check for specific event attendance
-        const allAtt = (student.eventStatus || "").split('|');
-        const isPresentForEvent = allAtt.some(a => a.trim() === event + ": PRESENT");
-
-        if (!isPresentForEvent) {
-            alert(`⚠️ ERROR: ${student.name} is marked as ABSENT for ${event}. Mark attendance first.`);
-            return;
-        }
-
         fetch(`${scriptURL}?action=markWinner&mobile=${mobile}&position=${pos}&event=${event}`)
             .then(r => r.text())
             .then(res => { 
-                alert(res.includes("Error") ? res : `🏆 Success: Marked ${pos} for ${event}`); 
+                alert(res); 
                 fetchParticipants(); 
             });
     }
@@ -267,13 +286,12 @@
         const rows = [];
         if (tableId === 'participantTable') {
             currentData.forEach((p, i) => {
-                // Corrected for PDF export status
                 const allAtt = (p.eventStatus || "").split('|');
                 const isPresentForEvent = allAtt.some(a => a.trim() === event + ": PRESENT");
-                rows.push([i+1, p.name, p.mobile, p.college, p.dept, p.semester, isPresentForEvent ? 'PRESENT' : 'ABSENT']);
+                rows.push([i+1, p.name, p.mobile, p.college, p.dept, p.teamName || 'N/A', isPresentForEvent ? 'PRESENT' : 'ABSENT']);
             });
             doc.autoTable({ 
-                head: [['SL', 'Name', 'Mobile', 'College', 'Dept', 'Sem/Year', 'Status']], 
+                head: [['SL', 'Name', 'Mobile', 'College', 'Dept', 'Team', 'Status']], 
                 body: rows, startY: 25, theme: 'grid',
                 headStyles: { fillColor: [31, 193, 209], textColor: [0, 0, 0] }
             });
@@ -282,12 +300,12 @@
                 if(p.winnerStatus) {
                     const specificWin = p.winnerStatus.split('|').find(w => w.trim().startsWith(event + ":"));
                     if(specificWin) {
-                        rows.push([rows.length + 1, specificWin.trim(), p.name, p.mobile, p.college, p.dept,p.semester]);
+                        rows.push([rows.length + 1, specificWin.trim(), p.name, p.mobile, p.college, p.teamName || 'N/A']);
                     }
                 }
             });
             doc.autoTable({ 
-                head: [['SL', 'Position', 'Name', 'Mobile', 'College', 'Dept','Sem/Year']], 
+                head: [['SL', 'Position', 'Name', 'Mobile', 'College', 'Team']], 
                 body: rows, startY: 25, theme: 'grid',
                 headStyles: { fillColor: [255, 193, 7], textColor: [0, 0, 0] }
             });
