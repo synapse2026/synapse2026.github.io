@@ -2,150 +2,248 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>LIVE | SYNAPSE 2026</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYNAPSE 2026 | LIVE HUD</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
-        :root { --neon-blue: #1fc1d1; --neon-pink: #ff0055; --dark-bg: #050508; }
-        body { background: var(--dark-bg); color: #fff; font-family: 'Rajdhani', sans-serif; overflow: hidden; height: 100vh; margin: 0; }
+        :root { 
+            --poster-pink: #d11fb7;
+            --poster-blue: #1fc1d1;
+            --poster-purple: #741fd1;
+            --bg: #07060f; 
+            --glass: rgba(15, 12, 41, 0.6); 
+            --gold: #ffea00;
+        }
         
-        canvas#neuralNet { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.4; }
-
-        /* Layout */
-        .live-wrapper { display: flex; flex-direction: column; height: 100vh; background: rgba(0,0,0,0.6); }
+        body, html { margin: 0; padding: 0; min-height: 100vh; background: var(--bg); color: #fff; font-family: 'Share Tech Mono', monospace; overflow-x: hidden; }
         
-        .header { height: 12vh; display: flex; align-items: center; justify-content: space-between; padding: 0 50px; border-bottom: 2px solid var(--neon-blue); box-shadow: 0 0 20px var(--neon-blue); }
-        .logo { font-family: 'Orbitron'; font-weight: 900; font-size: 3rem; letter-spacing: 8px; color: var(--neon-blue); }
+        canvas#neuralNet { position: fixed; top: 0; left: 0; z-index: -1; opacity: 0.3; }
+        .scanline { position: fixed; top: 0; left: 0; width: 100%; height: 10px; background: rgba(31, 193, 209, 0.05); z-index: 10; animation: scan 8s linear infinite; pointer-events: none; }
+        @keyframes scan { from { top: -10%; } to { top: 110%; } }
+
+        .college-header {
+            background: rgba(0, 0, 0, 0.8); text-align: center; padding: 15px 10px; border-bottom: 2px solid var(--gold);
+            font-family: 'Orbitron'; font-weight: 900; letter-spacing: 2px; 
+            font-size: clamp(0.9rem, 2.5vw, 2.2rem); color: var(--gold);
+            text-shadow: 0 0 15px rgba(255, 234, 0, 0.5); animation: goldGlow 3s ease-in-out infinite;
+            text-transform: uppercase; z-index: 100; position: relative;
+        }
+        @keyframes goldGlow { 0%, 100% { text-shadow: 0 0 10px rgba(255, 234, 0, 0.5); } 50% { text-shadow: 0 0 25px var(--gold); } }
+
+        /* Dashboard Grid - Set to responsive columns */
+        .dashboard { 
+            display: grid; 
+            grid-template-columns: 380px 1fr; 
+            grid-template-rows: auto 1fr auto; 
+            min-height: calc(100vh - 75px); 
+            gap: 15px; padding: 15px; box-sizing: border-box; 
+        }
+
+        .header { 
+            grid-column: 1 / span 2; background: var(--glass); border: 1px solid var(--poster-blue); 
+            display: flex; align-items: center; justify-content: space-between; padding: 15px 30px; 
+            box-shadow: 0 0 30px rgba(31, 193, 209, 0.15); flex-wrap: wrap; gap: 15px;
+        }
+        .logo { font-family: 'Orbitron'; font-size: clamp(1.2rem, 4vw, 3rem); font-weight: 900; color: var(--poster-blue); text-shadow: 0 0 20px var(--poster-blue); }
         
-        .main-content { display: grid; grid-template-columns: 30% 70%; flex-grow: 1; overflow: hidden; }
+        /* RESPONSIVE MECHANICAL CLOCK */
+        .flip-clock { display: flex; gap: 4px; align-items: center; flex-wrap: nowrap; }
+        .flip-card {
+            position: relative; width: clamp(30px, 5vw, 45px); height: clamp(45px, 7vw, 65px);
+            background: #111; border-radius: 4px; font-family: 'Orbitron';
+            font-size: clamp(1.5rem, 3vw, 2.8rem); font-weight: 900; color: #fff;
+            text-align: center; line-height: clamp(45px, 7vw, 65px); border: 1px solid #333;
+        }
+        .flip-card::before { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 1.5px; background: #000; z-index: 10; }
+        .clock-sep { font-size: 1.5rem; color: var(--poster-blue); font-weight: bold; }
+        .am-pm { font-size: 0.8rem; color: var(--gold); font-family: 'Orbitron'; font-weight: 900; margin-left: 5px; background: #111; padding: 4px; border: 1px solid #333; }
 
-        /* Stats Section */
-        .stats-area { padding: 40px; background: rgba(255,255,255,0.02); display: flex; flex-direction: column; justify-content: center; }
-        .stat-box { margin-bottom: 40px; padding: 20px; border-left: 8px solid var(--neon-pink); background: rgba(255,0,85,0.05); }
-        .stat-val { font-family: 'Orbitron'; font-size: 5rem; line-height: 1; color: #fff; text-shadow: 0 0 15px var(--neon-pink); }
-        .stat-label { font-size: 1.2rem; text-transform: uppercase; letter-spacing: 3px; color: var(--neon-pink); }
+        /* Sidebar Stats */
+        .sidebar { display: flex; flex-direction: column; gap: 15px; }
+        .stat-card { background: var(--glass); border-left: 6px solid var(--poster-pink); padding: 15px; flex: 1; display: flex; flex-direction: column; justify-content: center; border: 1px solid rgba(209, 31, 183, 0.2); }
+        .stat-label { font-size: 0.8rem; color: var(--poster-pink); text-transform: uppercase; }
+        .stat-val { font-family: 'Orbitron'; font-size: clamp(2rem, 5vw, 4.5rem); color: #fff; text-shadow: 0 0 15px var(--poster-pink); }
 
-        /* Gallery Section */
-        .gallery-area { position: relative; border-left: 1px solid rgba(255,255,255,0.1); }
-        .slide { position: absolute; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 2s ease-in-out; }
-        .slide.active { opacity: 1; }
+        /* Stage */
+        .stage { position: relative; background: rgba(0,0,0,0.4); border: 1px solid rgba(31, 193, 209, 0.2); overflow: hidden; border-radius: 10px; min-height: 400px; }
+        .slide { position: absolute; inset: 0; padding: 20px; opacity: 0; transition: opacity 0.5s; display: flex; flex-direction: column; visibility: hidden; overflow-y: auto; }
+        .slide.active { opacity: 1; z-index: 5; visibility: visible; }
+        .stage-title { font-family: 'Orbitron'; font-size: clamp(1.2rem, 3vw, 2.5rem); color: var(--poster-blue); margin-bottom: 15px; border-bottom: 3px solid var(--poster-blue); width: fit-content; }
 
-        /* Footer Sponsor Scroller */
-        .footer { height: 15vh; background: #000; border-top: 1px solid rgba(31,193,209,0.3); display: flex; align-items: center; overflow: hidden; }
-        .scroller { display: flex; white-space: nowrap; animation: scroll 40s linear infinite; }
-        .scroller img { height: 70px; margin: 0 60px; filter: brightness(0) invert(1); opacity: 0.7; }
+        /* Schedule Grid */
+        .schedule-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .sched-card {
+            background: rgba(209, 31, 183, 0.05); border: 1px solid rgba(209, 31, 183, 0.3);
+            border-radius: 10px; padding: 10px; opacity: 0; display: flex; justify-content: space-between; align-items: center;
+        }
+        .sched-name { font-family: 'Orbitron'; font-size: 1rem; color: var(--poster-blue); font-weight: 800; }
+        .sched-desc { font-size: 0.7rem; color: #ddd; display: block; text-transform: uppercase; }
+        .sched-time { font-family: 'Orbitron'; color: var(--gold); font-size: 0.9rem; text-align: right; margin-left: 5px; }
 
+        /* Mobile Adjustments */
+        @media (max-width: 992px) {
+            .dashboard { grid-template-columns: 1fr; height: auto; }
+            .header { grid-column: 1; justify-content: center; text-align: center; }
+            .sidebar { flex-direction: row; }
+            .schedule-grid { grid-template-columns: 1fr; }
+            .stat-card { padding: 10px; }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar { flex-direction: column; }
+            .logo { font-size: 1.5rem; }
+            .flip-clock { transform: scale(0.8); }
+        }
+
+        /* Confetti/Animations Styles kept as per requirements */
+        .group-tag { font-size: 0.5rem; background: var(--poster-pink); color: white; padding: 1px 4px; border-radius: 3px; margin-left: 4px; animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        @keyframes flyInLeft { from { opacity: 0; transform: translateX(-100px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes flyInRight { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
+        .fly-left { animation: flyInLeft 0.6s forwards; } .fly-right { animation: flyInRight 0.6s forwards; }
+        .list-item { font-size: clamp(1rem, 2vw, 1.5rem); padding: 10px; margin-bottom: 8px; background: rgba(31, 193, 209, 0.05); border-left: 4px solid var(--poster-blue); }
+        .winner-entry { border-left-color: var(--poster-pink); background: rgba(209, 31, 183, 0.1); }
+
+        .footer { grid-column: 1 / span 2; background: #000; border-top: 2px solid var(--poster-blue); display: flex; align-items: center; overflow: hidden; height: 100px; }
+        .scroller { display: flex; align-items: center; white-space: nowrap; animation: scroll 40s linear infinite; }
+        .sponsor-pod { height: 60px; margin: 0 15px; padding: 5px 15px; background: rgba(255, 255, 255, 0.05); border-radius: 8px; display: flex; align-items: center; border: 1px solid rgba(31, 193, 209, 0.1); }
+        .sponsor-pod img { height: 35px; object-fit: contain; }
         @keyframes scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-
-        /* Admin Trigger */
-        .login-trigger { position: fixed; top: 10px; right: 10px; width: 30px; height: 30px; background: transparent; border: none; cursor: pointer; z-index: 100; }
     </style>
 </head>
 <body>
 
-<canvas id="neuralNet"></canvas>
-<button class="login-trigger" onclick="location.href='portal.html'"></button>
+<div class="college-header">Govt. Residential Women's Polytechnic College Payyanur</div>
 
-<div class="live-wrapper">
+<canvas id="neuralNet"></canvas>
+<div class="scanline"></div>
+
+<div class="dashboard">
     <div class="header">
         <div class="logo">SYNAPSE '26</div>
-        <div id="clock" style="font-family: 'Orbitron'; font-size: 2rem; color: var(--neon-blue);">12:00:00 PM</div>
-    </div>
-
-    <div class="main-content">
-        <div class="stats-area">
-            <div class="stat-box">
-                <div class="stat-val" id="paidCount">0</div>
-                <div class="stat-label">Registrations</div>
-            </div>
-            <div class="stat-box" style="border-color: var(--neon-blue);">
-                <div class="stat-val" id="winCount" style="text-shadow: 0 0 15px var(--neon-blue);">0</div>
-                <div class="stat-label" style="color: var(--neon-blue);">Winners</div>
-            </div>
-            <div id="eventTicker" style="margin-top:20px; font-family:'Orbitron'; color:#555; font-size: 0.9rem;">
-                SYNCING LIVE DATA...
-            </div>
-        </div>
-
-        <div class="gallery-area" id="gallery">
-            <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1500" class="slide active">
+        <div class="flip-clock">
+            <div class="flip-card" id="h1">0</div><div class="flip-card" id="h2">0</div>
+            <div class="clock-sep">:</div>
+            <div class="flip-card" id="m1">0</div><div class="flip-card" id="m2">0</div>
+            <div class="clock-sep">:</div>
+            <div class="flip-card" id="s1">0</div><div class="flip-card" id="s2">0</div>
+            <div class="am-pm" id="ampm">AM</div>
         </div>
     </div>
 
-    <div class="footer">
-        <div class="scroller" id="sponsorScroller">
+    <aside class="sidebar">
+        <div class="stat-card"><div class="stat-label">Check-ins</div><div class="stat-val" id="paidCount">0</div></div>
+        <div class="stat-card" style="border-color: var(--poster-blue);"><div class="stat-label" style="color: var(--poster-blue);">Winners</div><div class="stat-val" id="winCount">0</div></div>
+    </aside>
+
+    <main class="stage">
+        <div class="slide active" id="slide-photos">
+            <img id="gallery-img" src="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:-1; filter:brightness(0.35);">
+            <div class="stage-title">LIVE MOMENTS</div>
+        </div>
+
+        <div class="slide" id="slide-schedule">
+            <div class="stage-title">TIMELINE</div>
+            <div class="schedule-grid">
+                <div class="sched-card"><div><span class="sched-name">Glow Craft</span><span class="sched-desc">LED Arduino</span></div><div class="sched-time">10:00 AM</div></div>
+                <div class="sched-card"><div><span class="sched-name">Reverse X</span><span class="sched-desc">Circuitry</span></div><div class="sched-time">10:30 AM</div></div>
+                <div class="sched-card"><div><span class="sched-name">Trail Blaze <span class="group-tag">GRP</span></span><span class="sched-desc">Decode Clues</span></div><div class="sched-time">11:00 AM</div></div>
+                <div class="sched-card"><div><span class="sched-name">Brain 2 Bot</span><span class="sched-desc">AI Prompt</span></div><div class="sched-time">11:45 AM</div></div>
+                <div class="sched-card"><div><span class="sched-name">Titan Trials <span class="group-tag">GRP</span></span><span class="sched-desc">Mgmt Team</span></div><div class="sched-time">01:30 PM</div></div>
+                <div class="sched-card"><div><span class="sched-name">Pixel Clash</span><span class="sched-desc">Designing</span></div><div class="sched-time">02:15 PM</div></div>
+                <div class="sched-card"><div><span class="sched-name">Innosense <span class="group-tag">GRP</span></span><span class="sched-desc">Sensors</span></div><div class="sched-time">03:00 PM</div></div>
+                <div class="sched-card"><div><span class="sched-name">Seminar</span><span class="sched-desc">Tech Showcase</span></div><div class="sched-time">03:45 PM</div></div>
+                <div class="sched-card" style="grid-column: 1 / -1;"><div><span class="sched-name">Play Villa</span><span class="sched-desc">Vibe Room</span></div><div class="sched-time">04:30 PM</div></div>
             </div>
-    </div>
+        </div>
+
+        <div class="slide" id="slide-winners"><div class="stage-title">HALL OF FAME</div><div id="winner-list"></div></div>
+        <div class="slide" id="slide-attendees"><div class="stage-title">ACTIVITY</div><div id="attendee-list"></div></div>
+    </main>
+
+    <footer class="footer"><div class="scroller" id="sponsorScroller"></div></footer>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbwKjrjjrV5hJUrqaP5nWjYAW2HW50y6EI3_k9bfzriS8ktMuAHpYe1i8K6IyPFV-jsndA/exec'; // Replace with your URL
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzb97bG3GTT1wMH7M9j8RDXkoqoFD_MWXFkUZS0przdUO51s-7Zyutn0FbRSRnjjH8X5A/exec';
+    let isWinnerPageActive = false;
 
-    function updateTime() {
-        document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+    function updateClock() {
+        const now = new Date();
+        let hours = now.getHours();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
+        const timeStr = String(hours).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0') + String(now.getSeconds()).padStart(2, '0');
+        ['h1','h2','m1','m2','s1','s2'].forEach((id, i) => {
+            const el = document.getElementById(id);
+            if(el.innerText !== timeStr[i]) {
+                el.style.transform = 'rotateX(90deg)';
+                setTimeout(() => { el.innerText = timeStr[i]; el.style.transform = 'rotateX(0deg)'; }, 150);
+            }
+        });
+        document.getElementById('ampm').innerText = ampm;
     }
-    setInterval(updateTime, 1000);
+    setInterval(updateClock, 1000);
 
     function fetchLiveData() {
-        fetch(`${scriptURL}?action=getLiveTVData`)
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById('paidCount').innerText = data.stats.paid;
-                document.getElementById('winCount').innerText = data.stats.winners;
-                
-                // Update Gallery
-                if(data.photos && data.photos.length > 0) {
-                    const gallery = document.getElementById('gallery');
-                    gallery.innerHTML = data.photos.map((url, i) => `<img src="${url}" class="slide ${i===0?'active':''}">`).join('');
-                    startCarousel();
-                }
+        fetch(`${scriptURL}?action=getLiveTVData`).then(res => res.json()).then(data => {
+            document.getElementById('paidCount').innerText = data.stats.paid || 0;
+            document.getElementById('winCount').innerText = data.stats.winners || 0;
+            if(data.photos?.length > 0) document.getElementById('gallery-img').src = data.photos[Math.floor(Math.random()*data.photos.length)];
+            document.getElementById('winner-list').innerHTML = data.winnerDetails?.length > 0 ? data.winnerDetails.reverse().map(w => `<div class="list-item winner-entry">🏆 ${w}</div>`).join('') : '<div class="list-item">Syncing results...</div>';
+            document.getElementById('attendee-list').innerHTML = data.recentAttendees?.length > 0 ? [...new Set(data.recentAttendees)].reverse().slice(0, 6).map(a => `<div class="list-item">⚡ ${a}</div>`).join('') : '<div class="list-item">Gate active...</div>';
+            if(data.sponsors?.length > 0) {
+                const pods = data.sponsors.map(url => `<div class="sponsor-pod"><img src="${url}"></div>`).join('');
+                document.getElementById('sponsorScroller').innerHTML = pods + pods;
+            }
+        });
+    }
 
-                // Update Sponsors
-                if(data.sponsors && data.sponsors.length > 0) {
-                    const scroller = document.getElementById('sponsorScroller');
-                    const imgHtml = data.sponsors.map(url => `<img src="${url}">`).join('');
-                    scroller.innerHTML = imgHtml + imgHtml; // Duplicate for smooth loop
-                }
+    let currentSlide = 0;
+    const slides = ['slide-photos', 'slide-schedule', 'slide-winners', 'slide-attendees'];
+    function rotateSlides() {
+        document.getElementById(slides[currentSlide]).classList.remove('active');
+        document.querySelectorAll('.sched-card').forEach(c => c.className = 'sched-card');
+        currentSlide = (currentSlide + 1) % slides.length;
+        const nextId = slides[currentSlide];
+        document.getElementById(nextId).classList.add('active');
+        if(nextId === 'slide-schedule') {
+            document.querySelectorAll('.sched-card').forEach((card, i) => {
+                card.style.animationDelay = (i * 0.1) + 's';
+                card.classList.add(i % 2 === 0 ? 'fly-left' : 'fly-right');
             });
+        }
+        isWinnerPageActive = (nextId === 'slide-winners');
+        if (isWinnerPageActive) throwConfetti();
+    }
+    setInterval(rotateSlides, 15000);
+
+    function throwConfetti() {
+        if (!isWinnerPageActive) return;
+        confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0, y: 0.8 }, colors: ['#1fc1d1', '#d11fb7'] });
+        confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1, y: 0.8 }, colors: ['#1fc1d1', '#d11fb7'] });
+        requestAnimationFrame(throwConfetti);
     }
 
-    function startCarousel() {
-        let current = 0;
-        const slides = document.querySelectorAll('.slide');
-        setInterval(() => {
-            slides[current].classList.remove('active');
-            current = (current + 1) % slides.length;
-            slides[current].classList.add('active');
-        }, 8000); // 8 seconds per photo
-    }
-
-    // Neural Net Background
     const canvas = document.getElementById('neuralNet');
     const ctx = canvas.getContext('2d');
     let pts = [];
     function init() {
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        pts = Array.from({length: 60}, () => ({
-            x: Math.random()*canvas.width, y: Math.random()*canvas.height,
-            vx: (Math.random()-0.5)*0.5, vy: (Math.random()-0.5)*0.5
-        }));
+        pts = Array.from({length: 30}, () => ({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3 }));
     }
     function draw() {
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        ctx.fillStyle = "#1fc1d1";
+        ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle = "#1fc1d1";
         pts.forEach(p => {
             p.x += p.vx; p.y += p.vy;
-            if(p.x<0 || p.x>canvas.width) p.vx*=-1;
-            if(p.y<0 || p.y>canvas.height) p.vy*=-1;
+            if(p.x<0 || p.x>canvas.width) p.vx*=-1; if(p.y<0 || p.y>canvas.height) p.vy*=-1;
             ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, Math.PI*2); ctx.fill();
         });
         requestAnimationFrame(draw);
     }
     window.onresize = init; init(); draw();
-
-    // Initial Fetch & Auto Refresh every 60 seconds
-    fetchLiveData();
-    setInterval(fetchLiveData, 60000);
+    fetchLiveData(); setInterval(fetchLiveData, 25000);
 </script>
 </body>
 </html>
