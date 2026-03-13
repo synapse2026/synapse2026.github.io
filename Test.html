@@ -230,16 +230,34 @@
             });
     }
 
-    async function openWinnerCamera() {
-        const wrapper = document.getElementById('cameraWrapper');
-        wrapper.style.display = 'block';
-        document.getElementById('camToggleBtn').style.display = 'none';
-        const isGroup = groupEvents.includes(document.getElementById('eventSelector').value);
-        try {
-            videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment", aspectRatio: isGroup ? 1.33 : 0.75 } });
-            document.getElementById('video').srcObject = videoStream;
-        } catch (err) { alert("Camera Error"); stopCamera(); }
+  async function openWinnerCamera() {
+    const wrapper = document.getElementById('cameraWrapper');
+    wrapper.style.display = 'block';
+    document.getElementById('camToggleBtn').style.display = 'none';
+    const isGroup = groupEvents.includes(document.getElementById('eventSelector').value);
+    
+    // Target High Resolution Constraints
+    const constraints = {
+        video: { 
+            facingMode: "environment", 
+            aspectRatio: isGroup ? 1.3333 : 0.75,
+            width: { ideal: 4096 }, // Requesting 4K/UHD height
+            height: { ideal: 4096 }
+        }
+    };
+
+    try {
+        videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+        document.getElementById('video').srcObject = videoStream;
+    } catch (err) { 
+        alert("Camera Error: Requesting standard resolution instead.");
+        // Fallback to standard high-res if 4K fails
+        videoStream = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: "environment", aspectRatio: isGroup ? 1.333 : 0.75 } 
+        });
+        document.getElementById('video').srcObject = videoStream;
     }
+}
 
     function stopCamera() {
         if (videoStream) videoStream.getTracks().forEach(track => track.stop());
@@ -247,34 +265,70 @@
         document.getElementById('camToggleBtn').style.display = 'block';
     }
 
-    function capturePhoto() {
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const event = document.getElementById('eventSelector').value;
-        const pos = document.getElementById('winnerPosition').value;
-        const btn = document.getElementById('captureBtn');
-        const isGroup = groupEvents.includes(event);
+   function capturePhoto() {
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const event = document.getElementById('eventSelector').value;
+    const pos = document.getElementById('winnerPosition').value;
+    const btn = document.getElementById('captureBtn');
+    const isGroup = groupEvents.includes(event);
 
-        canvas.width = isGroup ? 1600 : 1200;
-        canvas.height = isGroup ? 1200 : 1600;
-        const context = canvas.getContext('2d');
-        context.filter = 'saturate(1.25) brightness(1.1) contrast(1.1)';
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        btn.innerText = "⌛ UPLOADING...";
-        btn.disabled = true;
-
-        fetch(scriptURL, {
-            method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ action: "uploadWinnerPhoto", image: canvas.toDataURL('image/jpeg', 0.9), event: event, position: pos })
-        }).then(() => {
-            alert(`✅ Photo Uploaded for ${pos}`);
-            btn.disabled = false; btn.innerText = "SNAP & UPLOAD";
-            stopCamera();
-            fetchParticipants();
-        });
+    // ENFORCING HIGH RESOLUTION 4:3 vs 3:4
+    if (isGroup) {
+        // Landscape: Horizontal 4, Vertical 3 (Ultra HD)
+        canvas.width = 3200; 
+        canvas.height = 2400; 
+    } else {
+        // Portrait: Horizontal 3, Vertical 4 (Ultra HD)
+        canvas.width = 2400; 
+        canvas.height = 3200; 
     }
+
+    const context = canvas.getContext('2d');
+    
+    // NOISE REDUCTION & QUALITY SETTINGS
+    context.imageSmoothingEnabled = true;
+    context.imageSmoothingQuality = 'high';
+    
+    // REMOVED ARTIFICIAL FILTERS to reduce noise/grain
+    context.filter = 'none'; 
+
+    const targetRatio = isGroup ? 4/3 : 3/4;
+    const vW = video.videoWidth;
+    const vH = video.videoHeight;
+    let sX = 0, sY = 0, sW = vW, sH = vH;
+
+    // Calculate center-crop to preserve Aspect Ratio
+    if ((vW / vH) > targetRatio) {
+        sW = vH * targetRatio;
+        sX = (vW - sW) / 2;
+    } else {
+        sH = vW / targetRatio;
+        sY = (vH - sH) / 2;
+    }
+
+    // Draw frame
+    context.drawImage(video, sX, sY, sW, sH, 0, 0, canvas.width, canvas.height);
+    
+    // UI Feedback
+    btn.innerText = "⌛ UPLOADING HIGH-RES...";
+    btn.disabled = true;
+
+    // Save as JPEG with 0.92 quality (Sweet spot for high detail vs low noise)
+    const imageData = canvas.toDataURL('image/jpeg', 0.92);
+
+    fetch(scriptURL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "uploadWinnerPhoto", image: imageData, event: event, position: pos })
+    }).then(() => {
+        alert(`✅ High-Resolution Photo Secured for ${pos}`);
+        btn.disabled = false; 
+        btn.innerText = "SNAP & UPLOAD";
+        stopCamera();
+        fetchParticipants();
+    });
+}
 
     function exportTablePDF(tableId, fileName) {
         const { jsPDF } = window.jspdf;
