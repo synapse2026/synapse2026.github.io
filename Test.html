@@ -188,28 +188,44 @@
             });
     }
 
-    function loadGallery(eventName) {
-        const gallery = document.getElementById('winnerGallery');
-        gallery.innerHTML = "<p class='small text-white-50'>Loading media...</p>";
-        
-        fetch(`${scriptURL}?action=getLiveTVData`)
-            .then(res => res.json())
-            .then(data => {
-                gallery.innerHTML = "";
-                const isGroup = groupEvents.includes(eventName);
-                data.photos.reverse().forEach(url => {
-                    // Check if URL includes the event name (case insensitive)
-                    if(url.toLowerCase().includes(eventName.toLowerCase().replace(/ /g, "_"))) {
-                        gallery.innerHTML += `
-                            <div class="gallery-item ${isGroup ? 'landscape' : ''}">
-                                <img src="${url}" loading="lazy">
-                                <div class="gallery-tag">${eventName}</div>
-                            </div>`;
-                    }
-                });
-                if(gallery.innerHTML === "") gallery.innerHTML = "<p class='small text-white-50'>No photos uploaded for this event yet.</p>";
+   function loadGallery(eventName) {
+    const gallery = document.getElementById('winnerGallery');
+    gallery.innerHTML = "<div class='text-center w-100'><p class='small text-white-50'>🔍 Scanning Drive for media...</p></div>";
+    
+    fetch(`${scriptURL}?action=getLiveTVData`)
+        .then(res => res.json())
+        .then(data => {
+            gallery.innerHTML = "";
+            const isGroup = groupEvents.includes(eventName);
+            
+            // Clean names for matching (remove spaces/special chars)
+            const cleanEventName = eventName.toLowerCase().replace(/\s+/g, '');
+
+            const filteredPhotos = data.photos.filter(url => {
+                const cleanUrl = url.toLowerCase();
+                // Match "Trail Blaze", "Trail_Blaze", or "trailblaze"
+                return cleanUrl.includes(eventName.toLowerCase().replace(/ /g, "_")) || 
+                       cleanUrl.includes(eventName.toLowerCase().replace(/ /g, "%20")) ||
+                       cleanUrl.includes(cleanEventName);
             });
-    }
+
+            if(filteredPhotos.length > 0) {
+                // Show latest photos first
+                filteredPhotos.reverse().forEach(url => {
+                    gallery.innerHTML += `
+                        <div class="gallery-item ${isGroup ? 'landscape' : ''}">
+                            <img src="${url}" alt="Winner" onerror="this.src='https://placehold.co/400x600?text=Private+File'">
+                            <div class="gallery-tag">${eventName}</div>
+                        </div>`;
+                });
+            } else {
+                gallery.innerHTML = "<div class='text-center w-100'><p class='small text-white-50'>No photos found for this event yet.</p></div>";
+            }
+        })
+        .catch(err => {
+            gallery.innerHTML = "<p class='small text-danger'>Gallery Sync Error</p>";
+        });
+}
 
     async function openWinnerCamera() {
         const event = document.getElementById('eventSelector').value;
