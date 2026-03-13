@@ -27,7 +27,6 @@
         #cameraWrapper { background: #000; border-radius: 15px; padding: 10px; border: 1px solid var(--neon-blue); display: none; margin-top: 15px;}
         #cameraContainer { position: relative; width: 100%; overflow: hidden; background: #000; border-radius: 10px; transition: all 0.3s ease; }
         
-        /* FIX: DYNAMIC SCREEN BOXES */
         .portrait-frame { aspect-ratio: 3 / 4 !important; }
         .landscape-frame { aspect-ratio: 4 / 3 !important; }
 
@@ -35,7 +34,6 @@
         .camera-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: 20px solid rgba(0,0,0,0.6); pointer-events: none; }
         .camera-frame { width: 100%; height: 100%; border: 2px dashed var(--neon-blue); }
         
-        /* Gallery Styles */
         .winner-gallery { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
         .gallery-item { position: relative; border-radius: 10px; overflow: hidden; border: 1px solid var(--neon-blue); background: #222; }
         .gallery-item.portrait { aspect-ratio: 3/4; }
@@ -190,50 +188,40 @@
     }
 
     function loadGallery(eventName) {
-    const gallery = document.getElementById('winnerGallery');
-    gallery.innerHTML = "<div class='text-center w-100'><p class='small text-white-50'>🔍 Scanning media...</p></div>";
-    const targetEvent = eventName.trim();
+        const gallery = document.getElementById('winnerGallery');
+        gallery.innerHTML = "<div class='text-center w-100'><p class='small text-white-50'>🔍 Scanning media...</p></div>";
+        const targetEvent = eventName.trim();
 
-    fetch(`${scriptURL}?action=getLiveTVData`)
-        .then(res => res.json())
-        .then(data => {
-            gallery.innerHTML = "";
-            const isGroup = groupEvents.includes(targetEvent);
-            
-            // Filter photos based on the new {url, event} object structure
-            const filteredPhotos = data.photos.filter(item => {
-                if (typeof item === 'object' && item.event) {
-                    return item.event.trim() === targetEvent;
-                }
-                return false;
-            });
-
-            if(filteredPhotos.length > 0) {
-                filteredPhotos.reverse().forEach(item => {
-                    // Extract the URL from the object
-                    let imgUrl = item.url;
-
-                    // Ensure we handle URL encoding and add a cache buster to force refresh
-                    const finalUrl = imgUrl + (imgUrl.includes('?') ? '&' : '?') + "t=" + new Date().getTime();
-                    
-                    gallery.innerHTML += `
-                        <div class="gallery-item ${isGroup ? 'landscape' : 'portrait'}">
-                            <img src="${finalUrl}" 
-                                 loading="lazy" 
-                                 onerror="this.src='https://placehold.co/400x600?text=Reloading...'; setTimeout(()=>this.src='${finalUrl}', 2000);"
-                                 style="width:100%; height:100%; object-fit:cover;">
-                            <div class="gallery-tag">${targetEvent}</div>
-                        </div>`;
+        fetch(`${scriptURL}?action=getLiveTVData`)
+            .then(res => res.json())
+            .then(data => {
+                gallery.innerHTML = "";
+                const isGroup = groupEvents.includes(targetEvent);
+                
+                const filteredPhotos = data.photos.filter(item => {
+                    if (typeof item === 'object' && item.event) {
+                        return item.event.trim() === targetEvent;
+                    }
+                    return false;
                 });
-            } else {
-                gallery.innerHTML = "<div class='text-center w-100'><p class='small text-white-50'>No photos found for this event.</p></div>";
-            }
-        })
-        .catch(err => {
-            console.error("Gallery Sync Error:", err);
-            gallery.innerHTML = "<p class='small text-danger'>Sync Error. Please refresh.</p>";
-        });
-}
+
+                if(filteredPhotos.length > 0) {
+                    filteredPhotos.reverse().forEach(item => {
+                        let imgUrl = item.url;
+                        const finalUrl = imgUrl + (imgUrl.includes('?') ? '&' : '?') + "t=" + new Date().getTime();
+                        
+                        gallery.innerHTML += `
+                            <div class="gallery-item ${isGroup ? 'landscape' : 'portrait'}">
+                                <img src="${finalUrl}" loading="lazy" style="width:100%; height:100%; object-fit:cover;"
+                                     onerror="this.src='https://placehold.co/400x600?text=Syncing...'">
+                                <div class="gallery-tag">${targetEvent}</div>
+                            </div>`;
+                    });
+                } else {
+                    gallery.innerHTML = "<div class='text-center w-100'><p class='small text-white-50'>No photos found for this event.</p></div>";
+                }
+            });
+    }
 
     async function openWinnerCamera() {
         const event = document.getElementById('eventSelector').value;
@@ -241,7 +229,6 @@
         const container = document.getElementById('cameraContainer');
         const isGroup = groupEvents.includes(event);
         
-        // FIX: Force dynamic box shape on screen
         container.classList.remove('portrait-frame', 'landscape-frame');
         container.classList.add(isGroup ? "landscape-frame" : "portrait-frame");
         
@@ -279,17 +266,28 @@
         else { sH = sW / targetRatio; sY = (video.videoHeight - sH) / 2; }
 
         context.drawImage(video, sX, sY, sW, sH, 0, 0, canvas.width, canvas.height);
+        
+        const imageData = canvas.toDataURL('image/jpeg', 0.9);
         btn.innerText = "⌛ UPLOADING..."; btn.disabled = true;
 
         fetch(scriptURL, {
             method: "POST",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ action: "uploadWinnerPhoto", image: canvas.toDataURL('image/jpeg', 0.9), event: event, position: pos })
-        }).then(() => {
-            alert(`✅ Photo Secured!`);
+            body: JSON.stringify({ 
+                action: "uploadWinnerPhoto", 
+                image: imageData, 
+                event: event, 
+                position: pos 
+            })
+        }).then(response => response.text())
+          .then(result => {
+            alert(`✅ Photo Secured & Logged!`);
             btn.disabled = false; btn.innerText = "SNAP & UPLOAD";
             stopCamera();
             fetchParticipants();
+        }).catch(err => {
+            alert("Upload failed. Check connection.");
+            btn.disabled = false; btn.innerText = "SNAP & UPLOAD";
         });
     }
 
@@ -323,15 +321,18 @@
     }
 
     function toggleAll(source) { document.querySelectorAll('.user-check:not([disabled])').forEach(c => c.checked = source.checked); }
+    
     function startWinnerScan() {
         const reader = document.getElementById('reader'); reader.style.display = 'block';
         html5QrCode.start({ facingMode: 'environment' }, { fps: 15, qrbox: 250 }, (mobile) => {
             html5QrCode.stop().then(() => { reader.style.display = 'none'; processWinnerUpdate(mobile); });
         });
     }
+    
     function handleWinnerManualPrompt() {
         const mob = prompt("Enter Mobile:"); if(mob) processWinnerUpdate(mob);
     }
+    
     function processWinnerUpdate(mobile) {
         const pos = document.getElementById('winnerPosition').value;
         const event = document.getElementById('eventSelector').value;
@@ -342,6 +343,7 @@
         fetch(`${scriptURL}?action=markWinner&mobile=${mobile}&position=${pos}&event=${event}`)
             .then(() => { alert("Winner Marked!"); fetchParticipants(); });
     }
+    
     function exportTablePDF(tableId, fileName) {
         const { jsPDF } = window.jspdf; const doc = new jsPDF('l', 'mm', 'a4');
         const event = document.getElementById('eventSelector').value;
