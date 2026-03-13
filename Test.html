@@ -18,15 +18,11 @@
         .section-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 15px; margin-bottom: 20px; }
         .form-select, .form-control { background: rgba(0,0,0,0.5) !important; color: #fff !important; border: 1px solid #444; }
         .scrollable-container { max-height: 350px; overflow-y: auto; border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 10px; }
-        .table thead th { position: sticky; top: 0; background: #0d1117; z-index: 2; color: var(--neon-blue); font-family: 'Orbitron'; font-size: 0.7rem; border-bottom: 2px solid var(--neon-blue); }
         .table { color: #fff; border-color: rgba(255,255,255,0.1); font-size: 0.85rem; }
-        .bg-present { background: rgba(46, 213, 115, 0.2); color: #2ed573; border: 1px solid #2ed573; padding: 2px 5px; border-radius: 4px; font-weight: 700; font-size: 0.65rem; }
         .label-cyber { color: var(--neon-blue); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; display: block; }
         .btn-cyber { font-family: 'Orbitron', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-        .info-sub { color: #aaa; font-size: 0.75rem; line-height: 1.2; display: block; margin-top: 2px; }
-        #reader { border: 2px solid var(--neon-pink); border-radius: 15px; overflow: hidden; background: #000; display: none; margin-bottom: 15px; }
-
-        /* Camera UI - 3:4 Aspect Ratio */
+        
+        /* 3:4 PORTRAIT CAMERA UI WITH ENHANCEMENTS */
         #cameraWrapper { background: #000; border-radius: 15px; padding: 10px; border: 1px solid var(--neon-blue); display: none; margin-top: 15px;}
         #cameraContainer { 
             position: relative; 
@@ -36,16 +32,23 @@
             background: #000;
             border-radius: 10px;
         }
-        #video { width: 100%; height: 100%; object-fit: cover; }
+        #video { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            /* Color Enhancements */
+            filter: saturate(1.25) brightness(1.1) contrast(1.1); 
+        }
         .camera-overlay { 
             position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
-            border: 25px solid rgba(0,0,0,0.7); pointer-events: none; 
+            border: 20px solid rgba(0,0,0,0.6); pointer-events: none; 
         }
         .camera-frame { 
             width: 100%; height: 100%; 
             border: 2px dashed var(--neon-blue); 
-            box-shadow: 0 0 15px var(--neon-blue); 
+            box-shadow: 0 0 15px rgba(31, 193, 209, 0.4); 
         }
+        #reader { border: 2px solid var(--neon-pink); border-radius: 15px; overflow: hidden; display: none; margin-bottom: 15px; }
     </style>
 </head>
 <body>
@@ -61,31 +64,17 @@
         <select id="eventSelector" class="form-select shadow-none" onchange="fetchParticipants()">
             <option selected disabled>Loading Events...</option>
         </select>
-        <div id="loader" class="text-center mt-3 d-none" style="color: var(--neon-blue); font-family: 'Orbitron'; font-size: 0.8rem;">SYNCING DATABASE...</div>
+        <div id="loader" class="text-center mt-3 d-none" style="color: var(--neon-blue); font-family: 'Orbitron'; font-size: 0.8rem;">SYNCING...</div>
     </div>
 
     <div class="section-card d-none" id="attendanceSection">
-        <h5 class="mb-3" id="eventTitle" style="font-size: 0.9rem;">Paid Attendees</h5>
-        <input type="text" id="attendeeSearch" class="form-control mb-3 shadow-none" placeholder="🔍 Search Name or Mobile..." onkeyup="filterTable()">
-
+        <h5 class="mb-3" id="eventTitle" style="font-size: 0.9rem;">Attendees</h5>
         <div class="scrollable-container">
             <table class="table table-dark table-hover mb-0" id="participantTable">
-                <thead>
-                    <tr>
-                        <th width="30">SL</th>
-                        <th width="30"><input type="checkbox" id="selectAll" onclick="toggleAll(this)"></th>
-                        <th>Participant Info</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
                 <tbody id="participantBody"></tbody>
             </table>
         </div>
-        
-        <div class="mt-2">
-            <button class="btn btn-success w-100 mb-2 btn-cyber py-2" onclick="submitBulkAttendance()">✅ Mark Selected Present</button>
-            <button class="btn btn-outline-info w-100 btn-cyber py-2" onclick="exportTablePDF('participantTable', 'Attendee_List')">📥 Export Attendee PDF</button>
-        </div>
+        <button class="btn btn-success w-100 mb-2 btn-cyber" onclick="submitBulkAttendance()">✅ Mark Present</button>
     </div>
 
     <div class="section-card">
@@ -101,105 +90,69 @@
                 </select>
             </div>
             
-            <div id="winnerInputArea" class="col-12">
-                <div class="row g-2" id="individualWinnerBtns">
-                    <div class="col-6">
-                        <button onclick="startWinnerScan()" class="btn btn-warning w-100 btn-cyber py-2">📸 SCAN</button>
-                    </div>
-                    <div class="col-6">
-                        <button onclick="handleWinnerManualPrompt()" class="btn btn-outline-warning w-100 btn-cyber py-2">⌨ MANUAL</button>
-                    </div>
-                </div>
-                <div id="teamWinnerArea" class="d-none">
-                    <span class="label-cyber">SELECT WINNING TEAM</span>
-                    <select id="teamWinnerSelector" class="form-select border-warning mb-2 shadow-none"></select>
-                    <button onclick="submitTeamWinner()" class="btn btn-warning w-100 btn-cyber py-2">🏆 MARK TEAM AS WINNER</button>
-                </div>
-            </div>
+            <div class="col-6"><button onclick="startWinnerScan()" class="btn btn-warning w-100 btn-cyber">📸 SCAN QR</button></div>
+            <div class="col-6"><button onclick="handleWinnerManualPrompt()" class="btn btn-outline-warning w-100 btn-cyber">⌨ MANUAL</button></div>
 
-            <div class="col-12 mt-3">
+            <div class="col-12 mt-4">
                 <span class="label-cyber">WINNER MEDIA (PORTRAIT 3:4)</span>
-                <button id="camToggleBtn" onclick="openWinnerCamera()" class="btn btn-outline-info w-100 btn-cyber">📷 CAPTURE WINNER PHOTO</button>
+                <button id="camToggleBtn" onclick="openWinnerCamera()" class="btn btn-outline-info w-100 btn-cyber">📷 OPEN CAMERA</button>
                 
                 <div id="cameraWrapper">
                     <div id="cameraContainer">
                         <video id="video" autoplay playsinline></video>
                         <div class="camera-overlay"><div class="camera-frame"></div></div>
                     </div>
-                    <button onclick="capturePhoto()" class="btn btn-info w-100 btn-cyber mt-3 py-2">SNAP & UPLOAD TO DRIVE</button>
-                    <button onclick="stopCamera()" class="btn btn-link text-white-50 w-100 mt-2 btn-sm">Cancel Camera</button>
+                    <button id="captureBtn" onclick="capturePhoto()" class="btn btn-info w-100 btn-cyber mt-3 py-2">SNAP & UPLOAD</button>
+                    <button onclick="stopCamera()" class="btn btn-link text-white-50 w-100 mt-2 btn-sm">Close Camera</button>
                 </div>
-                <canvas id="canvas" class="d-none"></canvas>
             </div>
         </div>
     </div>
 
     <div class="section-card d-none" id="winnerSection">
         <h5 class="mb-3" style="font-size: 0.9rem;">Result Board</h5>
-        <div class="table-responsive">
-            <table class="table table-bordered border-secondary" id="winnerTable">
-                <thead class="table-dark text-warning">
-                    <tr><th>Pos</th><th>Winner Info</th></tr>
-                </thead>
-                <tbody id="winnerBody"></tbody>
-            </table>
-        </div>
-        <button class="btn btn-outline-warning w-100 btn-cyber py-2 mt-2" onclick="exportTablePDF('winnerTable', 'Winners_Report')">📥 Export Winners PDF</button>
+        <table class="table table-bordered border-secondary" id="winnerTable">
+            <tbody id="winnerBody"></tbody>
+        </table>
     </div>
+
+    <canvas id="canvas" class="d-none"></canvas>
 </div>
 
 <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbzb97bG3GTT1wMH7M9j8RDXkoqoFD_MWXFkUZS0przdUO51s-7Zyutn0FbRSRnjjH8X5A/exec';
-   
-    
+    const scriptURL = 'YOUR_APPS_SCRIPT_URL_HERE'; 
     const allEvents = ["Glow Craft", "Reverse X", "Trail Blaze", "Brain 2 Bot", "Titan Trials", "Pixel Clash", "Innosense", "Seminar Presentation", "Play villa"];
-    const groupEvents = ["Trail Blaze", "Titan Trials", "Innosense"];
     
-    const html5QrCode = new Html5Qrcode("reader");
-    let currentData = [];
     let videoStream = null;
+    const html5QrCode = new Html5Qrcode("reader");
 
     window.onload = () => {
         const selector = document.getElementById('eventSelector');
         selector.innerHTML = '<option selected disabled>Choose Event...</option>';
-        allEvents.forEach(evt => {
-            selector.innerHTML += `<option value="${evt}">${evt}</option>`;
-        });
+        allEvents.forEach(evt => selector.innerHTML += `<option value="${evt}">${evt}</option>`);
     };
 
-    // --- CAMERA & PHOTO UPLOAD LOGIC ---
-async function openWinnerCamera() {
-    const wrapper = document.getElementById('cameraWrapper');
-    wrapper.style.display = 'block';
-    document.getElementById('camToggleBtn').style.display = 'none';
-    
-    try {
-        // Requesting higher resolution for better focus and clarity
-        const constraints = {
-            video: { 
-                facingMode: "environment", 
-                aspectRatio: 0.75,
-                width: { ideal: 1920 }, // Request Full HD if available
-                height: { ideal: 2560 },
-                focusMode: "continuous" // Try to force continuous autofocus
-            }
-        };
-
-        videoStream = await navigator.mediaDevices.getUserMedia(constraints);
-        const video = document.getElementById('video');
-        video.srcObject = videoStream;
-
-        // Apply advanced constraints for focus if the browser supports it
-        const track = videoStream.getVideoTracks()[0];
-        const capabilities = track.getCapabilities();
-        if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
-            await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] });
+    // --- ENHANCED CAMERA LOGIC ---
+    async function openWinnerCamera() {
+        const wrapper = document.getElementById('cameraWrapper');
+        wrapper.style.display = 'block';
+        document.getElementById('camToggleBtn').style.display = 'none';
+        
+        try {
+            videoStream = await navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: "environment", 
+                    aspectRatio: 0.75,
+                    width: { ideal: 1920 }, // High res request
+                    height: { ideal: 2560 }
+                } 
+            });
+            document.getElementById('video').srcObject = videoStream;
+        } catch (err) {
+            alert("Camera Error: " + err.message);
+            stopCamera();
         }
-    } catch (err) {
-        alert("Camera Access Error: " + err.message);
-        stopCamera();
     }
-}
 
     function stopCamera() {
         if (videoStream) videoStream.getTracks().forEach(track => track.stop());
@@ -208,83 +161,52 @@ async function openWinnerCamera() {
     }
 
     function capturePhoto() {
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const context = canvas.getContext('2d');
-    const snapBtn = document.querySelector("#cameraWrapper button.btn-info");
-    const event = document.getElementById('eventSelector').value;
-    const pos = document.getElementById('winnerPosition').value;
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        const btn = document.getElementById('captureBtn');
+        const event = document.getElementById('eventSelector').value;
+        const pos = document.getElementById('winnerPosition').value;
 
-    if(!event || event.includes("Choose")) return alert("Please select an event!");
+        if(!event || event.includes("Choose")) return alert("Select event first!");
 
-    // UI Feedback
-    snapBtn.disabled = true;
-    snapBtn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> ⌛ PROCESSING...`;
+        // 1. High Resolution Output (1200x1600)
+        canvas.width = 1200;
+        canvas.height = 1600;
+        context.imageSmoothingEnabled = true;
+        context.imageSmoothingQuality = 'high';
 
-    // 1. INCREASE RESOLUTION for higher quality (Double the previous size)
-    canvas.width = 1200;
-    canvas.height = 1600;
+        // 2. Crop logic
+        const vW = video.videoWidth;
+        const vH = video.videoHeight;
+        const targetRatio = 3/4;
+        let sX = 0, sY = 0, sW = vW, sH = vH;
 
-    // 2. Enable Smoothing for better quality
-    context.imageSmoothingEnabled = true;
-    context.imageSmoothingQuality = 'high';
+        if ((vW / vH) > targetRatio) {
+            sW = vH * targetRatio;
+            sX = (vW - sW) / 2;
+        } else {
+            sH = vW / targetRatio;
+            sY = (vH - sH) / 2;
+        }
 
-    const vW = video.videoWidth;
-    const vH = video.videoHeight;
-    const targetRatio = 3/4;
-    
-    let sX = 0, sY = 0, sW = vW, sH = vH;
+        // 3. Draw with CSS-like filters manually applied via canvas if needed, 
+        // but browsers usually bake 'filter' into drawImage if applied to the video element.
+        context.filter = 'saturate(1.25) brightness(1.1) contrast(1.1)';
+        context.drawImage(video, sX, sY, sW, sH, 0, 0, canvas.width, canvas.height);
+        
+        const imageData = canvas.toDataURL('image/jpeg', 0.9);
+        
+        // 4. RESET BUTTON IMMEDIATELY for the next capture
+        btn.innerText = "UPLOADING...";
+        btn.disabled = true;
 
-    if ((vW / vH) > targetRatio) {
-        sW = vH * targetRatio;
-        sX = (vW - sW) / 2;
-    } else {
-        sH = vW / targetRatio;
-        sY = (vH - sH) / 2;
+        uploadPhoto(imageData, event, pos, btn);
     }
 
-    // Draw the high-quality crop
-    context.drawImage(video, sX, sY, sW, sH, 0, 0, canvas.width, canvas.height);
-    
-    // 3. Increase JPEG quality to 0.9 (90% quality)
-    const base64Data = canvas.toDataURL('image/jpeg', 0.9);
-    
-    uploadPhoto(base64Data, event, pos, snapBtn);
-}
-
-function uploadPhoto(img, event, pos, btn) {
-    document.getElementById('loader').innerText = "SENDING TO GOOGLE DRIVE...";
-
-    fetch(scriptURL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            action: "uploadWinnerPhoto",
-            image: img,
-            event: event,
-            position: pos
-        })
-    }).then(() => {
-        // Success Logic
-        alert(`✅ SUCCESS!\nPhoto secured for ${event} - ${pos}`);
-        document.getElementById('loader').classList.add('d-none');
-        
-        // Reset Button
-        btn.disabled = false;
-        btn.innerText = "SNAP & UPLOAD TO DRIVE";
-        
-        stopCamera();
-    }).catch(err => {
-        alert("Upload Failed: " + err);
-        btn.disabled = false;
-        btn.innerText = "SNAP & UPLOAD TO DRIVE";
-        document.getElementById('loader').classList.add('d-none');
-    });
-}
-    function uploadPhoto(img, event, pos) {
+    function uploadPhoto(img, event, pos, btn) {
         document.getElementById('loader').classList.remove('d-none');
-        document.getElementById('loader').innerText = "UPLOADING TO DRIVE...";
+        document.getElementById('loader').innerText = "DRIVE UPLOAD IN PROGRESS...";
 
         fetch(scriptURL, {
             method: "POST",
@@ -297,103 +219,52 @@ function uploadPhoto(img, event, pos, btn) {
                 position: pos
             })
         }).then(() => {
-            alert(`SUCCESS: Photo uploaded for ${event} - ${pos}`);
+            alert(`✅ Photo Secured for ${pos}`);
             document.getElementById('loader').classList.add('d-none');
-            stopCamera();
+            // Reset button state for next winner
+            btn.disabled = false;
+            btn.innerText = "SNAP & UPLOAD NEXT";
         }).catch(err => {
-            alert("Error: " + err);
-            document.getElementById('loader').classList.add('d-none');
+            alert("Upload Error: " + err);
+            btn.disabled = false;
+            btn.innerText = "RETRY SNAP";
         });
     }
 
-    // --- PRE-EXISTING DATA LOGIC ---
+    // --- DATA LOGIC ---
     function fetchParticipants() {
         const event = document.getElementById('eventSelector').value;
-        const body = document.getElementById('participantBody');
-        const loader = document.getElementById('loader');
-        
-        loader.classList.remove('d-none');
-        loader.innerText = "SYNCING DATABASE...";
-        body.innerHTML = "";
-        
-        if(groupEvents.includes(event)) {
-            document.getElementById('individualWinnerBtns').classList.add('d-none');
-            document.getElementById('teamWinnerArea').classList.remove('d-none');
-        } else {
-            document.getElementById('individualWinnerBtns').classList.remove('d-none');
-            document.getElementById('teamWinnerArea').classList.add('d-none');
-        }
-
+        document.getElementById('loader').classList.remove('d-none');
         fetch(`${scriptURL}?action=getEventList&event=${event}`)
             .then(res => res.json())
             .then(data => {
-                currentData = data;
-                loader.classList.add('d-none');
+                document.getElementById('loader').classList.add('d-none');
                 document.getElementById('attendanceSection').classList.remove('d-none');
                 document.getElementById('winnerSection').classList.remove('d-none');
-                document.getElementById('winnerBody').innerHTML = "";
-
-                const teamSet = new Set();
-                data.forEach((p, index) => {
-                    const allAtt = (p.eventStatus || "").split('|');
-                    const isPresentForEvent = allAtt.some(a => a.trim() === event + ": PRESENT");
-                    if(isPresentForEvent && p.teamName) teamSet.add(p.teamName);
-                    body.innerHTML += `<tr><td>${index+1}</td><td><input type="checkbox" class="user-check form-check-input" value="${p.mobile}" data-name="${p.name}" ${isPresentForEvent ? 'disabled' : ''}></td><td><strong>${p.name}</strong> ${p.teamName ? `<br><small class="text-warning">[${p.teamName}]</small>` : ''}<span class="info-sub">${p.mobile} | ${p.dept}</span><span class="info-sub" style="color: var(--neon-blue)">${p.college}</span></td><td><span class="${isPresentForEvent ? 'bg-present' : 'text-white-50 small'}">${isPresentForEvent ? 'PRESENT' : 'ABSENT'}</span></td></tr>`;
-                    if(p.winnerStatus) {
-                        const specificWin = p.winnerStatus.split('|').find(win => win.trim().startsWith(event + ":"));
-                        if (specificWin) {
-                            document.getElementById('winnerBody').innerHTML += `<tr><td class="text-warning fw-bold small">${specificWin.trim()}</td><td><strong>${p.name}</strong><span class="info-sub">${p.mobile} | ${p.dept}</span></td></tr>`;
-                        }
+                const body = document.getElementById('participantBody');
+                const winnerBody = document.getElementById('winnerBody');
+                body.innerHTML = ""; winnerBody.innerHTML = "";
+                data.forEach(p => {
+                    const isPresent = (p.eventStatus || "").includes(event + ": PRESENT");
+                    body.innerHTML += `<tr><td><input type="checkbox" class="user-check" value="${p.mobile}" ${isPresent?'disabled':''}></td><td>${p.name}<br><small>${p.mobile}</small></td></tr>`;
+                    if(p.winnerStatus && p.winnerStatus.includes(event)) {
+                        winnerBody.innerHTML += `<tr><td class="text-warning">${p.winnerStatus}</td><td>${p.name}</td></tr>`;
                     }
                 });
-
-                const teamSelect = document.getElementById('teamWinnerSelector');
-                teamSelect.innerHTML = '<option disabled selected>Select Winning Team...</option>';
-                teamSet.forEach(t => teamSelect.innerHTML += `<option value="${t}">${t}</option>`);
             });
-    }
-
-    function filterTable() {
-        const input = document.getElementById('attendeeSearch').value.toUpperCase();
-        const rows = document.getElementById('participantBody').getElementsByTagName('tr');
-        for (let i = 0; i < rows.length; i++) {
-            const text = rows[i].innerText.toUpperCase();
-            rows[i].style.display = text.indexOf(input) > -1 ? "" : "none";
-        }
-    }
-
-    function toggleAll(source) { document.querySelectorAll('.user-check:not([disabled])').forEach(c => c.checked = source.checked); }
-
-    function submitBulkAttendance() {
-        const event = document.getElementById('eventSelector').value;
-        const selectedElements = Array.from(document.querySelectorAll('.user-check:checked'));
-        const mobiles = selectedElements.map(c => c.value);
-        const names = selectedElements.map(c => c.getAttribute('data-name'));
-        if(mobiles.length === 0) return alert("Select students!");
-        let teamName = "";
-        if(groupEvents.includes(event)) {
-            teamName = prompt(`Assign team for ${event}.\nSelected: ${names.join(", ")}`);
-            if(!teamName) return alert("A team name is required for group events.");
-        }
-        if(!confirm(`Mark ${mobiles.length} participants as PRESENT for ${event}?`)) return;
-        const url = `${scriptURL}?action=bulkMarkAttendanceWithTeam&mobiles=${mobiles.join(",")}&event=${event}&team=${encodeURIComponent(teamName)}`;
-        fetch(url).then(r => r.text()).then(res => {
-            alert(`SUCCESS!\n${event} Attendance Marked.`);
-            fetchParticipants();
-        });
     }
 
     function startWinnerScan() {
         const reader = document.getElementById('reader');
         reader.style.display = 'block';
-        html5QrCode.start({ facingMode: 'environment' }, { fps: 15, qrbox: 250 }, (mobile) => {
+        html5QrCode.start({ facingMode: 'environment' }, { fps: 10, qrbox: 250 }, (mobile) => {
             html5QrCode.stop().then(() => { reader.style.display = 'none'; processWinnerUpdate(mobile); });
         });
     }
 
     function handleWinnerManualPrompt() {
         const mob = prompt("Enter Participant Mobile:");
-        if(mob && mob.length >= 10) processWinnerUpdate(mob);
+        if(mob) processWinnerUpdate(mob);
     }
 
     function processWinnerUpdate(mobile) {
@@ -401,31 +272,6 @@ function uploadPhoto(img, event, pos, btn) {
         const event = document.getElementById('eventSelector').value;
         fetch(`${scriptURL}?action=markWinner&mobile=${mobile}&position=${pos}&event=${event}`)
             .then(r => r.text()).then(res => { alert(res); fetchParticipants(); });
-    }
-
-    function exportTablePDF(tableId, fileName) {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('l', 'mm', 'a4');
-        const event = document.getElementById('eventSelector').value;
-        doc.setFontSize(18); doc.setTextColor(31, 193, 209);
-        doc.text(`SYNAPSE 2026: ${event}`, 14, 15);
-        const rows = [];
-        if (tableId === 'participantTable') {
-            currentData.forEach((p, i) => {
-                const isPresent = (p.eventStatus || "").includes(event + ": PRESENT");
-                rows.push([i+1, p.name, p.mobile, p.college, p.dept, p.teamName || 'N/A', isPresent ? 'PRESENT' : 'ABSENT']);
-            });
-            doc.autoTable({ head: [['SL', 'Name', 'Mobile', 'College', 'Dept', 'Team', 'Status']], body: rows, startY: 25, theme: 'grid', headStyles: { fillColor: [31, 193, 209], textColor: [0, 0, 0] } });
-        } else {
-            currentData.forEach((p, i) => {
-                if(p.winnerStatus) {
-                    const specificWin = p.winnerStatus.split('|').find(w => w.trim().startsWith(event + ":"));
-                    if(specificWin) rows.push([rows.length + 1, specificWin.trim(), p.name, p.mobile, p.college, p.teamName || 'N/A']);
-                }
-            });
-            doc.autoTable({ head: [['SL', 'Position', 'Name', 'Mobile', 'College', 'Team']], body: rows, startY: 25, theme: 'grid', headStyles: { fillColor: [255, 193, 7], textColor: [0, 0, 0] } });
-        }
-        doc.save(`${fileName}_${event}.pdf`);
     }
 </script>
 </body>
