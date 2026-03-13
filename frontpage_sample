@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYNAPSE 2026</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+
+    <style>
+        :root {
+            --poster-pink: #d11fb7;
+            --poster-blue: #1fc1d1;
+            --poster-purple: #741fd1;
+            --background-dark: #07060f;
+        }
+
+        body, html {
+            min-height: 100vh; 
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-dark);
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            overflow-x: hidden; 
+        }
+
+        /* --- TOP NAVIGATION BAR --- */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(7, 6, 15, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(31, 193, 209, 0.2);
+        }
+
+        .nav-logo {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
+            color: white;
+            text-decoration: none;
+            text-shadow: 0 0 10px var(--poster-blue);
+        }
+
+        .nav-register-btn {
+            background: linear-gradient(135deg, var(--poster-blue), var(--poster-purple));
+            border: none;
+            padding: 8px 15px;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: clamp(0.75rem, 3vw, 0.9rem);
+            border-radius: 5px;
+            text-decoration: none;
+            transition: 0.3s;
+            box-shadow: 0 0 15px rgba(31, 193, 209, 0.4);
+            white-space: nowrap;
+        }
+
+        .nav-register-btn:hover {
+            box-shadow: 0 0 25px rgba(209, 31, 183, 0.6);
+            color: white;
+        }
+
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            top: 0;
+            left: 0;
+            pointer-events: none; 
+        }
+
+        /* --- HERO SECTION --- */
+        .hero-section {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            text-align: center;
+            padding: 120px 15px 40px 15px;
+            background: radial-gradient(circle at center, rgba(116, 31, 209, 0.15) 0%, transparent 70%);
+        }
+
+        .college-presents {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(0.75rem, 3vw, 1.2rem);
+            color: #e0e0e0;
+            text-transform: uppercase;
+            letter-spacing: clamp(1px, 0.5vw, 3px);
+            margin-bottom: 25px;
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+            line-height: 1.5;
+        }
+
+        .presents-text {
+            color: var(--poster-pink);
+            font-size: clamp(0.65rem, 2.5vw, 1rem);
+            letter-spacing: 6px;
+            font-weight: 400;
+            display: inline-block;
+            margin-top: 5px;
+            text-shadow: 0 0 8px rgba(209, 31, 183, 0.5);
+        }
+
+        .glitch-title, #launch-notice {
+            visibility: hidden; 
+        }
+
+        .glitch-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2.2rem, 8vw, 5rem);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: clamp(3px, 1.5vw, 10px);
+            color: var(--poster-blue);
+            text-shadow: 0 0 20px var(--poster-blue);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(0.9rem, 4vw, 1.5rem);
+            color: var(--poster-pink);
+            letter-spacing: clamp(1px, 1vw, 5px);
+            text-transform: uppercase;
+            min-height: 1.6em;
+            margin-bottom: 10px;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            background-color: var(--poster-pink);
+            margin-left: 5px;
+            animation: blink 0.7s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        #launch-notice {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(0.75rem, 3vw, 1.1rem);
+            color: #fff;
+            letter-spacing: 2px;
+            margin-bottom: 15px; 
+            text-shadow: 0 0 10px var(--poster-purple);
+        }
+
+        .countdown-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(31, 193, 209, 0.3);
+            border-radius: 15px;
+            padding: clamp(10px, 4vw, 20px);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: inline-flex;
+            gap: clamp(8px, 2.5vw, 20px);
+            margin-top: 10px;
+            max-width: 100%;
+        }
+
+        .count-item { min-width: clamp(55px, 18vw, 85px); }
+        .count-number {
+            display: block;
+            font-size: clamp(1.4rem, 6vw, 2.5rem);
+            font-weight: 900;
+            font-family: 'Orbitron', sans-serif;
+        }
+        .count-label {
+            font-size: clamp(0.55rem, 2vw, 0.7rem);
+            text-transform: uppercase;
+            color: var(--poster-pink);
+        }
+
+        /* --- 3D POSTER GALLERY --- */
+        .poster-gallery-section {
+            position: relative;
+            z-index: 10;
+            padding: 60px 0 20px 0;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            color: white;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+        }
+        
+        .section-title span {
+            color: var(--poster-blue);
+        }
+
+        .swiper {
+            width: 100%;
+            padding-top: 30px;
+            padding-bottom: 60px;
+        }
+
+        .swiper-slide {
+            background-position: center;
+            background-size: cover;
+            width: 260px; 
+            height: 390px; 
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid rgba(31, 193, 209, 0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: 0.4s;
+        }
+
+        @media (min-width: 768px) {
+            .swiper-slide {
+                width: 320px;
+                height: 480px;
+                border-radius: 15px;
+            }
+        }
+
+        .swiper-slide-active {
+            border-color: var(--poster-pink);
+            box-shadow: 0 0 25px rgba(209, 31, 183, 0.6);
+        }
+
+        .swiper-slide img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .swiper-pagination-bullet {
+            background: var(--poster-blue);
+        }
+
+        .swiper-pagination-bullet-active {
+            background: var(--poster-pink);
+        }
+
+        /* --- SCHEDULE SECTION & ANIMATIONS --- */
+        .schedule-section {
+            position: relative;
+            z-index: 10;
+            padding: 40px 15px 80px 15px;
+            overflow: hidden;
+        }
+
+        .nav-pills .nav-link {
+            font-family: 'Orbitron', sans-serif;
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            padding: 10px 25px;
+            margin: 5px;
+            transition: all 0.3s ease;
+            letter-spacing: 2px;
+        }
+
+        .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, var(--poster-blue), var(--poster-purple));
+            border-color: transparent;
+            box-shadow: 0 0 15px rgba(31, 193, 209, 0.5);
+            color: white;
+        }
+
+        .nav-pills .nav-link:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--poster-pink);
+        }
+
+        .schedule-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(31, 193, 209, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            transition: 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            opacity: 0; /* Hidden by default for animation */
+        }
+
+        .schedule-card:hover {
+            transform: translateY(-5px) !important;
+            border-color: var(--poster-pink);
+            box-shadow: 0 10px 25px rgba(209, 31, 183, 0.2);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .schedule-time {
+            color: var(--poster-pink);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            display: inline-block;
+            background: rgba(209, 31, 183, 0.1);
+            padding: 5px 12px;
+            border-radius: 8px;
+        }
+
+        .schedule-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .schedule-venue {
+            color: #a0a0a0;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .venue-icon {
+            width: 16px;
+            height: 16px;
+            fill: var(--poster-blue);
+        }
+
+        /* --- NEW 3X SLOWER OPPOSING ANIMATIONS --- */
+        .tab-content {
+            overflow: hidden;
+            padding-top: 10px;
+        }
+        
+        /* Odd cards come from the Right */
+        .tab-pane.active .schedule-card:nth-child(odd) {
+            animation: slideFromRight 1.8s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+        }
+
+        /* Even cards come from the Left */
+        .tab-pane.active .schedule-card:nth-child(even) {
+            animation: slideFromLeft 1.8s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+        }
+
+        /* Adjusted Delays */
+        .tab-pane.active .schedule-card:nth-child(1) { animation-delay: 0.1s; }
+        .tab-pane.active .schedule-card:nth-child(2) { animation-delay: 0.4s; }
+        .tab-pane.active .schedule-card:nth-child(3) { animation-delay: 0.7s; }
+
+        @keyframes slideFromRight {
+            0% { 
+                opacity: 0; 
+                transform: translateX(100px); 
+            }
+            100% { 
+                opacity: 1; 
+                transform: translateX(0); 
+            }
+        }
+
+        @keyframes slideFromLeft {
+            0% { 
+                opacity: 0; 
+                transform: translateX(-100px); 
+            }
+            100% { 
+                opacity: 1; 
+                transform: translateX(0); 
+            }
+        }
+
+        /* --- SPONSOR SECTION --- */
+        .sponsor-section {
+            position: relative;
+            z-index: 10;
+            margin-top: 20px;
+            width: 100%;
+            text-align: center;
+            padding-bottom: 40px;
+        }
+
+        .sponsor-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(0.6rem, 2vw, 0.75rem);
+            letter-spacing: 5px;
+            color: var(--poster-pink);
+            text-transform: uppercase;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+
+        .official-sponsor-container {
+            position: relative;
+            display: inline-block;
+            padding: 4px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            overflow: hidden;
+            background: #000;
+            z-index: 1;
+        }
+
+        .official-sponsor-container::before {
+            content: '';
+            position: absolute;
+            z-index: -2;
+            left: -50%;
+            top: -50%;
+            width: 200%;
+            height: 200%;
+            background-color: #399953;
+            background-repeat: no-repeat;
+            background-size: 50% 50%, 50% 50%;
+            background-position: 0 0, 100% 0, 100% 100%, 0 100%;
+            background-image: linear-gradient(var(--poster-blue), var(--poster-blue)), 
+                              linear-gradient(var(--poster-purple), var(--poster-purple)), 
+                              linear-gradient(var(--poster-pink), var(--poster-pink)), 
+                              linear-gradient(var(--poster-blue), var(--poster-blue));
+            animation: rotate-border 4s linear infinite;
+        }
+
+        .official-sponsor-container::after {
+            content: '';
+            position: absolute;
+            z-index: -1;
+            left: 6px;
+            top: 6px;
+            width: calc(100% - 12px);
+            height: calc(100% - 12px);
+            background: var(--background-dark);
+            border-radius: 15px;
+        }
+
+        @keyframes rotate-border {
+            100% { transform: rotate(1turn); }
+        }
+
+        .official-sponsor-inner {
+            padding: clamp(15px, 5vw, 30px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: glow-shift 6s infinite alternate;
+            border-radius: 18px;
+        }
+
+        @keyframes glow-shift {
+            0% { box-shadow: inset 0 0 15px var(--poster-blue); }
+            50% { box-shadow: inset 0 0 30px var(--poster-purple); }
+            100% { box-shadow: inset 0 0 15px var(--poster-pink); }
+        }
+
+        .official-logo {
+            max-width: 100%;
+            height: auto;
+            width: clamp(180px, 60vw, 280px);
+            mix-blend-mode: screen; 
+            filter: brightness(1.2);
+        }
+
+        .marquee-container {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+            padding: 20px 0;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .marquee-content {
+            display: inline-flex;
+            align-items: center;
+            animation: scroll 25s linear infinite;
+        }
+
+        .co-sponsor-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 clamp(30px, 8vw, 80px);
+            text-align: center;
+            transform: scale(0.95); 
+        }
+
+        .co-sponsor-logo {
+            height: clamp(60px, 12vw, 90px); 
+            width: auto;
+            border-radius: 8px;
+        }
+
+        @keyframes scroll {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+
+        .footer-credit {
+            margin-top: 30px;
+            font-size: clamp(0.6rem, 2vw, 0.7rem);
+            color: #6c757d;
+            letter-spacing: 1px;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+            padding-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+        <a href="#" class="nav-logo">SYNAPSE <span style="color:var(--poster-pink)">26</span></a>
+        <a href="https://synapse2026.github.io/registration.html" class="nav-register-btn">REGISTER NOW</a>
+    </nav>
+
+    <div id="particles-js"></div>
+
+    <div class="hero-section container">
+        <div class="animate__animated animate__fadeIn w-100">
+            
+            <div class="college-presents animate__animated animate__fadeInDown">
+                Govt. Residential Women's Polytechnic College Payyanur <br>
+                <span class="presents-text">PRESENTS</span>
+            </div>
+
+            <p class="subtitle"><span id="typing-text"></span><span class="cursor">&nbsp;</span></p>
+            
+            <h1 id="main-heading" class="glitch-title">SYNAPSE 2026</h1>
+            
+            <div id="launch-notice">Registrations Close In</div>
+            
+            <div class="countdown-box animate__animated animate__zoomIn">
+                <div class="count-item"><span class="count-number" id="days">00</span><span class="count-label">Days</span></div>
+                <div class="count-item"><span class="count-number" id="hours">00</span><span class="count-label">Hours</span></div>
+                <div class="count-item"><span class="count-number" id="minutes">00</span><span class="count-label">Mins</span></div>
+                <div class="count-item"><span class="count-number" id="seconds">00</span><span class="count-label">Secs</span></div>
+            </div>
+        </div>
+    </div>
+
+    <section class="poster-gallery-section">
+        <h2 class="section-title">Explore <span>Events</span></h2>
+        
+        <div class="swiper mySwiper">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide"><img src="poster (1).jpeg" alt="Idea Forum"></div>
+                <div class="swiper-slide"><img src="poster (2).jpeg" alt="TrailBlaze"></div>
+                <div class="swiper-slide"><img src="poster (3).jpeg" alt="Play Villa"></div>
+                <div class="swiper-slide"><img src="poster (4).jpeg" alt="Project Expo"></div>
+                <div class="swiper-slide"><img src="poster (5).jpeg" alt="ReverseX"></div>
+                <div class="swiper-slide"><img src="poster (6).jpeg" alt="Glow Craft"></div>
+                <div class="swiper-slide"><img src="poster (7).jpeg" alt="The Titan Trials"></div>
+                <div class="swiper-slide"><img src="poster (8).jpeg" alt="Pixel Clash"></div>
+            </div>
+            <div class="swiper-pagination"></div>
+        </div>
+    </section>
+
+    <section class="schedule-section container">
+        <h2 class="section-title">Event <span>Schedule</span></h2>
+        
+        <ul class="nav nav-pills justify-content-center mb-5" id="scheduleTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="ie-tab" data-bs-toggle="pill" data-bs-target="#ie-schedule" type="button" role="tab">IE Dept</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="ec-tab" data-bs-toggle="pill" data-bs-target="#ec-schedule" type="button" role="tab">EC Dept</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="cabm-tab" data-bs-toggle="pill" data-bs-target="#cabm-schedule" type="button" role="tab">CABM Dept</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="ct-tab" data-bs-toggle="pill" data-bs-target="#ct-schedule" type="button" role="tab">CT Dept</button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="scheduleTabContent">
+            
+            <div class="tab-pane fade show active" id="ie-schedule" role="tabpanel">
+                <div class="row justify-content-center">
+                    <div class="col-md-8 col-lg-6">
+                        <div class="schedule-card">
+                            <span class="schedule-time">10:00 AM to 01:00 PM</span>
+                            <div class="schedule-title">Play Villa</div>
+                            <div class="schedule-venue">
+                                <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                                S6 IE Class Room
+                            </div>
+                        </div>
+                        <div class="schedule-card">
+                            <span class="schedule-time">02:00 PM to 04:00 PM</span>
+                            <div class="schedule-title">InnoSense</div>
+                            <div class="schedule-venue">
+                                <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                                Software Lab
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="ec-schedule" role="tabpanel">
+                <div class="row justify-content-center">
+                    <div class="col-md-8 col-lg-6">
+                        <div class="schedule-card">
+                            <span class="schedule-time">09:00 AM to 04:00 PM</span>
+                            <div class="schedule-title">Project Expo</div>
+                            <div class="schedule-venue">
+                                <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                                S6 EC & CT Class Rooms
+                            </div>
+                        </div>
+                        <div class="schedule-card">
+                            <span class="schedule-time">10:00 AM to 12:00 PM</span>
+                            <div class="schedule-title">Glow Craft</div>
+                            <div class="schedule-venue">
+                                <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                                Embedded System Lab
+                            </div>
+                        </div>
+                        <div class="schedule-card">
+                            <span class="schedule-time">01:00 PM to 03:00 PM</span>
+                            <div class="schedule-title">ReverseX</div>
+                            <div class="schedule-venue">
+                                <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                                Basic Electronics Lab
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="cabm-schedule" role="tabpanel">
+                <div class="row justify-content-center">
+                    <div class="col-md-8 col-lg-6">
+                        <div class="schedule-card">
+                            <span class="schedule-time">10:00 AM to 11:00 AM</span>
+                            <div class="schedule-title">Pixel Clash</div>
+                            <div class="schedule-venue">
+                                <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                                CABM Lab
+                            </div>
+                        </div>
+                        <div class="schedule-card">
+                            <span class="schedule-time">11:00 AM to 04:00 PM</span>
+                            <div class="schedule-title">The Titan Trials</div>
+                            <div class="schedule-venue">
+                                <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                                Resource Centre
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="ct-schedule" role="tabpanel">
+                <div class="row justify-content-center">
+                    <div class="col-md-8 col-lg-6">
+                        <div class="schedule-card">
+                            <span class="schedule-time">10:00 AM to 12:00 PM</span>
+                            <div class="schedule-title">TrailBlaze : Decode the Clues</div>
+                            <div class="schedule-venue">
+                                <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                                Software Lab 2 (Team Event)
+                            </div>
+                        </div>
+                        <div class="schedule-card">
+                            <span class="schedule-time">01:00 PM to 02:00 PM</span>
+                            <div class="schedule-title">Brain2Bot : Think sharp, Prompt Smarter</div>
+                            <div class="schedule-venue">
+                                <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                                Software Lab 1
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <div class="sponsor-section">
+        <p class="sponsor-label">Official Sponsor</p>
+        <div class="official-sponsor-container animate__animated animate__fadeInUp">
+            <div class="official-sponsor-inner">
+                <img src="sponser.png" alt="Official Sponsor" class="official-logo">
+            </div>
+        </div>
+
+        <p class="sponsor-label">Co-Sponsors</p>
+        <div class="marquee-container">
+            <div class="marquee-content">
+                <div class="co-sponsor-card"><img src="LOGO.jpg" alt="Co-Sponsor Partner" class="co-sponsor-logo"></div>
+                <div class="co-sponsor-card"><img src="dnesto.jpeg" alt="Dnesto" class="co-sponsor-logo"></div>
+                <div class="co-sponsor-card"><img src="dp.jpeg" alt="DP" class="co-sponsor-logo"></div>
+                
+                <div class="co-sponsor-card"><img src="LOGO.jpg" alt="Co-Sponsor Partner" class="co-sponsor-logo"></div>
+                <div class="co-sponsor-card"><img src="dnesto.jpeg" alt="Dnesto" class="co-sponsor-logo"></div>
+                <div class="co-sponsor-card"><img src="dp.jpeg" alt="DP" class="co-sponsor-logo"></div>
+            </div>
+        </div>
+    </div>
+
+    <p class="footer-credit">WEBSITE POWERED BY TEAM CT, GRWPC</p>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+    
+    <script>
+        // Particles JS
+        particlesJS("particles-js", {
+            "particles": {
+                "number": { "value": 40 },
+                "color": { "value": ["#d11fb7", "#1fc1d1"] },
+                "shape": { "type": "circle" },
+                "opacity": { "value": 0.4 },
+                "size": { "value": 2.5 },
+                "line_linked": { "enable": true, "distance": 120, "color": "#741fd1", "opacity": 0.3, "width": 1 },
+                "move": { "enable": true, "speed": 1.5 }
+            }
+        });
+
+        // Initialize Swiper
+        var swiper = new Swiper(".mySwiper", {
+            effect: "coverflow",
+            grabCursor: true,
+            centeredSlides: true,
+            slidesPerView: "auto",
+            coverflowEffect: {
+                rotate: 20,       
+                stretch: 0,       
+                depth: 150,       
+                modifier: 1,      
+                slideShadows: true, 
+            },
+            loop: true,           
+            autoplay: {
+                delay: 2500,      
+                disableOnInteraction: false, 
+            },
+            pagination: {
+                el: ".swiper-pagination",
+                clickable: true,
+            },
+        });
+
+        // Typing Effect & Animation Trigger
+        const fullText = "Connecting Ideas. Creating Innovation.";
+        const triggerPhrase = "Connecting Ideas."; 
+        const typingElement = document.getElementById("typing-text");
+        const headingElement = document.getElementById("main-heading");
+        const launchNotice = document.getElementById("launch-notice");
+        
+        let isDeleting = false;
+        let charIndex = 0;
+        let hasHeadingLoaded = false;
+
+        function typeLoop() {
+            const currentDisplay = isDeleting 
+                ? fullText.substring(0, charIndex - 1) 
+                : fullText.substring(0, charIndex + 1);
+
+            typingElement.innerHTML = currentDisplay;
+            charIndex = isDeleting ? charIndex - 1 : charIndex + 1;
+
+            if (!isDeleting && currentDisplay.includes(triggerPhrase) && !hasHeadingLoaded) {
+                headingElement.style.visibility = "visible";
+                headingElement.classList.add("animate__animated", "animate__backInDown");
+                
+                setTimeout(() => {
+                    launchNotice.style.visibility = "visible";
+                    launchNotice.classList.add("animate__animated", "animate__fadeInUp");
+                }, 400);
+
+                hasHeadingLoaded = true;
+            }
+
+            let typeSpeed = isDeleting ? 40 : 80;
+            if (!isDeleting && charIndex === fullText.length) { isDeleting = true; typeSpeed = 2000; } 
+            else if (isDeleting && charIndex === 0) { isDeleting = false; typeSpeed = 500; }
+            setTimeout(typeLoop, typeSpeed);
+        }
+
+        window.onload = () => setTimeout(typeLoop, 800);
+
+        // Countdown Timer - Set to March 16, 2026 at 23:59:59
+        const launchDate = new Date("March 16, 2026 23:59:59").getTime();
+        const timer = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = launchDate - now;
+            
+            if (distance < 0) {
+                clearInterval(timer);
+                document.getElementById("days").innerHTML = "00";
+                document.getElementById("hours").innerHTML = "00";
+                document.getElementById("minutes").innerHTML = "00";
+                document.getElementById("seconds").innerHTML = "00";
+                document.getElementById("launch-notice").innerHTML = "Registrations Closed";
+                return;
+            }
+
+            const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            document.getElementById("days").innerHTML = d.toString().padStart(2, '0');
+            document.getElementById("hours").innerHTML = h.toString().padStart(2, '0');
+            document.getElementById("minutes").innerHTML = m.toString().padStart(2, '0');
+            document.getElementById("seconds").innerHTML = s.toString().padStart(2, '0');
+        }, 1000);
+    </script>
+</body>
+</html>
