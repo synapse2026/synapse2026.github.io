@@ -190,35 +190,50 @@
     }
 
     function loadGallery(eventName) {
-        const gallery = document.getElementById('winnerGallery');
-        gallery.innerHTML = "<div class='text-center w-100'><p class='small text-white-50'>🔍 Scanning media...</p></div>";
-        const targetEvent = eventName.trim();
+    const gallery = document.getElementById('winnerGallery');
+    gallery.innerHTML = "<div class='text-center w-100'><p class='small text-white-50'>🔍 Scanning media...</p></div>";
+    const targetEvent = eventName.trim();
 
-        fetch(`${scriptURL}?action=getLiveTVData`)
-            .then(res => res.json())
-            .then(data => {
-                gallery.innerHTML = "";
-                const isGroup = groupEvents.includes(targetEvent);
-                const filteredPhotos = data.photos.filter(item => {
-                    if (typeof item === 'object' && item.event) return item.event.trim() === targetEvent;
-                    return false;
-                });
-
-                if(filteredPhotos.length > 0) {
-                    filteredPhotos.reverse().forEach(item => {
-                        // Added Timestamp to bypass Drive image caching
-                        const finalUrl = item.url + "&t=" + new Date().getTime();
-                        gallery.innerHTML += `
-                            <div class="gallery-item ${isGroup ? 'landscape' : 'portrait'}">
-                                <img src="${finalUrl}" loading="lazy">
-                                <div class="gallery-tag">${targetEvent}</div>
-                            </div>`;
-                    });
-                } else {
-                    gallery.innerHTML = "<div class='text-center w-100'><p class='small text-white-50'>No photos found for this event yet.</p></div>";
+    fetch(`${scriptURL}?action=getLiveTVData`)
+        .then(res => res.json())
+        .then(data => {
+            gallery.innerHTML = "";
+            const isGroup = groupEvents.includes(targetEvent);
+            
+            // Filter photos based on the new {url, event} object structure
+            const filteredPhotos = data.photos.filter(item => {
+                if (typeof item === 'object' && item.event) {
+                    return item.event.trim() === targetEvent;
                 }
+                return false;
             });
-    }
+
+            if(filteredPhotos.length > 0) {
+                filteredPhotos.reverse().forEach(item => {
+                    // Extract the URL from the object
+                    let imgUrl = item.url;
+
+                    // Ensure we handle URL encoding and add a cache buster to force refresh
+                    const finalUrl = imgUrl + (imgUrl.includes('?') ? '&' : '?') + "t=" + new Date().getTime();
+                    
+                    gallery.innerHTML += `
+                        <div class="gallery-item ${isGroup ? 'landscape' : 'portrait'}">
+                            <img src="${finalUrl}" 
+                                 loading="lazy" 
+                                 onerror="this.src='https://placehold.co/400x600?text=Reloading...'; setTimeout(()=>this.src='${finalUrl}', 2000);"
+                                 style="width:100%; height:100%; object-fit:cover;">
+                            <div class="gallery-tag">${targetEvent}</div>
+                        </div>`;
+                });
+            } else {
+                gallery.innerHTML = "<div class='text-center w-100'><p class='small text-white-50'>No photos found for this event.</p></div>";
+            }
+        })
+        .catch(err => {
+            console.error("Gallery Sync Error:", err);
+            gallery.innerHTML = "<p class='small text-danger'>Sync Error. Please refresh.</p>";
+        });
+}
 
     async function openWinnerCamera() {
         const event = document.getElementById('eventSelector').value;
