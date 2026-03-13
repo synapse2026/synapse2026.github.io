@@ -18,7 +18,6 @@
         .section-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 15px; margin-bottom: 20px; }
         .form-select, .form-control { background: rgba(0,0,0,0.5) !important; color: #fff !important; border: 1px solid #444; }
         .scrollable-container { max-height: 350px; overflow-y: auto; border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 10px; }
-        .table thead th { position: sticky; top: 0; background: #0d1117; z-index: 2; color: var(--neon-blue); font-family: 'Orbitron'; font-size: 0.7rem; border-bottom: 2px solid var(--neon-blue); }
         .table { color: #fff; border-color: rgba(255,255,255,0.1); font-size: 0.85rem; }
         .bg-present { background: rgba(46, 213, 115, 0.2); color: #2ed573; border: 1px solid #2ed573; padding: 2px 5px; border-radius: 4px; font-weight: 700; font-size: 0.65rem; }
         .label-cyber { color: var(--neon-blue); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; display: block; }
@@ -26,13 +25,22 @@
         .info-sub { color: #aaa; font-size: 0.75rem; line-height: 1.2; display: block; margin-top: 2px; }
         
         #cameraWrapper { background: #000; border-radius: 15px; padding: 10px; border: 1px solid var(--neon-blue); display: none; margin-top: 15px;}
-        #cameraContainer { position: relative; width: 100%; aspect-ratio: 3 / 4; overflow: hidden; background: #000; border-radius: 10px; }
-        .portrait-mode { aspect-ratio: 3 / 4; }
-        .landscape-mode { aspect-ratio: 4 / 3; }
-        #video { width: 100%; height: 100%; object-fit: cover; filter: saturate(1.25) brightness(1.1) contrast(1.1); }
+        #cameraContainer { position: relative; width: 100%; overflow: hidden; background: #000; border-radius: 10px; }
+        
+        /* FIX: DYNAMIC SCREEN BOXES */
+        .portrait-frame { aspect-ratio: 3 / 4 !important; }
+        .landscape-frame { aspect-ratio: 4 / 3 !important; }
+
+        #video { width: 100%; height: 100%; object-fit: cover; }
         .camera-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: 20px solid rgba(0,0,0,0.6); pointer-events: none; }
         .camera-frame { width: 100%; height: 100%; border: 2px dashed var(--neon-blue); }
-        #reader { border: 2px solid var(--neon-pink); border-radius: 15px; overflow: hidden; display: none; margin-bottom: 15px; }
+        
+        /* Gallery Styles */
+        .winner-gallery { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
+        .gallery-item { position: relative; border-radius: 10px; overflow: hidden; border: 1px solid var(--neon-blue); aspect-ratio: 3/4; background: #222; }
+        .gallery-item.landscape { aspect-ratio: 4/3; }
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; }
+        .gallery-tag { position: absolute; bottom: 0; background: rgba(0,0,0,0.8); color: var(--neon-blue); width: 100%; font-size: 0.6rem; padding: 2px 5px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -52,23 +60,19 @@
     </div>
 
     <div class="section-card d-none" id="attendanceSection">
-        <h5 class="mb-3" style="font-size: 0.9rem;">Attendees List</h5>
-        <input type="text" id="attendeeSearch" class="form-control mb-3 shadow-none" placeholder="🔍 Search Name..." onkeyup="filterTable()">
+        <h5 class="mb-3" style="font-size: 0.9rem;">Paid Attendees List</h5>
         <div class="scrollable-container">
             <table class="table table-dark table-hover mb-0" id="participantTable">
-                <thead>
-                    <tr><th width="30">SL</th><th width="30"><input type="checkbox" onclick="toggleAll(this)"></th><th>Info</th><th>Status</th></tr>
-                </thead>
+                <thead><tr><th width="30">SL</th><th width="30"><input type="checkbox" onclick="toggleAll(this)"></th><th>Info</th><th>Status</th></tr></thead>
                 <tbody id="participantBody"></tbody>
             </table>
         </div>
-        <button id="markAttBtn" class="btn btn-success w-100 mb-2 btn-cyber py-2" onclick="submitBulkAttendance()">✅ Mark Present</button>
-        <button class="btn btn-outline-info w-100 btn-cyber py-2" onclick="exportTablePDF('participantTable', 'Attendee_List')">📥 Export PDF</button>
+        <button id="markAttBtn" class="btn btn-success w-100 mb-2 btn-cyber py-2" onclick="submitBulkAttendance()">✅ Mark Selected Present</button>
     </div>
 
     <div class="section-card">
         <h5 class="mb-3" style="font-size: 0.9rem;">🏆 Winner Marking</h5>
-        <div id="reader"></div>
+        <div id="reader" style="display:none; border:2px solid var(--neon-pink); border-radius:15px; margin-bottom:15px; overflow:hidden;"></div>
         <div class="row g-2">
             <div class="col-12 mb-2">
                 <span class="label-cyber">SELECT RANK</span>
@@ -78,11 +82,20 @@
                     <option value="3rd Place">3rd Place</option>
                 </select>
             </div>
-            <div class="col-6"><button id="scanBtn" onclick="startWinnerScan()" class="btn btn-warning w-100 btn-cyber py-2">📸 SCAN</button></div>
-            <div class="col-6"><button id="manualBtn" onclick="handleWinnerManualPrompt()" class="btn btn-outline-warning w-100 btn-cyber py-2">⌨ MANUAL</button></div>
             
+            <div id="winnerInputArea" class="col-12">
+                <div class="row g-2" id="individualWinnerBtns">
+                    <div class="col-6"><button id="scanBtn" onclick="startWinnerScan()" class="btn btn-warning w-100 btn-cyber py-2">📸 SCAN</button></div>
+                    <div class="col-6"><button onclick="handleWinnerManualPrompt()" class="btn btn-outline-warning w-100 btn-cyber py-2">⌨ MANUAL</button></div>
+                </div>
+                <div id="teamWinnerArea" class="d-none">
+                    <span class="label-cyber">SELECT WINNING TEAM</span>
+                    <select id="teamWinnerSelector" class="form-select border-warning mb-2 shadow-none"></select>
+                    <button id="teamWinnerBtn" onclick="submitTeamWinner()" class="btn btn-warning w-100 btn-cyber py-2">🏆 MARK TEAM AS WINNER</button>
+                </div>
+            </div>
+
             <div class="col-12 mt-4 text-center">
-                <span id="photoLabel" class="label-cyber">WINNER PHOTO</span>
                 <button id="camToggleBtn" onclick="openWinnerCamera()" class="btn btn-outline-info w-100 btn-cyber">📷 OPEN CAMERA</button>
                 <div id="cameraWrapper">
                     <div id="cameraContainer">
@@ -97,23 +110,23 @@
     </div>
 
     <div class="section-card d-none" id="winnerSection">
-        <h5 class="mb-3" style="font-size: 0.9rem;">🏆 Detailed Result Board</h5>
+        <h5 class="mb-3" style="font-size: 0.9rem;">Result Board</h5>
         <div class="table-responsive">
             <table class="table table-bordered border-secondary" id="winnerTable">
-                <thead class="table-dark text-warning">
-                    <tr><th>Rank</th><th>Winner Details</th></tr>
-                </thead>
                 <tbody id="winnerBody"></tbody>
             </table>
         </div>
         <button class="btn btn-outline-warning w-100 btn-cyber py-2 mt-2" onclick="exportTablePDF('winnerTable', 'Winners_Report')">📥 Export Winners PDF</button>
+        
+        <h5 class="mt-4 mb-2" style="font-size: 0.7rem; color: #aaa;">EVENT MEDIA PREVIEW</h5>
+        <div id="winnerGallery" class="winner-gallery"></div>
     </div>
 </div>
 
 <canvas id="canvas" class="d-none"></canvas>
 
 <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbzb97bG3GTT1wMH7M9j8RDXkoqoFD_MWXFkUZS0przdUO51s-7Zyutn0FbRSRnjjH8X5A/exec'; 
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzb97bG3GTT1wMH7M9j8RDXkoqoFD_MWXFkUZS0przdUO51s-7Zyutn0FbRSRnjjH8X5A/exec';
     let currentData = [];
     let videoStream = null;
     const allEvents = ["Glow Craft", "Reverse X", "Trail Blaze", "Brain 2 Bot", "Titan Trials", "Pixel Clash", "Innosense", "Seminar Presentation", "Play villa"];
@@ -130,11 +143,15 @@
         const event = document.getElementById('eventSelector').value;
         const loader = document.getElementById('loader');
         loader.classList.remove('d-none');
-        loader.innerText = "SYNCING DATA...";
+        loader.innerText = "SYNCING DATABASE...";
 
-        const container = document.getElementById('cameraContainer');
-        if(groupEvents.includes(event)) { container.className = "landscape-mode"; } 
-        else { container.className = "portrait-mode"; }
+        if(groupEvents.includes(event)) {
+            document.getElementById('individualWinnerBtns').classList.add('d-none');
+            document.getElementById('teamWinnerArea').classList.remove('d-none');
+        } else {
+            document.getElementById('individualWinnerBtns').classList.remove('d-none');
+            document.getElementById('teamWinnerArea').classList.add('d-none');
+        }
 
         fetch(`${scriptURL}?action=getEventList&event=${event}`)
             .then(res => res.json())
@@ -145,119 +162,132 @@
                 document.getElementById('winnerSection').classList.remove('d-none');
                 const body = document.getElementById('participantBody');
                 const winnerBody = document.getElementById('winnerBody');
+                const teamSelect = document.getElementById('teamWinnerSelector');
                 body.innerHTML = ""; winnerBody.innerHTML = "";
-                
-                data.forEach((p, i) => {
+                teamSelect.innerHTML = '<option disabled selected>Select Winning Team...</option>';
+
+                const teamSet = new Set();
+                data.forEach((p, index) => {
                     const isPresent = (p.eventStatus || "").includes(event + ": PRESENT");
+                    if(isPresent && p.teamName) teamSet.add(p.teamName);
+
                     body.innerHTML += `<tr>
-                        <td>${i+1}</td>
-                        <td><input type="checkbox" class="user-check" value="${p.mobile}" data-name="${p.name}" ${isPresent?'disabled':''}></td>
-                        <td><strong>${p.name}</strong><span class="info-sub">${p.mobile} | ${p.dept} | Sem ${p.semester || 'N/A'}</span><span class="info-sub" style="color:var(--neon-blue)">${p.college}</span></td>
+                        <td>${index + 1}</td>
+                        <td><input type="checkbox" class="user-check" value="${p.mobile}" data-name="${p.name}" ${isPresent ? 'disabled' : ''}></td>
+                        <td><strong>${p.name}</strong> ${p.teamName ? `<br><small class="text-warning">[${p.teamName}]</small>` : ''}<span class="info-sub">${p.mobile} | ${p.dept}</span><span class="info-sub" style="color:var(--neon-blue)">${p.college}</span></td>
                         <td><span class="${isPresent ? 'bg-present' : 'text-white-50 small'}">${isPresent ? 'PRESENT' : 'ABSENT'}</span></td>
                     </tr>`;
                     
                     if(p.winnerStatus && p.winnerStatus.includes(event)) {
-                        winnerBody.innerHTML += `<tr>
-                            <td class="text-warning fw-bold">${p.winnerStatus.split('|').find(s => s.includes(event))}</td>
-                            <td><strong>${p.name}</strong><span class="info-sub">${p.mobile} | ${p.dept} | ${p.college}</span></td>
-                        </tr>`;
+                        const rank = p.winnerStatus.split('|').find(s => s.includes(event));
+                        winnerBody.innerHTML += `<tr><td class="text-warning fw-bold">${rank}</td><td><strong>${p.name}</strong> ${p.teamName ? `[${p.teamName}]` : ''}<span class="info-sub">${p.mobile} | ${p.college}</span></td></tr>`;
                     }
                 });
+                teamSet.forEach(t => teamSelect.innerHTML += `<option value="${t}">${t}</option>`);
+                loadGallery(event);
             });
     }
 
-    // --- WINNER ACTIONS WITH VALIDATION (ATTENDANCE & DUPLICATE) ---
-    function processWinnerUpdate(mobile) {
+    function loadGallery(eventName) {
+        const gallery = document.getElementById('winnerGallery');
+        gallery.innerHTML = "<p class='small text-white-50'>Loading media...</p>";
+        
+        fetch(`${scriptURL}?action=getLiveTVData`)
+            .then(res => res.json())
+            .then(data => {
+                gallery.innerHTML = "";
+                const isGroup = groupEvents.includes(eventName);
+                data.photos.reverse().forEach(url => {
+                    // Check if URL includes the event name (case insensitive)
+                    if(url.toLowerCase().includes(eventName.toLowerCase().replace(/ /g, "_"))) {
+                        gallery.innerHTML += `
+                            <div class="gallery-item ${isGroup ? 'landscape' : ''}">
+                                <img src="${url}" loading="lazy">
+                                <div class="gallery-tag">${eventName}</div>
+                            </div>`;
+                    }
+                });
+                if(gallery.innerHTML === "") gallery.innerHTML = "<p class='small text-white-50'>No photos uploaded for this event yet.</p>";
+            });
+    }
+
+    async function openWinnerCamera() {
+        const event = document.getElementById('eventSelector').value;
+        const wrapper = document.getElementById('cameraWrapper');
+        const container = document.getElementById('cameraContainer');
+        const isGroup = groupEvents.includes(event);
+        
+        container.className = isGroup ? "landscape-frame" : "portrait-frame";
+        wrapper.style.display = 'block';
+        document.getElementById('camToggleBtn').style.display = 'none';
+
+        try {
+            videoStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "environment", aspectRatio: isGroup ? 1.3333 : 0.75, width: { ideal: 3000 }, height: { ideal: 3000 } }
+            });
+            document.getElementById('video').srcObject = videoStream;
+        } catch (e) {
+            videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+            document.getElementById('video').srcObject = videoStream;
+        }
+    }
+
+    function capturePhoto() {
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
         const event = document.getElementById('eventSelector').value;
         const pos = document.getElementById('winnerPosition').value;
-        const loader = document.getElementById('loader');
+        const btn = document.getElementById('captureBtn');
+        const isGroup = groupEvents.includes(event);
 
-        // Find participant in local data
-        const participant = currentData.find(p => String(p.mobile) === String(mobile));
-        
-        if (!participant) {
-            alert("❌ ERROR: Mobile number not found in this event's list.");
-            return;
-        }
+        canvas.width = isGroup ? 3200 : 2400;
+        canvas.height = isGroup ? 2400 : 3200;
+        const context = canvas.getContext('2d');
+        context.imageSmoothingEnabled = true;
+        context.imageSmoothingQuality = 'high';
 
-        // Check if PRESENT
-        const isPresent = (participant.eventStatus || "").includes(event + ": PRESENT");
-        if (!isPresent) {
-            alert(`⚠️ WARNING: ${participant.name} is marked ABSENT. Mark attendance first!`);
-            return;
-        }
+        const targetRatio = isGroup ? 4/3 : 3/4;
+        let sX = 0, sY = 0, sW = video.videoWidth, sH = video.videoHeight;
+        if ((sW / sH) > targetRatio) { sW = sH * targetRatio; sX = (video.videoWidth - sW) / 2; }
+        else { sH = sW / targetRatio; sY = (video.videoHeight - sH) / 2; }
 
-        // Check if ALREADY A WINNER in this event
-        if (participant.winnerStatus && participant.winnerStatus.includes(event)) {
-            const currentRank = participant.winnerStatus.split('|').find(s => s.includes(event)).trim();
-            alert(`🛑 DUPLICATE: ${participant.name} is already recorded as "${currentRank}". You cannot mark the same person twice.`);
-            return;
-        }
+        context.drawImage(video, sX, sY, sW, sH, 0, 0, canvas.width, canvas.height);
+        btn.innerText = "⌛ UPLOADING..."; btn.disabled = true;
 
-        // Check if THIS RANK is already taken by someone else
-        const rankTaken = currentData.some(p => p.winnerStatus && p.winnerStatus.includes(event + ": " + pos));
-        if (rankTaken) {
-            alert(`🛑 RANK TAKEN: Someone is already marked as ${pos} for ${event}. Please check the result board.`);
-            return;
-        }
-
-        loader.classList.remove('d-none');
-        loader.innerText = "🏆 UPDATING WINNER... PLEASE WAIT";
-
-        fetch(`${scriptURL}?action=markWinner&mobile=${mobile}&position=${pos}&event=${event}`)
-            .then(() => {
-                loader.classList.add('d-none');
-                alert(`✅ SUCCESS: ${participant.name} marked as ${pos}`);
-                fetchParticipants();
-            });
+        fetch(scriptURL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ action: "uploadWinnerPhoto", image: canvas.toDataURL('image/jpeg', 0.9), event: event, position: pos })
+        }).then(() => {
+            alert(`✅ Photo Secured!`);
+            btn.disabled = false; btn.innerText = "SNAP & UPLOAD";
+            stopCamera();
+            fetchParticipants();
+        });
     }
 
     function submitBulkAttendance() {
         const event = document.getElementById('eventSelector').value;
-        const mobiles = Array.from(document.querySelectorAll('.user-check:checked')).map(c => c.value);
-        if(!mobiles.length) return alert("Select participants!");
-        
-        const btn = document.getElementById('markAttBtn');
-        btn.innerText = "⌛ UPDATING...";
-        btn.disabled = true;
-
-        fetch(`${scriptURL}?action=bulkMarkAttendanceWithTeam&mobiles=${mobiles.join(",")}&event=${event}`)
-            .then(() => {
-                alert("Attendance Updated!");
-                btn.innerText = "✅ Mark Present";
-                btn.disabled = false;
-                fetchParticipants();
-            });
+        const selected = Array.from(document.querySelectorAll('.user-check:checked'));
+        const mobiles = selected.map(c => c.value);
+        const names = selected.map(c => c.getAttribute('data-name'));
+        if(!mobiles.length) return alert("Select students!");
+        let teamName = groupEvents.includes(event) ? prompt(`Enter Team Name for: ${names.join(", ")}`) : "";
+        if(groupEvents.includes(event) && !teamName) return alert("Team name mandatory!");
+        document.getElementById('markAttBtn').innerText = "⌛ UPDATING...";
+        fetch(`${scriptURL}?action=bulkMarkAttendanceWithTeam&mobiles=${mobiles.join(",")}&event=${event}&team=${encodeURIComponent(teamName)}`)
+            .then(() => { alert("Attendance Updated!"); fetchParticipants(); });
     }
 
-  async function openWinnerCamera() {
-    const wrapper = document.getElementById('cameraWrapper');
-    wrapper.style.display = 'block';
-    document.getElementById('camToggleBtn').style.display = 'none';
-    const isGroup = groupEvents.includes(document.getElementById('eventSelector').value);
-    
-    // Target High Resolution Constraints
-    const constraints = {
-        video: { 
-            facingMode: "environment", 
-            aspectRatio: isGroup ? 1.3333 : 0.75,
-            width: { ideal: 4096 }, // Requesting 4K/UHD height
-            height: { ideal: 4096 }
-        }
-    };
-
-    try {
-        videoStream = await navigator.mediaDevices.getUserMedia(constraints);
-        document.getElementById('video').srcObject = videoStream;
-    } catch (err) { 
-        alert("Camera Error: Requesting standard resolution instead.");
-        // Fallback to standard high-res if 4K fails
-        videoStream = await navigator.mediaDevices.getUserMedia({ 
-            video: { facingMode: "environment", aspectRatio: isGroup ? 1.333 : 0.75 } 
-        });
-        document.getElementById('video').srcObject = videoStream;
+    function submitTeamWinner() {
+        const team = document.getElementById('teamWinnerSelector').value;
+        const pos = document.getElementById('winnerPosition').value;
+        const event = document.getElementById('eventSelector').value;
+        if(!team || team.includes("Select")) return alert("Select team!");
+        document.getElementById('teamWinnerBtn').innerText = "⌛ UPDATING...";
+        fetch(`${scriptURL}?action=markTeamWinner&team=${encodeURIComponent(team)}&position=${pos}&event=${event}`)
+            .then(() => { alert("Winners Marked!"); fetchParticipants(); });
     }
-}
 
     function stopCamera() {
         if (videoStream) videoStream.getTracks().forEach(track => track.stop());
@@ -265,107 +295,6 @@
         document.getElementById('camToggleBtn').style.display = 'block';
     }
 
-   function capturePhoto() {
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const event = document.getElementById('eventSelector').value;
-    const pos = document.getElementById('winnerPosition').value;
-    const btn = document.getElementById('captureBtn');
-    const isGroup = groupEvents.includes(event);
-
-    // ENFORCING HIGH RESOLUTION 4:3 vs 3:4
-    if (isGroup) {
-        // Landscape: Horizontal 4, Vertical 3 (Ultra HD)
-        canvas.width = 3200; 
-        canvas.height = 2400; 
-    } else {
-        // Portrait: Horizontal 3, Vertical 4 (Ultra HD)
-        canvas.width = 2400; 
-        canvas.height = 3200; 
-    }
-
-    const context = canvas.getContext('2d');
-    
-    // NOISE REDUCTION & QUALITY SETTINGS
-    context.imageSmoothingEnabled = true;
-    context.imageSmoothingQuality = 'high';
-    
-    // REMOVED ARTIFICIAL FILTERS to reduce noise/grain
-    context.filter = 'none'; 
-
-    const targetRatio = isGroup ? 4/3 : 3/4;
-    const vW = video.videoWidth;
-    const vH = video.videoHeight;
-    let sX = 0, sY = 0, sW = vW, sH = vH;
-
-    // Calculate center-crop to preserve Aspect Ratio
-    if ((vW / vH) > targetRatio) {
-        sW = vH * targetRatio;
-        sX = (vW - sW) / 2;
-    } else {
-        sH = vW / targetRatio;
-        sY = (vH - sH) / 2;
-    }
-
-    // Draw frame
-    context.drawImage(video, sX, sY, sW, sH, 0, 0, canvas.width, canvas.height);
-    
-    // UI Feedback
-    btn.innerText = "⌛ UPLOADING HIGH-RES...";
-    btn.disabled = true;
-
-    // Save as JPEG with 0.92 quality (Sweet spot for high detail vs low noise)
-    const imageData = canvas.toDataURL('image/jpeg', 0.92);
-
-    fetch(scriptURL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "uploadWinnerPhoto", image: imageData, event: event, position: pos })
-    }).then(() => {
-        alert(`✅ High-Resolution Photo Secured for ${pos}`);
-        btn.disabled = false; 
-        btn.innerText = "SNAP & UPLOAD";
-        stopCamera();
-        fetchParticipants();
-    });
-}
-
-    function exportTablePDF(tableId, fileName) {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('l', 'mm', 'a4');
-        const event = document.getElementById('eventSelector').value;
-        doc.setFontSize(18); doc.setTextColor(31, 193, 209);
-        doc.text(`SYNAPSE 2026: ${event} Report`, 14, 15);
-
-        const rows = [];
-        if (tableId === 'participantTable') {
-            currentData.forEach((p, i) => {
-                const isPresent = (p.eventStatus || "").includes(event + ": PRESENT");
-                rows.push([i+1, p.name, p.mobile, p.college, p.dept, p.semester || '-', isPresent ? 'PRESENT' : 'ABSENT']);
-            });
-            doc.autoTable({ head: [['SL', 'Name', 'Mobile', 'College', 'Department', 'Sem', 'Status']], body: rows, startY: 25, theme: 'grid' });
-        } else {
-            currentData.forEach((p, i) => {
-                if(p.winnerStatus && p.winnerStatus.includes(event)) {
-                    rows.push([rows.length+1, p.winnerStatus.split('|').find(s => s.includes(event)).trim(), p.name, p.mobile, p.college, p.dept, p.semester || '-']);
-                }
-            });
-            doc.autoTable({ head: [['SL', 'Rank', 'Winner Name', 'Mobile', 'College', 'Department', 'Sem']], body: rows, startY: 25, theme: 'grid', headStyles: { fillColor: [255, 193, 7], textColor: [0, 0, 0] } });
-        }
-        doc.save(`${fileName}_${event}.pdf`);
-    }
-
-    function startWinnerScan() {
-        const reader = document.getElementById('reader');
-        reader.style.display = 'block';
-        html5QrCode.start({ facingMode: 'environment' }, { fps: 15, qrbox: 250 }, (mobile) => {
-            html5QrCode.stop().then(() => { reader.style.display = 'none'; processWinnerUpdate(mobile); });
-        });
-    }
-    function handleWinnerManualPrompt() {
-        const mob = prompt("Enter Participant Mobile:");
-        if(mob) processWinnerUpdate(mob);
-    }
     function toggleAll(source) { document.querySelectorAll('.user-check:not([disabled])').forEach(c => c.checked = source.checked); }
     function filterTable() {
         const input = document.getElementById('attendeeSearch').value.toUpperCase();
@@ -374,6 +303,50 @@
             const text = rows[i].innerText.toUpperCase();
             rows[i].style.display = text.indexOf(input) > -1 ? "" : "none";
         }
+    }
+
+    function startWinnerScan() {
+        const reader = document.getElementById('reader'); reader.style.display = 'block';
+        html5QrCode.start({ facingMode: 'environment' }, { fps: 15, qrbox: 250 }, (mobile) => {
+            html5QrCode.stop().then(() => { reader.style.display = 'none'; processWinnerUpdate(mobile); });
+        });
+    }
+
+    function handleWinnerManualPrompt() {
+        const mob = prompt("Enter Mobile:"); if(mob) processWinnerUpdate(mob);
+    }
+
+    function processWinnerUpdate(mobile) {
+        const pos = document.getElementById('winnerPosition').value;
+        const event = document.getElementById('eventSelector').value;
+        const participant = currentData.find(p => String(p.mobile) === String(mobile));
+        if(!participant) return alert("Not found!");
+        if(!(participant.eventStatus || "").includes(event + ": PRESENT")) return alert("Mark Present First!");
+        document.getElementById('loader').classList.remove('d-none');
+        fetch(`${scriptURL}?action=markWinner&mobile=${mobile}&position=${pos}&event=${event}`)
+            .then(() => { alert("Winner Marked!"); fetchParticipants(); });
+    }
+
+    function exportTablePDF(tableId, fileName) {
+        const { jsPDF } = window.jspdf; const doc = new jsPDF('l', 'mm', 'a4');
+        const event = document.getElementById('eventSelector').value;
+        doc.text(`SYNAPSE 2026: ${event} Report`, 14, 15);
+        const rows = [];
+        if (tableId === 'participantTable') {
+            currentData.forEach((p, i) => {
+                const isPresent = (p.eventStatus || "").includes(event + ": PRESENT");
+                rows.push([i+1, p.name, p.mobile, p.college, p.dept, p.teamName || 'N/A', isPresent ? 'PRESENT' : 'ABSENT']);
+            });
+            doc.autoTable({ head: [['SL', 'Name', 'Mobile', 'College', 'Dept', 'Team', 'Status']], body: rows, startY: 25 });
+        } else {
+            currentData.forEach((p, i) => {
+                if(p.winnerStatus && p.winnerStatus.includes(event)) {
+                    rows.push([rows.length+1, p.winnerStatus.split('|').find(s => s.includes(event)).trim(), p.name, p.mobile, p.college, p.teamName || 'N/A']);
+                }
+            });
+            doc.autoTable({ head: [['SL', 'Rank', 'Winner Name', 'Mobile', 'College', 'Team']], body: rows, startY: 25 });
+        }
+        doc.save(`${fileName}_${event}.pdf`);
     }
 </script>
 </body>
