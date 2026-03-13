@@ -191,39 +191,75 @@
     }
 
     function capturePhoto() {
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const context = canvas.getContext('2d');
-        const event = document.getElementById('eventSelector').value;
-        const pos = document.getElementById('winnerPosition').value;
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+    const event = document.getElementById('eventSelector').value;
+    const pos = document.getElementById('winnerPosition').value;
+    const snapBtn = document.querySelector("#cameraWrapper button.btn-info");
 
-        if(!event || event.includes("Choose")) return alert("Please select an event first!");
+    if(!event || event.includes("Choose")) return alert("Please select an event first!");
 
-        // Set high-res portrait dimensions (Width 600, Height 800)
-        canvas.width = 600;
-        canvas.height = 800;
+    // 1. UI Feedback: Disable button and show "Waiting"
+    snapBtn.disabled = true;
+    snapBtn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> ⌛ UPLOADING... PLEASE WAIT`;
+    document.getElementById('loader').classList.remove('d-none');
+    document.getElementById('loader').innerText = "PROCESSING IMAGE...";
 
-        const vW = video.videoWidth;
-        const vH = video.videoHeight;
-        const targetRatio = 3/4;
-        
-        let sX = 0, sY = 0, sW = vW, sH = vH;
+    // Set portrait dimensions
+    canvas.width = 600;
+    canvas.height = 800;
 
-        // Smart Cropping Logic to ensure output is always 3:4
-        if ((vW / vH) > targetRatio) {
-            sW = vH * targetRatio;
-            sX = (vW - sW) / 2;
-        } else {
-            sH = vW / targetRatio;
-            sY = (vH - sH) / 2;
-        }
+    const vW = video.videoWidth;
+    const vH = video.videoHeight;
+    const targetRatio = 3/4;
+    let sX = 0, sY = 0, sW = vW, sH = vH;
 
-        context.drawImage(video, sX, sY, sW, sH, 0, 0, canvas.width, canvas.height);
-        const base64Data = canvas.toDataURL('image/jpeg', 0.8);
-        
-        uploadPhoto(base64Data, event, pos);
+    if ((vW / vH) > targetRatio) {
+        sW = vH * targetRatio;
+        sX = (vW - sW) / 2;
+    } else {
+        sH = vW / targetRatio;
+        sY = (vH - sH) / 2;
     }
 
+    context.drawImage(video, sX, sY, sW, sH, 0, 0, canvas.width, canvas.height);
+    const base64Data = canvas.toDataURL('image/jpeg', 0.8);
+    
+    // Send to server
+    uploadPhoto(base64Data, event, pos, snapBtn);
+}
+
+function uploadPhoto(img, event, pos, btn) {
+    document.getElementById('loader').innerText = "SENDING TO GOOGLE DRIVE...";
+
+    fetch(scriptURL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            action: "uploadWinnerPhoto",
+            image: img,
+            event: event,
+            position: pos
+        })
+    }).then(() => {
+        // Success Logic
+        alert(`✅ SUCCESS!\nPhoto secured for ${event} - ${pos}`);
+        document.getElementById('loader').classList.add('d-none');
+        
+        // Reset Button
+        btn.disabled = false;
+        btn.innerText = "SNAP & UPLOAD TO DRIVE";
+        
+        stopCamera();
+    }).catch(err => {
+        alert("Upload Failed: " + err);
+        btn.disabled = false;
+        btn.innerText = "SNAP & UPLOAD TO DRIVE";
+        document.getElementById('loader').classList.add('d-none');
+    });
+}
     function uploadPhoto(img, event, pos) {
         document.getElementById('loader').classList.remove('d-none');
         document.getElementById('loader').innerText = "UPLOADING TO DRIVE...";
