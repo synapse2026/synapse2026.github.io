@@ -267,30 +267,43 @@
 
         context.drawImage(video, sX, sY, sW, sH, 0, 0, canvas.width, canvas.height);
         
+        // Match Asset Manager Logic: Convert to raw Base64 string
         const imageData = canvas.toDataURL('image/jpeg', 0.9);
-        btn.innerText = "⌛ UPLOADING..."; btn.disabled = true;
+        
+        btn.innerText = "⌛ UPLOADING..."; 
+        btn.disabled = true;
 
+        // Use EXACT fetch settings from Asset Manager
         fetch(scriptURL, {
-            method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ 
-                action: "uploadWinnerPhoto", 
-                image: imageData, 
-                event: event, 
-                position: pos 
+            method: 'POST',
+            mode: 'no-cors', // CRITICAL: This bypasses the Google response block
+            cache: 'no-cache',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: "uploadWinnerPhoto",
+                image: imageData,
+                event: event,
+                position: pos
             })
-        }).then(response => response.text())
-          .then(result => {
-            alert(`✅ Photo Secured & Logged!`);
-            btn.disabled = false; btn.innerText = "SNAP & UPLOAD";
+        })
+        .then(() => {
+            // Asset Manager successful assumption logic
+            alert(`✅ Photo Secured & Broadcasting!`);
+            btn.disabled = false; 
+            btn.innerText = "SNAP & UPLOAD";
             stopCamera();
-            fetchParticipants();
-        }).catch(err => {
+            
+            // Wait 2 seconds for sheet to settle before refreshing gallery
+            setTimeout(() => {
+                fetchParticipants();
+            }, 2000);
+        })
+        .catch(err => {
             alert("Upload failed. Check connection.");
-            btn.disabled = false; btn.innerText = "SNAP & UPLOAD";
+            btn.disabled = false; 
+            btn.innerText = "SNAP & UPLOAD";
         });
     }
-
     function submitBulkAttendance() {
         const event = document.getElementById('eventSelector').value;
         const selected = Array.from(document.querySelectorAll('.user-check:checked'));
