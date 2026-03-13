@@ -161,48 +161,79 @@
     }
 
     function capturePhoto() {
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const context = canvas.getContext('2d');
-        const btn = document.getElementById('captureBtn');
-        const event = document.getElementById('eventSelector').value;
-        const pos = document.getElementById('winnerPosition').value;
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+    const btn = document.getElementById('captureBtn');
+    const event = document.getElementById('eventSelector').value;
+    const pos = document.getElementById('winnerPosition').value;
 
-        if(!event || event.includes("Choose")) return alert("Select event first!");
+    if(!event || event.includes("Choose")) return alert("Select event first!");
 
-        // 1. High Resolution Output (1200x1600)
-        canvas.width = 1200;
-        canvas.height = 1600;
-        context.imageSmoothingEnabled = true;
-        context.imageSmoothingQuality = 'high';
+    // Set resolution and filters
+    canvas.width = 1200;
+    canvas.height = 1600;
+    context.imageSmoothingEnabled = true;
+    context.imageSmoothingQuality = 'high';
 
-        // 2. Crop logic
-        const vW = video.videoWidth;
-        const vH = video.videoHeight;
-        const targetRatio = 3/4;
-        let sX = 0, sY = 0, sW = vW, sH = vH;
+    const vW = video.videoWidth;
+    const vH = video.videoHeight;
+    const targetRatio = 3/4;
+    let sX = 0, sY = 0, sW = vW, sH = vH;
 
-        if ((vW / vH) > targetRatio) {
-            sW = vH * targetRatio;
-            sX = (vW - sW) / 2;
-        } else {
-            sH = vW / targetRatio;
-            sY = (vH - sH) / 2;
-        }
-
-        // 3. Draw with CSS-like filters manually applied via canvas if needed, 
-        // but browsers usually bake 'filter' into drawImage if applied to the video element.
-        context.filter = 'saturate(1.25) brightness(1.1) contrast(1.1)';
-        context.drawImage(video, sX, sY, sW, sH, 0, 0, canvas.width, canvas.height);
-        
-        const imageData = canvas.toDataURL('image/jpeg', 0.9);
-        
-        // 4. RESET BUTTON IMMEDIATELY for the next capture
-        btn.innerText = "UPLOADING...";
-        btn.disabled = true;
-
-        uploadPhoto(imageData, event, pos, btn);
+    if ((vW / vH) > targetRatio) {
+        sW = vH * targetRatio;
+        sX = (vW - sW) / 2;
+    } else {
+        sH = vW / targetRatio;
+        sY = (vH - sH) / 2;
     }
+
+    context.filter = 'saturate(1.25) brightness(1.1) contrast(1.1)';
+    context.drawImage(video, sX, sY, sW, sH, 0, 0, canvas.width, canvas.height);
+    
+    const imageData = canvas.toDataURL('image/jpeg', 0.9);
+    
+    // UI Feedback
+    btn.innerText = "⌛ UPLOADING...";
+    btn.disabled = true;
+
+    uploadPhoto(imageData, event, pos, btn);
+}
+
+function uploadPhoto(img, event, pos, btn) {
+    document.getElementById('loader').classList.remove('d-none');
+    
+    fetch(scriptURL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            action: "uploadWinnerPhoto",
+            image: img,
+            event: event,
+            position: pos
+        })
+    }).then(() => {
+        // --- THE FIX: AUTO CLOSE CAMERA ON SUCCESS ---
+        alert(`✅ ${pos} Photo Uploaded!`);
+        document.getElementById('loader').classList.add('d-none');
+        
+        // Reset button state
+        btn.disabled = false;
+        btn.innerText = "SNAP & UPLOAD";
+        
+        // Automatically close the camera interface
+        stopCamera(); 
+        
+        // Refresh the results board to show the new winner
+        fetchParticipants(); 
+    }).catch(err => {
+        alert("Upload Error: " + err);
+        btn.disabled = false;
+        btn.innerText = "RETRY SNAP";
+    });
+}
 
     function uploadPhoto(img, event, pos, btn) {
         document.getElementById('loader').classList.remove('d-none');
