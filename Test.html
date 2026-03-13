@@ -18,37 +18,22 @@
         .section-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 15px; margin-bottom: 20px; }
         .form-select, .form-control { background: rgba(0,0,0,0.5) !important; color: #fff !important; border: 1px solid #444; }
         .scrollable-container { max-height: 350px; overflow-y: auto; border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 10px; }
+        .table thead th { position: sticky; top: 0; background: #0d1117; z-index: 2; color: var(--neon-blue); font-family: 'Orbitron'; font-size: 0.7rem; border-bottom: 2px solid var(--neon-blue); }
         .table { color: #fff; border-color: rgba(255,255,255,0.1); font-size: 0.85rem; }
+        .bg-present { background: rgba(46, 213, 115, 0.2); color: #2ed573; border: 1px solid #2ed573; padding: 2px 5px; border-radius: 4px; font-weight: 700; font-size: 0.65rem; }
         .label-cyber { color: var(--neon-blue); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; display: block; }
         .btn-cyber { font-family: 'Orbitron', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .info-sub { color: #aaa; font-size: 0.75rem; line-height: 1.2; display: block; margin-top: 2px; }
         
-        /* 3:4 PORTRAIT CAMERA UI WITH ENHANCEMENTS */
+        /* DYNAMIC CAMERA UI */
         #cameraWrapper { background: #000; border-radius: 15px; padding: 10px; border: 1px solid var(--neon-blue); display: none; margin-top: 15px;}
-        #cameraContainer { 
-            position: relative; 
-            width: 100%; 
-            aspect-ratio: 3 / 4; 
-            overflow: hidden; 
-            background: #000;
-            border-radius: 10px;
-        }
-        #video { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-            /* Color Enhancements */
-            filter: saturate(1.25) brightness(1.1) contrast(1.1); 
-        }
-        .camera-overlay { 
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
-            border: 20px solid rgba(0,0,0,0.6); pointer-events: none; 
-        }
-        .camera-frame { 
-            width: 100%; height: 100%; 
-            border: 2px dashed var(--neon-blue); 
-            box-shadow: 0 0 15px rgba(31, 193, 209, 0.4); 
-        }
-        #reader { border: 2px solid var(--neon-pink); border-radius: 15px; overflow: hidden; display: none; margin-bottom: 15px; }
+        #cameraContainer { position: relative; width: 100%; overflow: hidden; background: #000; border-radius: 10px; transition: aspect-ratio 0.3s ease; }
+        .portrait-mode { aspect-ratio: 3 / 4; }
+        .landscape-mode { aspect-ratio: 4 / 3; }
+        #video { width: 100%; height: 100%; object-fit: cover; filter: saturate(1.25) brightness(1.1) contrast(1.1); }
+        .camera-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: 20px solid rgba(0,0,0,0.6); pointer-events: none; }
+        .camera-frame { width: 100%; height: 100%; border: 2px dashed var(--neon-blue); }
+        #reader { border: 2px solid var(--neon-pink); border-radius: 15px; overflow: hidden; background: #000; display: none; margin-bottom: 15px; }
     </style>
 </head>
 <body>
@@ -64,17 +49,31 @@
         <select id="eventSelector" class="form-select shadow-none" onchange="fetchParticipants()">
             <option selected disabled>Loading Events...</option>
         </select>
-        <div id="loader" class="text-center mt-3 d-none" style="color: var(--neon-blue); font-family: 'Orbitron'; font-size: 0.8rem;">SYNCING...</div>
+        <div id="loader" class="text-center mt-3 d-none" style="color: var(--neon-blue); font-family: 'Orbitron'; font-size: 0.8rem;">SYNCING DATABASE...</div>
     </div>
 
     <div class="section-card d-none" id="attendanceSection">
-        <h5 class="mb-3" id="eventTitle" style="font-size: 0.9rem;">Attendees</h5>
+        <h5 class="mb-3" style="font-size: 0.9rem;">Paid Attendees List</h5>
+        <input type="text" id="attendeeSearch" class="form-control mb-3 shadow-none" placeholder="🔍 Search Name or Mobile..." onkeyup="filterTable()">
+
         <div class="scrollable-container">
             <table class="table table-dark table-hover mb-0" id="participantTable">
+                <thead>
+                    <tr>
+                        <th width="30">SL</th>
+                        <th width="30"><input type="checkbox" id="selectAll" onclick="toggleAll(this)"></th>
+                        <th>Participant Info</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
                 <tbody id="participantBody"></tbody>
             </table>
         </div>
-        <button class="btn btn-success w-100 mb-2 btn-cyber" onclick="submitBulkAttendance()">✅ Mark Present</button>
+        
+        <div class="mt-2">
+            <button class="btn btn-success w-100 mb-2 btn-cyber py-2" onclick="submitBulkAttendance()">✅ Mark Selected Present</button>
+            <button class="btn btn-outline-info w-100 btn-cyber py-2" onclick="exportTablePDF('participantTable', 'Attendee_List')">📥 Export Attendee PDF</button>
+        </div>
     </div>
 
     <div class="section-card">
@@ -90,15 +89,24 @@
                 </select>
             </div>
             
-            <div class="col-6"><button onclick="startWinnerScan()" class="btn btn-warning w-100 btn-cyber">📸 SCAN QR</button></div>
-            <div class="col-6"><button onclick="handleWinnerManualPrompt()" class="btn btn-outline-warning w-100 btn-cyber">⌨ MANUAL</button></div>
+            <div id="winnerInputArea" class="col-12">
+                <div class="row g-2" id="individualWinnerBtns">
+                    <div class="col-6"><button onclick="startWinnerScan()" class="btn btn-warning w-100 btn-cyber py-2">📸 SCAN</button></div>
+                    <div class="col-6"><button onclick="handleWinnerManualPrompt()" class="btn btn-outline-warning w-100 btn-cyber py-2">⌨ MANUAL</button></div>
+                </div>
+                <div id="teamWinnerArea" class="d-none">
+                    <span class="label-cyber">SELECT WINNING TEAM</span>
+                    <select id="teamWinnerSelector" class="form-select border-warning mb-2 shadow-none"></select>
+                    <button onclick="submitTeamWinner()" class="btn btn-warning w-100 btn-cyber py-2">🏆 MARK TEAM AS WINNER</button>
+                </div>
+            </div>
 
-            <div class="col-12 mt-4">
-                <span class="label-cyber">WINNER MEDIA (PORTRAIT 3:4)</span>
-                <button id="camToggleBtn" onclick="openWinnerCamera()" class="btn btn-outline-info w-100 btn-cyber">📷 OPEN CAMERA</button>
+            <div class="col-12 mt-4 text-center">
+                <span id="photoLabel" class="label-cyber">WINNER MEDIA</span>
+                <button id="camToggleBtn" onclick="openWinnerCamera()" class="btn btn-outline-info w-100 btn-cyber py-2">📷 OPEN CAMERA</button>
                 
                 <div id="cameraWrapper">
-                    <div id="cameraContainer">
+                    <div id="cameraContainer" class="portrait-mode">
                         <video id="video" autoplay playsinline></video>
                         <div class="camera-overlay"><div class="camera-frame"></div></div>
                     </div>
@@ -110,21 +118,29 @@
     </div>
 
     <div class="section-card d-none" id="winnerSection">
-        <h5 class="mb-3" style="font-size: 0.9rem;">Result Board</h5>
-        <table class="table table-bordered border-secondary" id="winnerTable">
-            <tbody id="winnerBody"></tbody>
-        </table>
+        <h5 class="mb-3" style="font-size: 0.9rem;">🏆 Event Result Board</h5>
+        <div class="table-responsive">
+            <table class="table table-bordered border-secondary" id="winnerTable">
+                <thead class="table-dark text-warning">
+                    <tr><th>Pos</th><th>Winner Info</th></tr>
+                </thead>
+                <tbody id="winnerBody"></tbody>
+            </table>
+        </div>
+        <button class="btn btn-outline-warning w-100 btn-cyber py-2 mt-2" onclick="exportTablePDF('winnerTable', 'Winners_Report')">📥 Export Winners PDF</button>
     </div>
-
-    <canvas id="canvas" class="d-none"></canvas>
 </div>
 
+<canvas id="canvas" class="d-none"></canvas>
+
 <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbzb97bG3GTT1wMH7M9j8RDXkoqoFD_MWXFkUZS0przdUO51s-7Zyutn0FbRSRnjjH8X5A/exec'; 
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbwKjrjjrV5hJUrqaP5nWjYAW2HW50y6EI3_k9bfzriS8ktMuAHpYe1i8K6IyPFV-jsndA/exec';
     const allEvents = ["Glow Craft", "Reverse X", "Trail Blaze", "Brain 2 Bot", "Titan Trials", "Pixel Clash", "Innosense", "Seminar Presentation", "Play villa"];
+    const groupEvents = ["Trail Blaze", "Titan Trials", "Innosense"];
     
-    let videoStream = null;
     const html5QrCode = new Html5Qrcode("reader");
+    let currentData = [];
+    let videoStream = null;
 
     window.onload = () => {
         const selector = document.getElementById('eventSelector');
@@ -132,26 +148,89 @@
         allEvents.forEach(evt => selector.innerHTML += `<option value="${evt}">${evt}</option>`);
     };
 
-    // --- ENHANCED CAMERA LOGIC ---
+    function fetchParticipants() {
+        const event = document.getElementById('eventSelector').value;
+        const body = document.getElementById('participantBody');
+        const loader = document.getElementById('loader');
+        const container = document.getElementById('cameraContainer');
+        const label = document.getElementById('photoLabel');
+        
+        loader.classList.remove('d-none');
+        body.innerHTML = "";
+        
+        // Setup UI for Group vs Individual
+        if(groupEvents.includes(event)) {
+            document.getElementById('individualWinnerBtns').classList.add('d-none');
+            document.getElementById('teamWinnerArea').classList.remove('d-none');
+            container.className = "landscape-mode";
+            label.innerText = "GROUP PHOTO (LANDSCAPE 4:3)";
+        } else {
+            document.getElementById('individualWinnerBtns').classList.remove('d-none');
+            document.getElementById('teamWinnerArea').classList.add('d-none');
+            container.className = "portrait-mode";
+            label.innerText = "WINNER PHOTO (PORTRAIT 3:4)";
+        }
+
+        fetch(`${scriptURL}?action=getEventList&event=${event}`)
+            .then(res => res.json())
+            .then(data => {
+                currentData = data;
+                loader.classList.add('d-none');
+                document.getElementById('attendanceSection').classList.remove('d-none');
+                document.getElementById('winnerSection').classList.remove('d-none');
+                document.getElementById('winnerBody').innerHTML = "";
+                const teamSet = new Set();
+
+                data.forEach((p, index) => {
+                    const allAtt = (p.eventStatus || "").split('|');
+                    const isPresent = allAtt.some(a => a.trim() === event + ": PRESENT");
+                    if(isPresent && p.teamName) teamSet.add(p.teamName);
+
+                    body.innerHTML += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td><input type="checkbox" class="user-check form-check-input" value="${p.mobile}" data-name="${p.name}" ${isPresent ? 'disabled' : ''}></td>
+                            <td>
+                                <strong>${p.name}</strong> ${p.teamName ? `<br><small class="text-warning">[${p.teamName}]</small>` : ''}
+                                <span class="info-sub">${p.mobile} | ${p.dept} | Sem ${p.semester || 'N/A'}</span>
+                                <span class="info-sub" style="color: var(--neon-blue)">${p.college}</span>
+                            </td>
+                            <td><span class="${isPresent ? 'bg-present' : 'text-white-50 small'}">${isPresent ? 'PRESENT' : 'ABSENT'}</span></td>
+                        </tr>`;
+                    
+                    if(p.winnerStatus) {
+                        const specificWin = p.winnerStatus.split('|').find(win => win.trim().startsWith(event + ":"));
+                        if (specificWin) {
+                            document.getElementById('winnerBody').innerHTML += `
+                                <tr>
+                                    <td class="text-warning fw-bold small">${specificWin.trim()}</td>
+                                    <td>
+                                        <strong>${p.name}</strong>
+                                        <span class="info-sub">${p.mobile} | ${p.dept} | ${p.college}</span>
+                                    </td>
+                                </tr>`;
+                        }
+                    }
+                });
+
+                const teamSelect = document.getElementById('teamWinnerSelector');
+                teamSelect.innerHTML = '<option disabled selected>Select Winning Team...</option>';
+                teamSet.forEach(t => teamSelect.innerHTML += `<option value="${t}">${t}</option>`);
+            });
+    }
+
+    // --- CAMERA ENGINE ---
     async function openWinnerCamera() {
         const wrapper = document.getElementById('cameraWrapper');
         wrapper.style.display = 'block';
         document.getElementById('camToggleBtn').style.display = 'none';
-        
+        const isGroup = groupEvents.includes(document.getElementById('eventSelector').value);
         try {
             videoStream = await navigator.mediaDevices.getUserMedia({ 
-                video: { 
-                    facingMode: "environment", 
-                    aspectRatio: 0.75,
-                    width: { ideal: 1920 }, // High res request
-                    height: { ideal: 2560 }
-                } 
+                video: { facingMode: "environment", aspectRatio: isGroup ? 1.33 : 0.75 } 
             });
             document.getElementById('video').srcObject = videoStream;
-        } catch (err) {
-            alert("Camera Error: " + err.message);
-            stopCamera();
-        }
+        } catch (err) { alert("Camera Error: " + err.message); stopCamera(); }
     }
 
     function stopCamera() {
@@ -161,148 +240,152 @@
     }
 
     function capturePhoto() {
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const context = canvas.getContext('2d');
-    const btn = document.getElementById('captureBtn');
-    const event = document.getElementById('eventSelector').value;
-    const pos = document.getElementById('winnerPosition').value;
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        const event = document.getElementById('eventSelector').value;
+        const pos = document.getElementById('winnerPosition').value;
+        const btn = document.getElementById('captureBtn');
 
-    if(!event || event.includes("Choose")) return alert("Select event first!");
+        const isGroup = groupEvents.includes(event);
+        canvas.width = isGroup ? 1600 : 1200;
+        canvas.height = isGroup ? 1200 : 1600;
 
-    // Set resolution and filters
-    canvas.width = 1200;
-    canvas.height = 1600;
-    context.imageSmoothingEnabled = true;
-    context.imageSmoothingQuality = 'high';
+        const targetRatio = isGroup ? 4/3 : 3/4;
+        const vW = video.videoWidth; const vH = video.videoHeight;
+        let sX = 0, sY = 0, sW = vW, sH = vH;
 
-    const vW = video.videoWidth;
-    const vH = video.videoHeight;
-    const targetRatio = 3/4;
-    let sX = 0, sY = 0, sW = vW, sH = vH;
+        if ((vW / vH) > targetRatio) {
+            sW = vH * targetRatio; sX = (vW - sW) / 2;
+        } else {
+            sH = vW / targetRatio; sY = (vH - sH) / 2;
+        }
 
-    if ((vW / vH) > targetRatio) {
-        sW = vH * targetRatio;
-        sX = (vW - sW) / 2;
-    } else {
-        sH = vW / targetRatio;
-        sY = (vH - sH) / 2;
-    }
-
-    context.filter = 'saturate(1.25) brightness(1.1) contrast(1.1)';
-    context.drawImage(video, sX, sY, sW, sH, 0, 0, canvas.width, canvas.height);
-    
-    const imageData = canvas.toDataURL('image/jpeg', 0.9);
-    
-    // UI Feedback
-    btn.innerText = "⌛ UPLOADING...";
-    btn.disabled = true;
-
-    uploadPhoto(imageData, event, pos, btn);
-}
-
-function uploadPhoto(img, event, pos, btn) {
-    document.getElementById('loader').classList.remove('d-none');
-    
-    fetch(scriptURL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            action: "uploadWinnerPhoto",
-            image: img,
-            event: event,
-            position: pos
-        })
-    }).then(() => {
-        // --- THE FIX: AUTO CLOSE CAMERA ON SUCCESS ---
-        alert(`✅ ${pos} Photo Uploaded!`);
-        document.getElementById('loader').classList.add('d-none');
+        context.filter = 'saturate(1.25) brightness(1.1) contrast(1.1)';
+        context.drawImage(video, sX, sY, sW, sH, 0, 0, canvas.width, canvas.height);
         
-        // Reset button state
-        btn.disabled = false;
-        btn.innerText = "SNAP & UPLOAD";
-        
-        // Automatically close the camera interface
-        stopCamera(); 
-        
-        // Refresh the results board to show the new winner
-        fetchParticipants(); 
-    }).catch(err => {
-        alert("Upload Error: " + err);
-        btn.disabled = false;
-        btn.innerText = "RETRY SNAP";
-    });
-}
-
-    function uploadPhoto(img, event, pos, btn) {
-        document.getElementById('loader').classList.remove('d-none');
-        document.getElementById('loader').innerText = "DRIVE UPLOAD IN PROGRESS...";
+        const imageData = canvas.toDataURL('image/jpeg', 0.9);
+        btn.innerText = "⌛ UPLOADING..."; btn.disabled = true;
 
         fetch(scriptURL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                action: "uploadWinnerPhoto",
-                image: img,
-                event: event,
-                position: pos
-            })
+            method: "POST", mode: "no-cors",
+            body: JSON.stringify({ action: "uploadWinnerPhoto", image: imageData, event: event, position: pos })
         }).then(() => {
             alert(`✅ Photo Secured for ${pos}`);
-            document.getElementById('loader').classList.add('d-none');
-            // Reset button state for next winner
-            btn.disabled = false;
-            btn.innerText = "SNAP & UPLOAD NEXT";
-        }).catch(err => {
-            alert("Upload Error: " + err);
-            btn.disabled = false;
-            btn.innerText = "RETRY SNAP";
+            btn.disabled = false; btn.innerText = "SNAP & UPLOAD";
+            stopCamera();
+            fetchParticipants();
         });
     }
 
-    // --- DATA LOGIC ---
-    function fetchParticipants() {
+    // --- PDF & DATA EXPORT ENGINE ---
+    function exportTablePDF(tableId, fileName) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('l', 'mm', 'a4'); // Landscape for better data fit
         const event = document.getElementById('eventSelector').value;
-        document.getElementById('loader').classList.remove('d-none');
-        fetch(`${scriptURL}?action=getEventList&event=${event}`)
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById('loader').classList.add('d-none');
-                document.getElementById('attendanceSection').classList.remove('d-none');
-                document.getElementById('winnerSection').classList.remove('d-none');
-                const body = document.getElementById('participantBody');
-                const winnerBody = document.getElementById('winnerBody');
-                body.innerHTML = ""; winnerBody.innerHTML = "";
-                data.forEach(p => {
-                    const isPresent = (p.eventStatus || "").includes(event + ": PRESENT");
-                    body.innerHTML += `<tr><td><input type="checkbox" class="user-check" value="${p.mobile}" ${isPresent?'disabled':''}></td><td>${p.name}<br><small>${p.mobile}</small></td></tr>`;
-                    if(p.winnerStatus && p.winnerStatus.includes(event)) {
-                        winnerBody.innerHTML += `<tr><td class="text-warning">${p.winnerStatus}</td><td>${p.name}</td></tr>`;
-                    }
-                });
+        
+        doc.setFontSize(18); doc.setTextColor(31, 193, 209);
+        doc.text(`SYNAPSE 2026: ${event}`, 14, 15);
+        doc.setFontSize(10); doc.setTextColor(100);
+        doc.text(`Report Generated: ${new Date().toLocaleString()}`, 14, 20);
+
+        const rows = [];
+        if (tableId === 'participantTable') {
+            currentData.forEach((p, i) => {
+                const allAtt = (p.eventStatus || "").split('|');
+                const isPresent = allAtt.some(a => a.trim() === event + ": PRESENT");
+                rows.push([
+                    i + 1, 
+                    p.name, 
+                    p.mobile, 
+                    p.college, 
+                    p.dept, 
+                    p.semester || 'N/A', 
+                    p.teamName || 'N/A', 
+                    isPresent ? 'PRESENT' : 'ABSENT'
+                ]);
             });
+            doc.autoTable({ 
+                head: [['SL', 'Name', 'Mobile', 'College', 'Department', 'Sem', 'Team', 'Status']], 
+                body: rows, startY: 25, theme: 'grid',
+                headStyles: { fillColor: [31, 193, 209], textColor: [0, 0, 0] }
+            });
+        } else {
+            // Mapping for Winners Report
+            currentData.forEach((p, i) => {
+                if(p.winnerStatus) {
+                    const specificWin = p.winnerStatus.split('|').find(w => w.trim().startsWith(event + ":"));
+                    if(specificWin) {
+                        rows.push([
+                            rows.length + 1, 
+                            specificWin.trim(), 
+                            p.name, 
+                            p.mobile, 
+                            p.college, 
+                            p.dept, 
+                            p.teamName || 'N/A'
+                        ]);
+                    }
+                }
+            });
+            doc.autoTable({ 
+                head: [['SL', 'Rank/Position', 'Winner Name', 'Mobile', 'College', 'Department', 'Team']], 
+                body: rows, startY: 25, theme: 'grid',
+                headStyles: { fillColor: [255, 193, 7], textColor: [0, 0, 0] }
+            });
+        }
+        doc.save(`${fileName}_${event}.pdf`);
+    }
+
+    // --- SEARCH & ATTENDANCE UTILITIES ---
+    function filterTable() {
+        const input = document.getElementById('attendeeSearch').value.toUpperCase();
+        const rows = document.getElementById('participantBody').getElementsByTagName('tr');
+        for (let i = 0; i < rows.length; i++) {
+            const text = rows[i].innerText.toUpperCase();
+            rows[i].style.display = text.indexOf(input) > -1 ? "" : "none";
+        }
+    }
+
+    function toggleAll(source) { document.querySelectorAll('.user-check:not([disabled])').forEach(c => c.checked = source.checked); }
+
+    function submitBulkAttendance() {
+        const event = document.getElementById('eventSelector').value;
+        const selectedMobiles = Array.from(document.querySelectorAll('.user-check:checked')).map(c => c.value);
+        if(selectedMobiles.length === 0) return alert("Select students!");
+        let team = groupEvents.includes(event) ? prompt("Enter Team Name:") : "";
+        if(groupEvents.includes(event) && !team) return alert("Team required.");
+        fetch(`${scriptURL}?action=bulkMarkAttendanceWithTeam&mobiles=${selectedMobiles.join(",")}&event=${event}&team=${encodeURIComponent(team)}`)
+            .then(() => { alert("Attendance Updated"); fetchParticipants(); });
+    }
+
+    function submitTeamWinner() {
+        const team = document.getElementById('teamWinnerSelector').value;
+        const pos = document.getElementById('winnerPosition').value;
+        const event = document.getElementById('eventSelector').value;
+        if(!team || team.includes("Select")) return alert("Select team!");
+        fetch(`${scriptURL}?action=markTeamWinner&team=${encodeURIComponent(team)}&position=${pos}&event=${event}`)
+            .then(() => { alert("Winners Marked"); fetchParticipants(); });
     }
 
     function startWinnerScan() {
         const reader = document.getElementById('reader');
         reader.style.display = 'block';
-        html5QrCode.start({ facingMode: 'environment' }, { fps: 10, qrbox: 250 }, (mobile) => {
+        html5QrCode.start({ facingMode: 'environment' }, { fps: 15, qrbox: 250 }, (mobile) => {
             html5QrCode.stop().then(() => { reader.style.display = 'none'; processWinnerUpdate(mobile); });
         });
     }
 
     function handleWinnerManualPrompt() {
         const mob = prompt("Enter Participant Mobile:");
-        if(mob) processWinnerUpdate(mob);
+        if(mob && mob.length >= 10) processWinnerUpdate(mob);
     }
 
     function processWinnerUpdate(mobile) {
         const pos = document.getElementById('winnerPosition').value;
         const event = document.getElementById('eventSelector').value;
         fetch(`${scriptURL}?action=markWinner&mobile=${mobile}&position=${pos}&event=${event}`)
-            .then(r => r.text()).then(res => { alert(res); fetchParticipants(); });
+            .then(() => { alert("Marked!"); fetchParticipants(); });
     }
 </script>
 </body>
