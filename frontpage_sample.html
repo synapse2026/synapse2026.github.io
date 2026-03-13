@@ -92,7 +92,7 @@
             justify-content: center;
             z-index: 10;
             text-align: center;
-            padding: 120px 15px 40px 15px;
+            padding: 120px 15px 80px 15px; /* Added bottom padding for the arrow */
             background: radial-gradient(circle at center, rgba(116, 31, 209, 0.15) 0%, transparent 70%);
         }
 
@@ -191,6 +191,35 @@
             color: var(--poster-pink);
         }
 
+        /* --- NEW SCROLL INDICATOR --- */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+            opacity: 0.7;
+            cursor: pointer;
+            z-index: 20;
+        }
+
+        .scroll-indicator svg {
+            width: 30px;
+            height: 30px;
+            fill: none;
+            stroke: var(--poster-blue);
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            filter: drop-shadow(0 0 5px var(--poster-blue));
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0) translateX(-50%); }
+            40% { transform: translateY(-15px) translateX(-50%); }
+            60% { transform: translateY(-7px) translateX(-50%); }
+        }
+
         /* --- 3D POSTER GALLERY --- */
         .poster-gallery-section {
             position: relative;
@@ -198,6 +227,8 @@
             padding: 60px 0 20px 0;
             width: 100%;
             overflow: hidden;
+            /* Added ID for the scroll indicator to target */
+            scroll-margin-top: 70px; 
         }
 
         .section-title {
@@ -261,7 +292,7 @@
             background: var(--poster-pink);
         }
 
-        /* --- SCHEDULE SECTION & ANIMATIONS --- */
+        /* --- NEW TIMELINE SCHEDULE SECTION --- */
         .schedule-section {
             position: relative;
             z-index: 10;
@@ -269,46 +300,86 @@
             overflow: hidden;
         }
 
-        .nav-pills .nav-link {
-            font-family: 'Orbitron', sans-serif;
-            color: white;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 30px;
-            padding: 10px 25px;
-            margin: 5px;
-            transition: all 0.3s ease;
-            letter-spacing: 2px;
+        .timeline {
+            position: relative;
+            max-width: 800px;
+            margin: 40px auto 0 auto;
         }
 
-        .nav-pills .nav-link.active {
-            background: linear-gradient(135deg, var(--poster-blue), var(--poster-purple));
-            border-color: transparent;
-            box-shadow: 0 0 15px rgba(31, 193, 209, 0.5);
-            color: white;
+        /* The central glowing line */
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            background: linear-gradient(to bottom, var(--poster-blue), var(--poster-pink), var(--poster-purple));
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -2px;
+            border-radius: 5px;
+            box-shadow: 0 0 15px var(--poster-pink);
         }
 
-        .nav-pills .nav-link:hover:not(.active) {
-            background: rgba(255, 255, 255, 0.1);
+        .timeline-item {
+            padding: 10px 40px;
+            position: relative;
+            background-color: inherit;
+            width: 50%;
+            opacity: 0; /* Hidden initially for scroll animation */
+            transition: all 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        /* Setup starting positions for animations */
+        .timeline-item.left {
+            left: 0;
+            transform: translateX(-50px);
+        }
+
+        .timeline-item.right {
+            left: 50%;
+            transform: translateX(50px);
+        }
+
+        /* Class added by Javascript when element scrolls into view */
+        .timeline-item.in-view {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* The glowing dots on the line */
+        .timeline-dot {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            right: -10px;
+            background-color: var(--background-dark);
+            border: 4px solid var(--poster-blue);
+            top: 50%;
+            transform: translateY(-50%);
+            border-radius: 50%;
+            z-index: 1;
+            box-shadow: 0 0 10px var(--poster-blue);
+        }
+
+        .right .timeline-dot {
+            left: -10px;
             border-color: var(--poster-pink);
+            box-shadow: 0 0 10px var(--poster-pink);
         }
 
         .schedule-card {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(31, 193, 209, 0.2);
             border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
+            padding: 20px;
             backdrop-filter: blur(10px);
             transition: 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            opacity: 0; /* Hidden by default for animation */
+            position: relative;
         }
 
         .schedule-card:hover {
-            transform: translateY(-5px) !important;
+            transform: translateY(-5px);
             border-color: var(--poster-pink);
             box-shadow: 0 10px 25px rgba(209, 31, 183, 0.2);
             background: rgba(255, 255, 255, 0.06);
@@ -318,76 +389,55 @@
             color: var(--poster-pink);
             font-family: 'Orbitron', sans-serif;
             font-weight: 700;
-            font-size: 0.9rem;
-            margin-bottom: 10px;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
             display: inline-block;
             background: rgba(209, 31, 183, 0.1);
-            padding: 5px 12px;
-            border-radius: 8px;
+            padding: 4px 10px;
+            border-radius: 6px;
         }
 
         .schedule-title {
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: bold;
             color: white;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             letter-spacing: 1px;
         }
 
         .schedule-venue {
             color: #a0a0a0;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
         .venue-icon {
-            width: 16px;
-            height: 16px;
+            width: 14px;
+            height: 14px;
             fill: var(--poster-blue);
         }
 
-        /* --- NEW 3X SLOWER OPPOSING ANIMATIONS --- */
-        .tab-content {
-            overflow: hidden;
-            padding-top: 10px;
-        }
-        
-        /* Odd cards come from the Right */
-        .tab-pane.active .schedule-card:nth-child(odd) {
-            animation: slideFromRight 1.8s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
-        }
-
-        /* Even cards come from the Left */
-        .tab-pane.active .schedule-card:nth-child(even) {
-            animation: slideFromLeft 1.8s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
-        }
-
-        /* Adjusted Delays */
-        .tab-pane.active .schedule-card:nth-child(1) { animation-delay: 0.1s; }
-        .tab-pane.active .schedule-card:nth-child(2) { animation-delay: 0.4s; }
-        .tab-pane.active .schedule-card:nth-child(3) { animation-delay: 0.7s; }
-
-        @keyframes slideFromRight {
-            0% { 
-                opacity: 0; 
-                transform: translateX(100px); 
+        /* Mobile Adjustments for Timeline */
+        @media screen and (max-width: 768px) {
+            .timeline::after {
+                left: 20px;
             }
-            100% { 
-                opacity: 1; 
-                transform: translateX(0); 
+            .timeline-item {
+                width: 100%;
+                padding-left: 50px;
+                padding-right: 15px;
             }
-        }
-
-        @keyframes slideFromLeft {
-            0% { 
-                opacity: 0; 
-                transform: translateX(-100px); 
+            .timeline-item.left, .timeline-item.right {
+                left: 0;
+                transform: translateX(50px); /* All come from right on mobile */
             }
-            100% { 
-                opacity: 1; 
-                transform: translateX(0); 
+            .timeline-item.in-view {
+                transform: translateX(0);
+            }
+            .timeline-dot, .right .timeline-dot {
+                left: 10px;
             }
         }
 
@@ -556,10 +606,16 @@
                 <div class="count-item"><span class="count-number" id="minutes">00</span><span class="count-label">Mins</span></div>
                 <div class="count-item"><span class="count-number" id="seconds">00</span><span class="count-label">Secs</span></div>
             </div>
+
+            <a href="#events" class="scroll-indicator animate__animated animate__fadeIn animate__delay-2s">
+                <svg viewBox="0 0 24 24">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </a>
         </div>
     </div>
 
-    <section class="poster-gallery-section">
+    <section id="events" class="poster-gallery-section">
         <h2 class="section-title">Explore <span>Events</span></h2>
         
         <div class="swiper mySwiper">
@@ -580,119 +636,124 @@
     <section class="schedule-section container">
         <h2 class="section-title">Event <span>Schedule</span></h2>
         
-        <ul class="nav nav-pills justify-content-center mb-5" id="scheduleTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="ie-tab" data-bs-toggle="pill" data-bs-target="#ie-schedule" type="button" role="tab">IE Dept</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="ec-tab" data-bs-toggle="pill" data-bs-target="#ec-schedule" type="button" role="tab">EC Dept</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="cabm-tab" data-bs-toggle="pill" data-bs-target="#cabm-schedule" type="button" role="tab">CABM Dept</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="ct-tab" data-bs-toggle="pill" data-bs-target="#ct-schedule" type="button" role="tab">CT Dept</button>
-            </li>
-        </ul>
-
-        <div class="tab-content" id="scheduleTabContent">
+        <div class="timeline">
             
-            <div class="tab-pane fade show active" id="ie-schedule" role="tabpanel">
-                <div class="row justify-content-center">
-                    <div class="col-md-8 col-lg-6">
-                        <div class="schedule-card">
-                            <span class="schedule-time">10:00 AM to 01:00 PM</span>
-                            <div class="schedule-title">Play Villa</div>
-                            <div class="schedule-venue">
-                                <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                                S6 IE Class Room
-                            </div>
-                        </div>
-                        <div class="schedule-card">
-                            <span class="schedule-time">02:00 PM to 04:00 PM</span>
-                            <div class="schedule-title">InnoSense</div>
-                            <div class="schedule-venue">
-                                <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                                Software Lab
-                            </div>
-                        </div>
+            <div class="timeline-item left">
+                <div class="timeline-dot"></div>
+                <div class="schedule-card">
+                    <span class="schedule-time">09:00 AM to 04:00 PM</span>
+                    <div class="schedule-title">Project Expo</div>
+                    <div class="schedule-venue">
+                        <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                        S6 EC & CT Class Rooms
                     </div>
                 </div>
             </div>
 
-            <div class="tab-pane fade" id="ec-schedule" role="tabpanel">
-                <div class="row justify-content-center">
-                    <div class="col-md-8 col-lg-6">
-                        <div class="schedule-card">
-                            <span class="schedule-time">09:00 AM to 04:00 PM</span>
-                            <div class="schedule-title">Project Expo</div>
-                            <div class="schedule-venue">
-                                <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                                S6 EC & CT Class Rooms
-                            </div>
-                        </div>
-                        <div class="schedule-card">
-                            <span class="schedule-time">10:00 AM to 12:00 PM</span>
-                            <div class="schedule-title">Glow Craft</div>
-                            <div class="schedule-venue">
-                                <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                                Embedded System Lab
-                            </div>
-                        </div>
-                        <div class="schedule-card">
-                            <span class="schedule-time">01:00 PM to 03:00 PM</span>
-                            <div class="schedule-title">ReverseX</div>
-                            <div class="schedule-venue">
-                                <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                                Basic Electronics Lab
-                            </div>
-                        </div>
+            <div class="timeline-item right">
+                <div class="timeline-dot"></div>
+                <div class="schedule-card">
+                    <span class="schedule-time">10:00 AM to 11:00 AM</span>
+                    <div class="schedule-title">Pixel Clash</div>
+                    <div class="schedule-venue">
+                        <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                        CABM Lab
                     </div>
                 </div>
             </div>
 
-            <div class="tab-pane fade" id="cabm-schedule" role="tabpanel">
-                <div class="row justify-content-center">
-                    <div class="col-md-8 col-lg-6">
-                        <div class="schedule-card">
-                            <span class="schedule-time">10:00 AM to 11:00 AM</span>
-                            <div class="schedule-title">Pixel Clash</div>
-                            <div class="schedule-venue">
-                                <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                                CABM Lab
-                            </div>
-                        </div>
-                        <div class="schedule-card">
-                            <span class="schedule-time">11:00 AM to 04:00 PM</span>
-                            <div class="schedule-title">The Titan Trials</div>
-                            <div class="schedule-venue">
-                                <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                                Resource Centre
-                            </div>
-                        </div>
+            <div class="timeline-item left">
+                <div class="timeline-dot"></div>
+                <div class="schedule-card">
+                    <span class="schedule-time">10:00 AM to 12:00 PM</span>
+                    <div class="schedule-title">Glow Craft</div>
+                    <div class="schedule-venue">
+                        <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                        Embedded System Lab
                     </div>
                 </div>
             </div>
 
-            <div class="tab-pane fade" id="ct-schedule" role="tabpanel">
-                <div class="row justify-content-center">
-                    <div class="col-md-8 col-lg-6">
-                        <div class="schedule-card">
-                            <span class="schedule-time">10:00 AM to 12:00 PM</span>
-                            <div class="schedule-title">TrailBlaze : Decode the Clues</div>
-                            <div class="schedule-venue">
-                                <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                                Software Lab 2 (Team Event)
-                            </div>
-                        </div>
-                        <div class="schedule-card">
-                            <span class="schedule-time">01:00 PM to 02:00 PM</span>
-                            <div class="schedule-title">Brain2Bot : Think sharp, Prompt Smarter</div>
-                            <div class="schedule-venue">
-                                <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                                Software Lab 1
-                            </div>
-                        </div>
+            <div class="timeline-item right">
+                <div class="timeline-dot"></div>
+                <div class="schedule-card">
+                    <span class="schedule-time">10:00 AM to 12:00 PM</span>
+                    <div class="schedule-title">TrailBlaze : Decode the Clues</div>
+                    <div class="schedule-venue">
+                        <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                        Software Lab 2
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item left">
+                <div class="timeline-dot"></div>
+                <div class="schedule-card">
+                    <span class="schedule-time">10:00 AM to 01:00 PM</span>
+                    <div class="schedule-title">Play Villa</div>
+                    <div class="schedule-venue">
+                        <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                        S6 IE Class Room
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item right">
+                <div class="timeline-dot"></div>
+                <div class="schedule-card">
+                    <span class="schedule-time">11:00 AM to 04:00 PM</span>
+                    <div class="schedule-title">The Titan Trials</div>
+                    <div class="schedule-venue">
+                        <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                        Resource Centre
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item left">
+                <div class="timeline-dot"></div>
+                <div class="schedule-card">
+                    <span class="schedule-time">11:30 AM</span>
+                    <div class="schedule-title">Idea Forum: Seminar Presentation</div>
+                    <div class="schedule-venue">
+                        <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                        Mini Auditorium
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item right">
+                <div class="timeline-dot"></div>
+                <div class="schedule-card">
+                    <span class="schedule-time">01:00 PM to 02:00 PM</span>
+                    <div class="schedule-title">Brain2Bot</div>
+                    <div class="schedule-venue">
+                        <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                        Software Lab 1
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item left">
+                <div class="timeline-dot"></div>
+                <div class="schedule-card">
+                    <span class="schedule-time">01:00 PM to 03:00 PM</span>
+                    <div class="schedule-title">ReverseX</div>
+                    <div class="schedule-venue">
+                        <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                        Basic Electronics Lab
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item right">
+                <div class="timeline-dot"></div>
+                <div class="schedule-card">
+                    <span class="schedule-time">02:00 PM to 04:00 PM</span>
+                    <div class="schedule-title">InnoSense</div>
+                    <div class="schedule-venue">
+                        <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                        Software Lab
                     </div>
                 </div>
             </div>
@@ -711,11 +772,11 @@
         <p class="sponsor-label">Co-Sponsors</p>
         <div class="marquee-container">
             <div class="marquee-content">
-                <div class="co-sponsor-card"><img src="LOGO.jpg" alt="Co-Sponsor Partner" class="co-sponsor-logo"></div>
+                <div class="co-sponsor-card"><img src="LOGO.jpeg" alt="Co-Sponsor Partner" class="co-sponsor-logo"></div>
                 <div class="co-sponsor-card"><img src="dnesto.jpeg" alt="Dnesto" class="co-sponsor-logo"></div>
                 <div class="co-sponsor-card"><img src="dp.jpeg" alt="DP" class="co-sponsor-logo"></div>
                 
-                <div class="co-sponsor-card"><img src="LOGO.jpg" alt="Co-Sponsor Partner" class="co-sponsor-logo"></div>
+                <div class="co-sponsor-card"><img src="LOGO.jpeg" alt="Co-Sponsor Partner" class="co-sponsor-logo"></div>
                 <div class="co-sponsor-card"><img src="dnesto.jpeg" alt="Dnesto" class="co-sponsor-logo"></div>
                 <div class="co-sponsor-card"><img src="dp.jpeg" alt="DP" class="co-sponsor-logo"></div>
             </div>
@@ -764,6 +825,25 @@
                 el: ".swiper-pagination",
                 clickable: true,
             },
+        });
+
+        // Timeline Scroll Animation Observer
+        document.addEventListener("DOMContentLoaded", function() {
+            const timelineItems = document.querySelectorAll('.timeline-item');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('in-view');
+                    }
+                });
+            }, {
+                threshold: 0.15 // Triggers when 15% of the card is visible
+            });
+
+            timelineItems.forEach(item => {
+                observer.observe(item);
+            });
         });
 
         // Typing Effect & Animation Trigger
