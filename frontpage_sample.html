@@ -92,7 +92,7 @@
             justify-content: center;
             z-index: 10;
             text-align: center;
-            padding: 120px 15px 80px 15px; /* Added bottom padding for the arrow */
+            padding: 120px 15px 100px 15px; /* Increased bottom padding for larger arrow */
             background: radial-gradient(circle at center, rgba(116, 31, 209, 0.15) 0%, transparent 70%);
         }
 
@@ -191,27 +191,27 @@
             color: var(--poster-pink);
         }
 
-        /* --- NEW SCROLL INDICATOR --- */
+        /* --- UPDATED SCROLL INDICATOR --- */
         .scroll-indicator {
             position: absolute;
-            bottom: 30px;
+            bottom: 6vh; /* Uses viewport height to stay comfortably above the bottom edge */
             left: 50%;
             transform: translateX(-50%);
             animation: bounce 2s infinite;
-            opacity: 0.7;
+            opacity: 0.8;
             cursor: pointer;
             z-index: 20;
         }
 
         .scroll-indicator svg {
-            width: 30px;
-            height: 30px;
+            width: 45px; /* Increased Size */
+            height: 45px; /* Increased Size */
             fill: none;
             stroke: var(--poster-blue);
-            stroke-width: 3;
+            stroke-width: 4; /* Slightly thicker line */
             stroke-linecap: round;
             stroke-linejoin: round;
-            filter: drop-shadow(0 0 5px var(--poster-blue));
+            filter: drop-shadow(0 0 8px var(--poster-blue));
         }
 
         @keyframes bounce {
@@ -227,7 +227,6 @@
             padding: 60px 0 20px 0;
             width: 100%;
             overflow: hidden;
-            /* Added ID for the scroll indicator to target */
             scroll-margin-top: 70px; 
         }
 
@@ -292,7 +291,7 @@
             background: var(--poster-pink);
         }
 
-        /* --- NEW TIMELINE SCHEDULE SECTION --- */
+        /* --- TIMELINE SCHEDULE SECTION --- */
         .schedule-section {
             position: relative;
             z-index: 10;
@@ -302,11 +301,10 @@
 
         .timeline {
             position: relative;
-            max-width: 800px;
+            max-width: 900px; /* Slightly wider max-width for balance */
             margin: 40px auto 0 auto;
         }
 
-        /* The central glowing line */
         .timeline::after {
             content: '';
             position: absolute;
@@ -325,11 +323,10 @@
             position: relative;
             background-color: inherit;
             width: 50%;
-            opacity: 0; /* Hidden initially for scroll animation */
+            opacity: 0; 
             transition: all 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
-        /* Setup starting positions for animations */
         .timeline-item.left {
             left: 0;
             transform: translateX(-50px);
@@ -340,13 +337,11 @@
             transform: translateX(50px);
         }
 
-        /* Class added by Javascript when element scrolls into view */
         .timeline-item.in-view {
             opacity: 1;
             transform: translateX(0);
         }
 
-        /* The glowing dots on the line */
         .timeline-dot {
             content: '';
             position: absolute;
@@ -419,25 +414,53 @@
             fill: var(--poster-blue);
         }
 
-        /* Mobile Adjustments for Timeline */
+        /* --- UPDATED MOBILE TIMELINE (Two-Sided Branches) --- */
         @media screen and (max-width: 768px) {
-            .timeline::after {
-                left: 20px;
-            }
             .timeline-item {
-                width: 100%;
-                padding-left: 50px;
-                padding-right: 15px;
+                padding: 10px 0; /* Removing side padding from wrapper */
             }
-            .timeline-item.left, .timeline-item.right {
-                left: 0;
-                transform: translateX(50px); /* All come from right on mobile */
+            .timeline-item.left {
+                padding-right: 15px; /* Spacing from center line */
+                transform: translateX(-30px); /* Slightly shorter slide-in distance on mobile */
             }
-            .timeline-item.in-view {
-                transform: translateX(0);
+            .timeline-item.right {
+                padding-left: 15px; /* Spacing from center line */
+                transform: translateX(30px);
             }
-            .timeline-dot, .right .timeline-dot {
-                left: 10px;
+            
+            /* Shrink dots to fit mobile cleanly */
+            .timeline-dot {
+                width: 14px;
+                height: 14px;
+                border-width: 3px;
+                right: -7px;
+            }
+            .right .timeline-dot {
+                left: -7px;
+            }
+
+            /* Shrink cards and text so they fit 50% width on small screens */
+            .schedule-card {
+                padding: 12px 10px;
+                border-radius: 10px;
+            }
+            .schedule-title {
+                font-size: 0.85rem;
+                line-height: 1.2;
+                margin-bottom: 5px;
+            }
+            .schedule-time {
+                font-size: 0.65rem;
+                padding: 3px 6px;
+                margin-bottom: 6px;
+                letter-spacing: 0px;
+            }
+            .schedule-venue {
+                font-size: 0.7rem;
+            }
+            .venue-icon {
+                width: 12px;
+                height: 12px;
             }
         }
 
@@ -628,6 +651,7 @@
                 <div class="swiper-slide"><img src="poster (6).jpeg" alt="Glow Craft"></div>
                 <div class="swiper-slide"><img src="poster (7).jpeg" alt="The Titan Trials"></div>
                 <div class="swiper-slide"><img src="poster (8).jpeg" alt="Pixel Clash"></div>
+		<div class="swiper-slide"><img src="poster10.jpeg" alt="Brain 2 Bot"></div>
             </div>
             <div class="swiper-pagination"></div>
         </div>
@@ -714,7 +738,7 @@
                 <div class="timeline-dot"></div>
                 <div class="schedule-card">
                     <span class="schedule-time">11:30 AM</span>
-                    <div class="schedule-title">Idea Forum: Seminar Presentation</div>
+                    <div class="schedule-title">Idea Forum: Seminar</div>
                     <div class="schedule-venue">
                         <svg class="venue-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
                         Mini Auditorium
@@ -838,7 +862,7 @@
                     }
                 });
             }, {
-                threshold: 0.15 // Triggers when 15% of the card is visible
+                threshold: 0.15 
             });
 
             timelineItems.forEach(item => {
@@ -885,7 +909,7 @@
 
         window.onload = () => setTimeout(typeLoop, 800);
 
-        // Countdown Timer - Set to March 16, 2026 at 23:59:59
+        // Countdown Timer
         const launchDate = new Date("March 16, 2026 23:59:59").getTime();
         const timer = setInterval(function() {
             const now = new Date().getTime();
