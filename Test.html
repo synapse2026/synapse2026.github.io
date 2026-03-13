@@ -168,22 +168,38 @@
     };
 
     // --- CAMERA & PHOTO UPLOAD LOGIC ---
-    async function openWinnerCamera() {
-        const wrapper = document.getElementById('cameraWrapper');
-        wrapper.style.display = 'block';
-        document.getElementById('camToggleBtn').style.display = 'none';
-        
-        try {
-            // Request 3:4 aspect ratio (Portrait)
-            videoStream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "environment", aspectRatio: 0.75 } 
-            });
-            document.getElementById('video').srcObject = videoStream;
-        } catch (err) {
-            alert("Camera Access Error: " + err.message);
-            stopCamera();
+async function openWinnerCamera() {
+    const wrapper = document.getElementById('cameraWrapper');
+    wrapper.style.display = 'block';
+    document.getElementById('camToggleBtn').style.display = 'none';
+    
+    try {
+        // Requesting higher resolution for better focus and clarity
+        const constraints = {
+            video: { 
+                facingMode: "environment", 
+                aspectRatio: 0.75,
+                width: { ideal: 1920 }, // Request Full HD if available
+                height: { ideal: 2560 },
+                focusMode: "continuous" // Try to force continuous autofocus
+            }
+        };
+
+        videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+        const video = document.getElementById('video');
+        video.srcObject = videoStream;
+
+        // Apply advanced constraints for focus if the browser supports it
+        const track = videoStream.getVideoTracks()[0];
+        const capabilities = track.getCapabilities();
+        if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
+            await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] });
         }
+    } catch (err) {
+        alert("Camera Access Error: " + err.message);
+        stopCamera();
     }
+}
 
     function stopCamera() {
         if (videoStream) videoStream.getTracks().forEach(track => track.stop());
@@ -195,25 +211,28 @@
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const context = canvas.getContext('2d');
+    const snapBtn = document.querySelector("#cameraWrapper button.btn-info");
     const event = document.getElementById('eventSelector').value;
     const pos = document.getElementById('winnerPosition').value;
-    const snapBtn = document.querySelector("#cameraWrapper button.btn-info");
 
-    if(!event || event.includes("Choose")) return alert("Please select an event first!");
+    if(!event || event.includes("Choose")) return alert("Please select an event!");
 
-    // 1. UI Feedback: Disable button and show "Waiting"
+    // UI Feedback
     snapBtn.disabled = true;
-    snapBtn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> ⌛ UPLOADING... PLEASE WAIT`;
-    document.getElementById('loader').classList.remove('d-none');
-    document.getElementById('loader').innerText = "PROCESSING IMAGE...";
+    snapBtn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> ⌛ PROCESSING...`;
 
-    // Set portrait dimensions
-    canvas.width = 600;
-    canvas.height = 800;
+    // 1. INCREASE RESOLUTION for higher quality (Double the previous size)
+    canvas.width = 1200;
+    canvas.height = 1600;
+
+    // 2. Enable Smoothing for better quality
+    context.imageSmoothingEnabled = true;
+    context.imageSmoothingQuality = 'high';
 
     const vW = video.videoWidth;
     const vH = video.videoHeight;
     const targetRatio = 3/4;
+    
     let sX = 0, sY = 0, sW = vW, sH = vH;
 
     if ((vW / vH) > targetRatio) {
@@ -224,10 +243,12 @@
         sY = (vH - sH) / 2;
     }
 
+    // Draw the high-quality crop
     context.drawImage(video, sX, sY, sW, sH, 0, 0, canvas.width, canvas.height);
-    const base64Data = canvas.toDataURL('image/jpeg', 0.8);
     
-    // Send to server
+    // 3. Increase JPEG quality to 0.9 (90% quality)
+    const base64Data = canvas.toDataURL('image/jpeg', 0.9);
+    
     uploadPhoto(base64Data, event, pos, snapBtn);
 }
 
