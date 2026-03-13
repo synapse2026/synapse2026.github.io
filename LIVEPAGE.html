@@ -6,95 +6,46 @@
     <title>SYNAPSE 2026 | LIVE HUD</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --poster-pink: #d11fb7;
-            --poster-blue: #1fc1d1;
-            --poster-purple: #741fd1;
-            --bg: #07060f; 
-            --glass: rgba(15, 12, 41, 0.6); 
-            --gold: #ffea00;
-        }
-        
+        :root { --poster-pink: #d11fb7; --poster-blue: #1fc1d1; --poster-purple: #741fd1; --bg: #07060f; --glass: rgba(15, 12, 41, 0.6); --gold: #ffea00; }
         body, html { margin: 0; padding: 0; min-height: 100vh; background: var(--bg); color: #fff; font-family: 'Share Tech Mono', monospace; overflow-x: hidden; }
-        
         canvas#neuralNet { position: fixed; top: 0; left: 0; z-index: -1; opacity: 0.3; }
         .scanline { position: fixed; top: 0; left: 0; width: 100%; height: 10px; background: rgba(31, 193, 209, 0.05); z-index: 10; animation: scan 8s linear infinite; pointer-events: none; }
         @keyframes scan { from { top: -10%; } to { top: 110%; } }
-
-        .college-header {
-            background: rgba(0, 0, 0, 0.8); text-align: center; padding: 15px 10px; border-bottom: 2px solid var(--gold);
-            font-family: 'Orbitron'; font-weight: 900; letter-spacing: 2px; 
-            font-size: clamp(0.9rem, 2.5vw, 2.2rem); color: var(--gold);
-            text-shadow: 0 0 15px rgba(255, 234, 0, 0.5); text-transform: uppercase; z-index: 100; position: relative;
-        }
-
-        .dashboard { 
-            display: grid; grid-template-columns: 380px 1fr; grid-template-rows: auto 1fr auto; 
-            min-height: calc(100vh - 75px); gap: 15px; padding: 15px; box-sizing: border-box; 
-        }
-
-        .header { 
-            grid-column: 1 / span 2; background: var(--glass); border: 1px solid var(--poster-blue); 
-            display: flex; align-items: center; justify-content: space-between; padding: 15px 30px; 
-        }
+        .college-header { background: rgba(0, 0, 0, 0.8); text-align: center; padding: 15px 10px; border-bottom: 2px solid var(--gold); font-family: 'Orbitron'; font-weight: 900; letter-spacing: 2px; font-size: clamp(0.9rem, 2.5vw, 2.2rem); color: var(--gold); text-shadow: 0 0 15px rgba(255, 234, 0, 0.5); text-transform: uppercase; z-index: 100; position: relative; }
+        .dashboard { display: grid; grid-template-columns: 380px 1fr; grid-template-rows: auto 1fr auto; min-height: calc(100vh - 75px); gap: 15px; padding: 15px; box-sizing: border-box; }
+        .header { grid-column: 1 / span 2; background: var(--glass); border: 1px solid var(--poster-blue); display: flex; align-items: center; justify-content: space-between; padding: 15px 30px; }
         .logo { font-family: 'Orbitron'; font-size: 2.5rem; font-weight: 900; color: var(--poster-blue); text-shadow: 0 0 20px var(--poster-blue); }
-        
         .flip-clock { display: flex; gap: 4px; align-items: center; }
-        .flip-card {
-            position: relative; width: 45px; height: 65px;
-            background: #111; border-radius: 4px; font-family: 'Orbitron';
-            font-size: 2.5rem; font-weight: 900; color: #fff;
-            text-align: center; line-height: 65px; border: 1px solid #333;
-        }
+        .flip-card { position: relative; width: 45px; height: 65px; background: #111; border-radius: 4px; font-family: 'Orbitron'; font-size: 2.5rem; font-weight: 900; color: #fff; text-align: center; line-height: 65px; border: 1px solid #333; }
         .flip-card::before { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 1.5px; background: #000; z-index: 10; }
-
         .sidebar { display: flex; flex-direction: column; gap: 15px; }
         .stat-card { background: var(--glass); border-left: 6px solid var(--poster-pink); padding: 15px; flex: 1; display: flex; flex-direction: column; justify-content: center; }
         .stat-val { font-family: 'Orbitron'; font-size: 4rem; color: #fff; text-shadow: 0 0 15px var(--poster-pink); }
-
         .stage { position: relative; background: rgba(0,0,0,0.4); border: 1px solid rgba(31, 193, 209, 0.2); overflow: hidden; border-radius: 10px; }
         .slide { position: absolute; inset: 0; padding: 20px; opacity: 0; transition: opacity 0.5s; visibility: hidden; }
         .slide.active { opacity: 1; visibility: visible; z-index: 5; }
         .stage-title { font-family: 'Orbitron'; font-size: 2rem; color: var(--poster-blue); margin-bottom: 15px; border-bottom: 3px solid var(--poster-blue); width: fit-content; }
-
-        /* WINNER MARATHON STYLES */
         .winner-marathon { display: flex; align-items: center; justify-content: center; gap: 40px; height: 100%; animation: slideIn 0.8s ease-out; }
-        .winner-frame {
-            width: 320px; height: 420px; border: 5px solid var(--poster-pink);
-            border-radius: 15px; box-shadow: 0 0 30px var(--poster-pink);
-            padding: 10px; background: #000;
-        }
-        .winner-frame img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+        .winner-frame { width: 320px; height: 420px; border: 5px solid var(--poster-pink); border-radius: 15px; box-shadow: 0 0 30px var(--poster-pink); padding: 10px; background: #000; }
+        .winner-frame img, .winner-frame video { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
         .winner-info-card { flex: 1; text-align: left; }
         .winner-rank { font-family: 'Orbitron'; font-size: 2.2rem; color: var(--gold); margin-bottom: 10px; }
         .winner-name { font-family: 'Orbitron'; font-size: 3rem; color: #fff; margin-bottom: 10px; text-transform: uppercase; line-height: 1.1; }
         .winner-sub { font-size: 1.5rem; color: var(--poster-blue); }
-
         @keyframes slideIn { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* SCHEDULE ANIMATIONS */
         .schedule-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .sched-card { 
-            background: rgba(209, 31, 183, 0.05); border: 1px solid rgba(209, 31, 183, 0.3); 
-            border-radius: 10px; padding: 12px; display: flex; justify-content: space-between; align-items: center;
-            opacity: 0; 
-        }
+        .sched-card { background: rgba(209, 31, 183, 0.05); border: 1px solid rgba(209, 31, 183, 0.3); border-radius: 10px; padding: 12px; display: flex; justify-content: space-between; align-items: center; opacity: 0; }
         .sched-name { font-family: 'Orbitron'; font-size: 1rem; color: var(--poster-blue); font-weight: 800; }
         .sched-time { font-family: 'Orbitron'; color: var(--gold); font-size: 0.9rem; }
-        
         @keyframes flyInLeft { from { opacity: 0; transform: translateX(-100px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes flyInRight { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
-        .fly-left { animation: flyInLeft 0.6s forwards; } 
-        .fly-right { animation: flyInRight 0.6s forwards; }
-
+        .fly-left { animation: flyInLeft 0.6s forwards; } .fly-right { animation: flyInRight 0.6s forwards; }
         .list-item { font-size: 1.5rem; padding: 10px; margin-bottom: 8px; background: rgba(31, 193, 209, 0.05); border-left: 5px solid var(--poster-blue); }
-
         .footer { grid-column: 1 / span 2; background: #000; border-top: 2px solid var(--poster-blue); display: flex; align-items: center; overflow: hidden; height: 100px; }
         .scroller { display: flex; align-items: center; white-space: nowrap; animation: scroll 40s linear infinite; }
         .sponsor-pod { height: 60px; margin: 0 20px; }
         .sponsor-pod img { height: 40px; object-fit: contain; }
         @keyframes scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-
         #gallery-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; filter: brightness(0.35); transition: opacity 0.8s; }
     </style>
 </head>
@@ -122,17 +73,15 @@
 
     <main class="stage">
         <img id="gallery-img" src="">
-
         <div class="slide active" id="slide-photos">
-            <div class="stage-title">LIVE MOMENTS</div>
-            <h2 id="live-moment-status" style="text-align: center; margin-top: 15%; color: var(--poster-blue);">CAPTURING THE VIBE...</h2>
+            <div class="stage-title" id="live-title">LIVE MOMENTS</div>
+            <div id="live-media-content" style="height: 100%;"></div>
+            <h2 id="live-moment-status" style="text-align: center; margin-top: 15%; color: var(--poster-blue);">WAITING FOR UPLINK...</h2>
         </div>
-
         <div class="slide" id="slide-winners">
             <div class="stage-title">HALL OF FAME</div>
             <div id="winner-marathon-area" style="height: 100%;"></div>
         </div>
-
         <div class="slide" id="slide-schedule">
             <div class="stage-title">TIMELINE</div>
             <div class="schedule-grid">
@@ -146,10 +95,8 @@
                 <div class="sched-card"><div><span class="sched-name">Seminar</span></div><div class="sched-time">03:45 PM</div></div>
             </div>
         </div>
-
         <div class="slide" id="slide-attendees"><div class="stage-title">ACTIVITY FEED</div><div id="attendee-list"></div></div>
     </main>
-
     <footer class="footer"><div class="scroller" id="sponsorScroller"></div></footer>
 </div>
 
@@ -159,69 +106,103 @@
     let cachedData = null;
     let isCyclingWinners = false;
 
+    // THE CLEANER: Crucial to remove trailing timestamps like "15:33:41"
+    function cleanUrl(url) {
+        if (!url) return "";
+        let u = url.trim();
+        // Extract the actual URL using regex to ignore anything that isn't part of the link
+        const match = u.match(/(https?:\/\/[^\s]+)/);
+        if (match) u = match[1];
+        
+        // Remove trailing event/timestamp artifacts commonly stuck to end
+        u = u.split(/[ ]+/)[0]; 
+        
+        // Convert Drive "uc" links to Direct high-res links for better loading
+        if(u.includes("drive.google.com/uc")){
+            const id = u.split("id=")[1];
+            u = "https://lh3.googleusercontent.com/d/" + id + "=s2000";
+        }
+        return u;
+    }
+
     function fetchLiveData() {
         fetch(`${scriptURL}?action=getLiveTVData`).then(res => res.json()).then(data => {
             cachedData = data;
             document.getElementById('paidCount').innerText = data.stats.paid || 0;
             document.getElementById('winCount').innerText = data.stats.winners || 0;
 
-            // --- IMPROVED LIVE MOMENTS LOGIC ---
-            // Show photos that ARE NOT tagged as specific competition winners
-            const eventCompetitions = ["Glow Craft", "Reverse X", "Trail Blaze", "Brain 2 Bot", "Titan Trials", "Pixel Clash", "Innosense", "Seminar Presentation", "Play villa"];
-            const livePhotos = data.photos.filter(p => {
-                const tag = p.event || "General";
-                return !eventCompetitions.includes(tag.trim());
-            });
-
+            // BACKGROUND LOGIC: Show ANY photo that isn't a known competition winner
+            const livePhotos = data.photos.filter(p => p.type === "LIVE_MOMENT" || p.type === "PHOTO" || p.type === "");
             if (livePhotos.length > 0) {
-                const latestThree = livePhotos.slice(-3); // Get 3 most recent non-winner photos
-                const randomPhoto = latestThree[Math.floor(Math.random() * latestThree.length)];
+                const randomPhoto = livePhotos[Math.floor(Math.random() * livePhotos.length)];
                 const galleryImg = document.getElementById('gallery-img');
-                
-                const imgLoader = new Image();
-                imgLoader.src = (randomPhoto.url || randomPhoto) + "&t=" + Date.now();
-                imgLoader.onload = () => {
-                    galleryImg.src = imgLoader.src;
-                    document.getElementById('live-moment-status').style.display = 'none';
-                };
+                const finalUrl = cleanUrl(randomPhoto.url);
+                galleryImg.src = finalUrl + (finalUrl.includes("?") ? "&" : "?") + "v=" + Date.now();
+                document.getElementById('live-moment-status').style.display = 'none';
             }
 
             document.getElementById('attendee-list').innerHTML = data.recentAttendees?.reverse().slice(0, 5).map(a => `<div class="list-item">⚡ ${a}</div>`).join('');
             
             if(data.sponsors?.length > 0) {
-                const pods = data.sponsors.map(url => `<div class="sponsor-pod"><img src="${url}"></div>`).join('');
+                const pods = data.sponsors.map(url => `<div class="sponsor-pod"><img src="${cleanUrl(url)}"></div>`).join('');
                 document.getElementById('sponsorScroller').innerHTML = pods + pods;
             }
         });
     }
 
+    async function startMediaMarathon(type, title, containerId) {
+        if (!cachedData || !cachedData.photos) return;
+        const container = document.getElementById(containerId);
+        const assets = cachedData.photos.filter(p => p.type === type).reverse();
+        if (assets.length === 0) return;
+
+        isCyclingWinners = true;
+        document.getElementById('live-title').innerText = title;
+
+        for (let item of assets) {
+            const url = cleanUrl(item.url);
+            container.innerHTML = `
+                <div class="winner-marathon">
+                    <div class="winner-frame">
+                        ${url.includes("export=view") ? `<video src="${url}" autoplay muted loop></video>` : `<img src="${url}">`}
+                    </div>
+                    <div class="winner-info-card">
+                        <div class="winner-rank">${title}</div>
+                        <div class="winner-name">${item.event || "SYNAPSE 2026"}</div>
+                        <div class="winner-sub">SYNAPSE UPDATE</div>
+                    </div>
+                </div>`;
+            await new Promise(r => setTimeout(r, 7000));
+        }
+        isCyclingWinners = false;
+        document.getElementById('live-title').innerText = "LIVE MOMENTS";
+        container.innerHTML = "";
+    }
+
     async function startWinnerMarathon() {
         if (!cachedData || !cachedData.photos) return;
         const marathonArea = document.getElementById('winner-marathon-area');
-        const winners = cachedData.photos.filter(p => typeof p === 'object' && p.event && p.event !== "General").reverse();
+        const winners = cachedData.photos.filter(p => p.event && p.event !== "General" && p.event !== "" && p.type === "PHOTO").reverse();
         
         if (winners.length === 0) {
-            marathonArea.innerHTML = "<h2 style='text-align:center; padding-top:100px;'>AWAITING RESULTS...</h2>";
+            marathonArea.innerHTML = "<h2 style='text-align:center; padding-top:100px;'>AWAITING GRAND RESULTS...</h2>";
             await new Promise(r => setTimeout(r, 4000));
         } else {
             isCyclingWinners = true;
             for (let winner of winners) {
                 const details = cachedData.winnerDetails.find(d => d.includes(winner.event)) || winner.event;
                 const [identity, rank] = details.split('|');
-
                 marathonArea.innerHTML = `
                     <div class="winner-marathon">
-                        <div class="winner-frame"><img src="${winner.url}"></div>
+                        <div class="winner-frame"><img src="${cleanUrl(winner.url)}"></div>
                         <div class="winner-info-card">
-                            <div class="winner-rank">${rank || "CHAMPION"}</div>
-                            <div class="winner-name">${identity || "Champion"}</div>
-                            <div class="winner-sub">${winner.event} | SYNAPSE 2026</div>
+                            <div class="winner-rank">${rank || "WINNER"}</div>
+                            <div class="winner-name">${identity || "Winner"}</div>
+                            <div class="winner-sub">${winner.event} | HALL OF FAME</div>
                         </div>
-                    </div>
-                `;
-                
+                    </div>`;
                 triggerFullCelebration();
-                await new Promise(r => setTimeout(r, 6000));
+                await new Promise(r => setTimeout(r, 7000));
             }
             isCyclingWinners = false;
         }
@@ -241,27 +222,26 @@
     let currentSlide = 0;
     const slides = ['slide-photos', 'slide-schedule', 'slide-winners', 'slide-attendees'];
     
-    function rotateSlides() {
+    async function rotateSlides() {
         if (isCyclingWinners) return;
-
         document.getElementById(slides[currentSlide]).classList.remove('active');
         currentSlide = (currentSlide + 1) % slides.length;
         const nextId = slides[currentSlide];
         document.getElementById(nextId).classList.add('active');
 
-        // ANIMATION RESET FOR TIMELINE
         if(nextId === 'slide-schedule') {
             const cards = document.querySelectorAll('.sched-card');
             cards.forEach((card, i) => {
                 card.classList.remove('fly-left', 'fly-right');
-                void card.offsetWidth; // Force Reflow
+                void card.offsetWidth; 
                 card.style.animationDelay = (i * 0.1) + 's';
                 card.classList.add(i % 2 === 0 ? 'fly-left' : 'fly-right');
             });
         }
-
-        if (nextId === 'slide-winners') {
-            startWinnerMarathon();
+        if (nextId === 'slide-winners') await startWinnerMarathon();
+        if (nextId === 'slide-photos') {
+            await startMediaMarathon("ACHIEVEMENT", "ACHIEVEMENTS", "live-media-content");
+            await startMediaMarathon("STUDENT_REEL", "REELS", "live-media-content");
         }
     }
 
@@ -282,19 +262,8 @@
     const canvas = document.getElementById('neuralNet');
     const ctx = canvas.getContext('2d');
     let pts = [];
-    function init() {
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        pts = Array.from({length: 25}, () => ({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2 }));
-    }
-    function draw() {
-        ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle = "#1fc1d1";
-        pts.forEach(p => {
-            p.x += p.vx; p.y += p.vy;
-            if(p.x<0 || p.x>canvas.width) p.vx*=-1; if(p.y<0 || p.y>canvas.height) p.vy*=-1;
-            ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, Math.PI*2); ctx.fill();
-        });
-        requestAnimationFrame(draw);
-    }
+    function init() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; pts = Array.from({length: 25}, () => ({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2 })); }
+    function draw() { ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle = "#1fc1d1"; pts.forEach(p => { p.x += p.vx; p.y += p.vy; if(p.x<0 || p.x>canvas.width) p.vx*=-1; if(p.y<0 || p.y>canvas.height) p.vy*=-1; ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, Math.PI*2); ctx.fill(); }); requestAnimationFrame(draw); }
     window.onresize = init; init(); draw();
 </script>
 </body>
