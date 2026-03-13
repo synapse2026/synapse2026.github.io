@@ -3,418 +3,372 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SYNAPSE 2026 | Launching Soon</title>
-    
+    <title>Event Hub | SYNAPSE 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
     <style>
-        :root {
-            --poster-pink: #d11fb7;
-            --poster-blue: #1fc1d1;
-            --poster-purple: #741fd1;
-            --background-dark: #07060f;
-        }
+        :root { --neon-blue: #1fc1d1; --neon-pink: #d11fb7; --dark-bg: #0a0a0f; --warning-gold: #ffc107; }
+        body { background: var(--dark-bg); color: #fff; font-family: 'Rajdhani', sans-serif; min-height: 100vh; }
+        .container { max-width: 500px; padding: 15px; margin: auto; }
+        h3, h5 { font-family: 'Orbitron', sans-serif; letter-spacing: 2px; color: var(--neon-blue); text-shadow: 0 0 10px rgba(31, 193, 209, 0.3); text-transform: uppercase; }
+        .section-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 15px; margin-bottom: 20px; }
+        .form-select, .form-control { background: rgba(0,0,0,0.5) !important; color: #fff !important; border: 1px solid #444; }
+        .scrollable-container { max-height: 350px; overflow-y: auto; border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 10px; }
+        .table thead th { position: sticky; top: 0; background: #0d1117; z-index: 2; color: var(--neon-blue); font-family: 'Orbitron'; font-size: 0.7rem; border-bottom: 2px solid var(--neon-blue); }
+        .table { color: #fff; border-color: rgba(255,255,255,0.1); font-size: 0.85rem; }
+        .bg-present { background: rgba(46, 213, 115, 0.2); color: #2ed573; border: 1px solid #2ed573; padding: 2px 5px; border-radius: 4px; font-weight: 700; font-size: 0.65rem; }
+        .label-cyber { color: var(--neon-blue); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        .btn-cyber { font-family: 'Orbitron', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .info-sub { color: #aaa; font-size: 0.75rem; line-height: 1.2; display: block; margin-top: 2px; }
+        #reader { border: 2px solid var(--neon-pink); border-radius: 15px; overflow: hidden; background: #000; display: none; margin-bottom: 15px; }
 
-        body, html {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            background-color: var(--background-dark);
-            color: white;
-            font-family: 'Segoe UI', sans-serif;
-            overflow-x: hidden; 
-        }
-
-        #particles-js {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-
-        .hero-section {
-            position: relative;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-            text-align: center;
-            padding: 40px 15px;
-            background: radial-gradient(circle at center, rgba(116, 31, 209, 0.15) 0%, transparent 70%);
-        }
-
-        .glitch-title, #launch-notice {
-            visibility: hidden; 
-        }
-
-        .glitch-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: clamp(2.2rem, 8vw, 5rem);
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: clamp(3px, 1.5vw, 10px);
-            color: var(--poster-blue);
-            text-shadow: 0 0 20px var(--poster-blue);
-            margin-bottom: 10px;
-        }
-
-        #launch-notice {
-            font-family: 'Orbitron', sans-serif;
-            font-size: clamp(0.75rem, 3vw, 1.1rem);
-            color: #fff;
-            letter-spacing: 2px;
-            margin-bottom: 30px; 
-            text-shadow: 0 0 10px var(--poster-purple);
-        }
-
-        .subtitle {
-            font-family: 'Orbitron', sans-serif;
-            font-size: clamp(0.9rem, 4vw, 1.5rem);
-            color: var(--poster-pink);
-            letter-spacing: clamp(1px, 1vw, 5px);
-            text-transform: uppercase;
-            min-height: 1.6em;
-            margin-bottom: 10px;
-        }
-
-        .cursor {
-            display: inline-block;
-            width: 8px;
-            background-color: var(--poster-pink);
-            margin-left: 5px;
-            animation: blink 0.7s infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 0; }
-            50% { opacity: 1; }
-        }
-
-        .countdown-box {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(31, 193, 209, 0.3);
-            border-radius: 15px;
-            padding: clamp(10px, 4vw, 20px);
-            backdrop-filter: blur(10px);
-            display: inline-flex;
-            gap: clamp(8px, 2.5vw, 20px);
-            margin-top: 10px;
-            max-width: 100%;
-        }
-
-        .count-item { min-width: clamp(55px, 18vw, 85px); }
-        .count-number {
-            display: block;
-            font-size: clamp(1.4rem, 6vw, 2.5rem);
-            font-weight: 900;
-            font-family: 'Orbitron', sans-serif;
-        }
-        .count-label {
-            font-size: clamp(0.55rem, 2vw, 0.7rem);
-            text-transform: uppercase;
-            color: var(--poster-pink);
-        }
-
-        .launch-btn {
-            background: linear-gradient(135deg, var(--poster-blue), var(--poster-purple));
-            border: none;
-            padding: 12px clamp(25px, 6vw, 40px);
-            color: white;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            font-size: clamp(0.85rem, 3vw, 1rem);
-            border-radius: 50px;
-            margin-top: 40px;
-            transition: 0.3s;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        /* --- PROMINENT OFFICIAL SPONSOR ANIMATION --- */
-        .sponsor-section {
-            margin-top: 60px;
-            width: 100%;
-        }
-
-        .sponsor-label {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.75rem;
-            letter-spacing: 5px;
-            color: var(--poster-pink);
-            text-transform: uppercase;
-            margin-bottom: 25px;
-            font-weight: bold;
-        }
-
-        .official-sponsor-container {
-            position: relative;
-            display: inline-block;
-            padding: 4px;
-            border-radius: 20px;
-            margin-bottom: 40px;
-            overflow: hidden;
+        /* Camera UI - 3:4 Aspect Ratio */
+        #cameraWrapper { background: #000; border-radius: 15px; padding: 10px; border: 1px solid var(--neon-blue); display: none; margin-top: 15px;}
+        #cameraContainer { 
+            position: relative; 
+            width: 100%; 
+            aspect-ratio: 3 / 4; 
+            overflow: hidden; 
             background: #000;
-            /* Animated rotating border effect */
-            z-index: 1;
+            border-radius: 10px;
         }
-
-        .official-sponsor-container::before {
-            content: '';
-            position: absolute;
-            z-index: -2;
-            left: -50%;
-            top: -50%;
-            width: 200%;
-            height: 200%;
-            background-color: #399953;
-            background-repeat: no-repeat;
-            background-size: 50% 50%, 50% 50%;
-            background-position: 0 0, 100% 0, 100% 100%, 0 100%;
-            background-image: linear-gradient(var(--poster-blue), var(--poster-blue)), 
-                              linear-gradient(var(--poster-purple), var(--poster-purple)), 
-                              linear-gradient(var(--poster-pink), var(--poster-pink)), 
-                              linear-gradient(var(--poster-blue), var(--poster-blue));
-            animation: rotate-border 4s linear infinite;
+        #video { width: 100%; height: 100%; object-fit: cover; }
+        .camera-overlay { 
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
+            border: 25px solid rgba(0,0,0,0.7); pointer-events: none; 
         }
-
-        .official-sponsor-container::after {
-            content: '';
-            position: absolute;
-            z-index: -1;
-            left: 6px;
-            top: 6px;
-            width: calc(100% - 12px);
-            height: calc(100% - 12px);
-            background: var(--background-dark);
-            border-radius: 15px;
-        }
-
-        @keyframes rotate-border {
-            100% { transform: rotate(1turn); }
-        }
-
-        .official-sponsor-inner {
-            padding: clamp(15px, 5vw, 30px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            /* Color shifting glow */
-            animation: glow-shift 6s infinite alternate;
-            border-radius: 18px;
-        }
-
-        @keyframes glow-shift {
-            0% { box-shadow: inset 0 0 20px var(--poster-blue); }
-            50% { box-shadow: inset 0 0 40px var(--poster-purple); }
-            100% { box-shadow: inset 0 0 20px var(--poster-pink); }
-        }
-
-        .official-logo {
-            max-width: 100%;
-            height: auto;
-            width: clamp(200px, 70vw, 280px);
-            mix-blend-mode: screen; 
-            filter: brightness(1.2);
-        }
-
-        /* --- CO-SPONSOR SCROLLER (NO FILTERS) --- */
-        .marquee-container {
-            width: 100%;
-            overflow: hidden;
-            white-space: nowrap;
-            position: relative;
-            padding: 30px 0;
-            background: rgba(255, 255, 255, 0.03);
-        }
-
-        .marquee-content {
-            display: inline-flex;
-            align-items: center;
-            animation: scroll 35s linear infinite;
-        }
-
-        .co-sponsor-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 0 80px;
-            text-align: center;
-            transform: scale(0.85); /* Scaled down slightly */
-        }
-
-        .co-sponsor-logo {
-            height: clamp(45px, 10vw, 65px);
-            width: auto;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            /* No color filter, keeping natural image colors */
-        }
-
-        .co-sponsor-caption-box {
-            display: flex;
-            flex-direction: column;
-            font-family: 'Orbitron', sans-serif;
-            line-height: 1.4;
-        }
-
-        .cap-main {
-            color: var(--poster-blue);
-            font-size: clamp(0.7rem, 2.8vw, 0.9rem);
-            font-weight: 800;
-            text-transform: uppercase;
-        }
-
-        .cap-sub {
-            color: var(--poster-pink);
-            font-size: clamp(0.6rem, 2.2vw, 0.75rem);
-            font-weight: 600;
-        }
-
-        @keyframes scroll {
-            from { transform: translateX(0); }
-            to { transform: translateX(-50%); }
-        }
-
-        .footer-credit {
-            margin-top: 50px;
-            font-size: 0.7rem;
-            color: #6c757d;
-            letter-spacing: 1px;
+        .camera-frame { 
+            width: 100%; height: 100%; 
+            border: 2px dashed var(--neon-blue); 
+            box-shadow: 0 0 15px var(--neon-blue); 
         }
     </style>
 </head>
 <body>
 
-    <div id="particles-js"></div>
+<div class="container">
+    <div class="text-center my-4">
+        <h3>EVENT HUB</h3>
+        <p class="text-white-50 small" style="font-family: 'Orbitron';">SYNAPSE 2026</p>
+    </div>
 
-    <div class="hero-section container">
-        <div class="animate__animated animate__fadeIn w-100">
-            <p class="subtitle"><span id="typing-text"></span><span class="cursor">&nbsp;</span></p>
-            
-            <h1 id="main-heading" class="glitch-title">SYNAPSE 2026</h1>
-            
-            <div id="launch-notice">Official site will be launched soon</div>
-            
-            <div class="countdown-box animate__animated animate__zoomIn">
-                <div class="count-item"><span class="count-number" id="days">00</span><span class="count-label">Days</span></div>
-                <div class="count-item"><span class="count-number" id="hours">00</span><span class="count-label">Hours</span></div>
-                <div class="count-item"><span class="count-number" id="minutes">00</span><span class="count-label">Mins</span></div>
-                <div class="count-item"><span class="count-number" id="seconds">00</span><span class="count-label">Secs</span></div>
-            </div>
+    <div class="section-card">
+        <span class="label-cyber">1. SELECT EVENT</span>
+        <select id="eventSelector" class="form-select shadow-none" onchange="fetchParticipants()">
+            <option selected disabled>Loading Events...</option>
+        </select>
+        <div id="loader" class="text-center mt-3 d-none" style="color: var(--neon-blue); font-family: 'Orbitron'; font-size: 0.8rem;">SYNCING DATABASE...</div>
+    </div>
 
-            <br>
-            <a href="https://synapse2026.github.io/registration.html" class="launch-btn">PRE-REGISTER NOW</a>
+    <div class="section-card d-none" id="attendanceSection">
+        <h5 class="mb-3" id="eventTitle" style="font-size: 0.9rem;">Paid Attendees</h5>
+        <input type="text" id="attendeeSearch" class="form-control mb-3 shadow-none" placeholder="🔍 Search Name or Mobile..." onkeyup="filterTable()">
 
-            <div class="sponsor-section">
-                <p class="sponsor-label">Official Sponsor</p>
-                <div class="official-sponsor-container animate__animated animate__fadeInUp">
-                    <div class="official-sponsor-inner">
-                        <img src="sponser.png" alt="Official Sponsor" class="official-logo">
-                    </div>
-                </div>
-
-                <p class="sponsor-label">Co-Sponsors</p>
-                <div class="marquee-container">
-                    <div class="marquee-content">
-                        <div class="co-sponsor-card">
-                            <img src="C1.jpeg" alt="TechCake" class="co-sponsor-logo">
-                            <div class="co-sponsor-caption-box">
-                                <span class="cap-main">DevOps, AWS Cloud & Linux</span>
-                                <span class="cap-sub">Learn, Build & Get Hired</span>
-                            </div>
-                        </div>
-
-                        <div class="co-sponsor-card">
-                            <span style="font-family: 'Orbitron'; color: rgba(255,255,255,0.1); letter-spacing: 5px;">More Joining Soon</span>
-                        </div>
-
-                        <div class="co-sponsor-card">
-                            <img src="C1.jpeg" alt="TechCake" class="co-sponsor-logo">
-                            <div class="co-sponsor-caption-box">
-                                <span class="cap-main">DevOps, AWS Cloud & Linux</span>
-                                <span class="cap-sub">Learn, Build & Get Hired</span>
-                            </div>
-                        </div>
-                        <div class="co-sponsor-card">
-                            <span style="font-family: 'Orbitron'; color: rgba(255,255,255,0.1); letter-spacing: 5px;">More Joining Soon</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <p class="footer-credit">WEBSITE POWERED BY TEAM CT, GRWPC</p>
+        <div class="scrollable-container">
+            <table class="table table-dark table-hover mb-0" id="participantTable">
+                <thead>
+                    <tr>
+                        <th width="30">SL</th>
+                        <th width="30"><input type="checkbox" id="selectAll" onclick="toggleAll(this)"></th>
+                        <th>Participant Info</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="participantBody"></tbody>
+            </table>
+        </div>
+        
+        <div class="mt-2">
+            <button class="btn btn-success w-100 mb-2 btn-cyber py-2" onclick="submitBulkAttendance()">✅ Mark Selected Present</button>
+            <button class="btn btn-outline-info w-100 btn-cyber py-2" onclick="exportTablePDF('participantTable', 'Attendee_List')">📥 Export Attendee PDF</button>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-    <script>
-        particlesJS("particles-js", {
-            "particles": {
-                "number": { "value": 50 },
-                "color": { "value": ["#d11fb7", "#1fc1d1"] },
-                "shape": { "type": "circle" },
-                "opacity": { "value": 0.4 },
-                "size": { "value": 2.5 },
-                "line_linked": { "enable": true, "distance": 120, "color": "#741fd1", "opacity": 0.3, "width": 1 },
-                "move": { "enable": true, "speed": 2 }
-            }
-        });
+    <div class="section-card">
+        <h5 class="mb-3" style="font-size: 0.9rem;">🏆 Winner Marking</h5>
+        <div id="reader"></div>
+        <div class="row g-2">
+            <div class="col-12 mb-2">
+                <span class="label-cyber">SELECT RANK</span>
+                <select id="winnerPosition" class="form-select border-warning shadow-none">
+                    <option value="1st Place">1st Place</option>
+                    <option value="2nd Place">2nd Place</option>
+                    <option value="3rd Place">3rd Place</option>
+                </select>
+            </div>
+            
+            <div id="winnerInputArea" class="col-12">
+                <div class="row g-2" id="individualWinnerBtns">
+                    <div class="col-6">
+                        <button onclick="startWinnerScan()" class="btn btn-warning w-100 btn-cyber py-2">📸 SCAN</button>
+                    </div>
+                    <div class="col-6">
+                        <button onclick="handleWinnerManualPrompt()" class="btn btn-outline-warning w-100 btn-cyber py-2">⌨ MANUAL</button>
+                    </div>
+                </div>
+                <div id="teamWinnerArea" class="d-none">
+                    <span class="label-cyber">SELECT WINNING TEAM</span>
+                    <select id="teamWinnerSelector" class="form-select border-warning mb-2 shadow-none"></select>
+                    <button onclick="submitTeamWinner()" class="btn btn-warning w-100 btn-cyber py-2">🏆 MARK TEAM AS WINNER</button>
+                </div>
+            </div>
 
-        const fullText = "Connecting Ideas. Creating Innovation.";
-        const triggerPhrase = "Connecting Ideas."; 
-        const typingElement = document.getElementById("typing-text");
-        const headingElement = document.getElementById("main-heading");
-        const launchNotice = document.getElementById("launch-notice");
-        
-        let isDeleting = false;
-        let charIndex = 0;
-        let hasHeadingLoaded = false;
-
-        function typeLoop() {
-            const currentDisplay = isDeleting 
-                ? fullText.substring(0, charIndex - 1) 
-                : fullText.substring(0, charIndex + 1);
-
-            typingElement.innerHTML = currentDisplay;
-            charIndex = isDeleting ? charIndex - 1 : charIndex + 1;
-
-            if (!isDeleting && currentDisplay.includes(triggerPhrase) && !hasHeadingLoaded) {
-                headingElement.style.visibility = "visible";
-                headingElement.classList.add("animate__animated", "animate__backInDown");
+            <div class="col-12 mt-3">
+                <span class="label-cyber">WINNER MEDIA (PORTRAIT 3:4)</span>
+                <button id="camToggleBtn" onclick="openWinnerCamera()" class="btn btn-outline-info w-100 btn-cyber">📷 CAPTURE WINNER PHOTO</button>
                 
-                setTimeout(() => {
-                    launchNotice.style.visibility = "visible";
-                    launchNotice.classList.add("animate__animated", "animate__fadeInUp");
-                }, 400);
+                <div id="cameraWrapper">
+                    <div id="cameraContainer">
+                        <video id="video" autoplay playsinline></video>
+                        <div class="camera-overlay"><div class="camera-frame"></div></div>
+                    </div>
+                    <button onclick="capturePhoto()" class="btn btn-info w-100 btn-cyber mt-3 py-2">SNAP & UPLOAD TO DRIVE</button>
+                    <button onclick="stopCamera()" class="btn btn-link text-white-50 w-100 mt-2 btn-sm">Cancel Camera</button>
+                </div>
+                <canvas id="canvas" class="d-none"></canvas>
+            </div>
+        </div>
+    </div>
 
-                hasHeadingLoaded = true;
-            }
+    <div class="section-card d-none" id="winnerSection">
+        <h5 class="mb-3" style="font-size: 0.9rem;">Result Board</h5>
+        <div class="table-responsive">
+            <table class="table table-bordered border-secondary" id="winnerTable">
+                <thead class="table-dark text-warning">
+                    <tr><th>Pos</th><th>Winner Info</th></tr>
+                </thead>
+                <tbody id="winnerBody"></tbody>
+            </table>
+        </div>
+        <button class="btn btn-outline-warning w-100 btn-cyber py-2 mt-2" onclick="exportTablePDF('winnerTable', 'Winners_Report')">📥 Export Winners PDF</button>
+    </div>
+</div>
 
-            let typeSpeed = isDeleting ? 40 : 80;
-            if (!isDeleting && charIndex === fullText.length) { isDeleting = true; typeSpeed = 2000; } 
-            else if (isDeleting && charIndex === 0) { isDeleting = false; typeSpeed = 500; }
-            setTimeout(typeLoop, typeSpeed);
+<script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbwKjrjjrV5hJUrqaP5nWjYAW2HW50y6EI3_k9bfzriS8ktMuAHpYe1i8K6IyPFV-jsndA/exec';
+    
+    const allEvents = ["Glow Craft", "Reverse X", "Trail Blaze", "Brain 2 Bot", "Titan Trials", "Pixel Clash", "Innosense", "Seminar Presentation", "Play villa"];
+    const groupEvents = ["Trail Blaze", "Titan Trials", "Innosense"];
+    
+    const html5QrCode = new Html5Qrcode("reader");
+    let currentData = [];
+    let videoStream = null;
+
+    window.onload = () => {
+        const selector = document.getElementById('eventSelector');
+        selector.innerHTML = '<option selected disabled>Choose Event...</option>';
+        allEvents.forEach(evt => {
+            selector.innerHTML += `<option value="${evt}">${evt}</option>`;
+        });
+    };
+
+    // --- CAMERA & PHOTO UPLOAD LOGIC ---
+    async function openWinnerCamera() {
+        const wrapper = document.getElementById('cameraWrapper');
+        wrapper.style.display = 'block';
+        document.getElementById('camToggleBtn').style.display = 'none';
+        
+        try {
+            // Request 3:4 aspect ratio (Portrait)
+            videoStream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: "environment", aspectRatio: 0.75 } 
+            });
+            document.getElementById('video').srcObject = videoStream;
+        } catch (err) {
+            alert("Camera Access Error: " + err.message);
+            stopCamera();
+        }
+    }
+
+    function stopCamera() {
+        if (videoStream) videoStream.getTracks().forEach(track => track.stop());
+        document.getElementById('cameraWrapper').style.display = 'none';
+        document.getElementById('camToggleBtn').style.display = 'block';
+    }
+
+    function capturePhoto() {
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        const event = document.getElementById('eventSelector').value;
+        const pos = document.getElementById('winnerPosition').value;
+
+        if(!event || event.includes("Choose")) return alert("Please select an event first!");
+
+        // Set high-res portrait dimensions (Width 600, Height 800)
+        canvas.width = 600;
+        canvas.height = 800;
+
+        const vW = video.videoWidth;
+        const vH = video.videoHeight;
+        const targetRatio = 3/4;
+        
+        let sX = 0, sY = 0, sW = vW, sH = vH;
+
+        // Smart Cropping Logic to ensure output is always 3:4
+        if ((vW / vH) > targetRatio) {
+            sW = vH * targetRatio;
+            sX = (vW - sW) / 2;
+        } else {
+            sH = vW / targetRatio;
+            sY = (vH - sH) / 2;
         }
 
-        window.onload = () => setTimeout(typeLoop, 800);
+        context.drawImage(video, sX, sY, sW, sH, 0, 0, canvas.width, canvas.height);
+        const base64Data = canvas.toDataURL('image/jpeg', 0.8);
+        
+        uploadPhoto(base64Data, event, pos);
+    }
 
-        const launchDate = new Date("March 17, 2026 09:00:00").getTime();
-        const timer = setInterval(function() {
-            const now = new Date().getTime();
-            const distance = launchDate - now;
-            const d = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const s = Math.floor((distance % (1000 * 60)) / 1000);
-            
-            document.getElementById("days").innerHTML = d.toString().padStart(2, '0');
-            document.getElementById("hours").innerHTML = h.toString().padStart(2, '0');
-            document.getElementById("minutes").innerHTML = m.toString().padStart(2, '0');
-            document.getElementById("seconds").innerHTML = s.toString().padStart(2, '0');
-        }, 1000);
-    </script>
+    function uploadPhoto(img, event, pos) {
+        document.getElementById('loader').classList.remove('d-none');
+        document.getElementById('loader').innerText = "UPLOADING TO DRIVE...";
+
+        fetch(scriptURL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                action: "uploadWinnerPhoto",
+                image: img,
+                event: event,
+                position: pos
+            })
+        }).then(() => {
+            alert(`SUCCESS: Photo uploaded for ${event} - ${pos}`);
+            document.getElementById('loader').classList.add('d-none');
+            stopCamera();
+        }).catch(err => {
+            alert("Error: " + err);
+            document.getElementById('loader').classList.add('d-none');
+        });
+    }
+
+    // --- PRE-EXISTING DATA LOGIC ---
+    function fetchParticipants() {
+        const event = document.getElementById('eventSelector').value;
+        const body = document.getElementById('participantBody');
+        const loader = document.getElementById('loader');
+        
+        loader.classList.remove('d-none');
+        loader.innerText = "SYNCING DATABASE...";
+        body.innerHTML = "";
+        
+        if(groupEvents.includes(event)) {
+            document.getElementById('individualWinnerBtns').classList.add('d-none');
+            document.getElementById('teamWinnerArea').classList.remove('d-none');
+        } else {
+            document.getElementById('individualWinnerBtns').classList.remove('d-none');
+            document.getElementById('teamWinnerArea').classList.add('d-none');
+        }
+
+        fetch(`${scriptURL}?action=getEventList&event=${event}`)
+            .then(res => res.json())
+            .then(data => {
+                currentData = data;
+                loader.classList.add('d-none');
+                document.getElementById('attendanceSection').classList.remove('d-none');
+                document.getElementById('winnerSection').classList.remove('d-none');
+                document.getElementById('winnerBody').innerHTML = "";
+
+                const teamSet = new Set();
+                data.forEach((p, index) => {
+                    const allAtt = (p.eventStatus || "").split('|');
+                    const isPresentForEvent = allAtt.some(a => a.trim() === event + ": PRESENT");
+                    if(isPresentForEvent && p.teamName) teamSet.add(p.teamName);
+                    body.innerHTML += `<tr><td>${index+1}</td><td><input type="checkbox" class="user-check form-check-input" value="${p.mobile}" data-name="${p.name}" ${isPresentForEvent ? 'disabled' : ''}></td><td><strong>${p.name}</strong> ${p.teamName ? `<br><small class="text-warning">[${p.teamName}]</small>` : ''}<span class="info-sub">${p.mobile} | ${p.dept}</span><span class="info-sub" style="color: var(--neon-blue)">${p.college}</span></td><td><span class="${isPresentForEvent ? 'bg-present' : 'text-white-50 small'}">${isPresentForEvent ? 'PRESENT' : 'ABSENT'}</span></td></tr>`;
+                    if(p.winnerStatus) {
+                        const specificWin = p.winnerStatus.split('|').find(win => win.trim().startsWith(event + ":"));
+                        if (specificWin) {
+                            document.getElementById('winnerBody').innerHTML += `<tr><td class="text-warning fw-bold small">${specificWin.trim()}</td><td><strong>${p.name}</strong><span class="info-sub">${p.mobile} | ${p.dept}</span></td></tr>`;
+                        }
+                    }
+                });
+
+                const teamSelect = document.getElementById('teamWinnerSelector');
+                teamSelect.innerHTML = '<option disabled selected>Select Winning Team...</option>';
+                teamSet.forEach(t => teamSelect.innerHTML += `<option value="${t}">${t}</option>`);
+            });
+    }
+
+    function filterTable() {
+        const input = document.getElementById('attendeeSearch').value.toUpperCase();
+        const rows = document.getElementById('participantBody').getElementsByTagName('tr');
+        for (let i = 0; i < rows.length; i++) {
+            const text = rows[i].innerText.toUpperCase();
+            rows[i].style.display = text.indexOf(input) > -1 ? "" : "none";
+        }
+    }
+
+    function toggleAll(source) { document.querySelectorAll('.user-check:not([disabled])').forEach(c => c.checked = source.checked); }
+
+    function submitBulkAttendance() {
+        const event = document.getElementById('eventSelector').value;
+        const selectedElements = Array.from(document.querySelectorAll('.user-check:checked'));
+        const mobiles = selectedElements.map(c => c.value);
+        const names = selectedElements.map(c => c.getAttribute('data-name'));
+        if(mobiles.length === 0) return alert("Select students!");
+        let teamName = "";
+        if(groupEvents.includes(event)) {
+            teamName = prompt(`Assign team for ${event}.\nSelected: ${names.join(", ")}`);
+            if(!teamName) return alert("A team name is required for group events.");
+        }
+        if(!confirm(`Mark ${mobiles.length} participants as PRESENT for ${event}?`)) return;
+        const url = `${scriptURL}?action=bulkMarkAttendanceWithTeam&mobiles=${mobiles.join(",")}&event=${event}&team=${encodeURIComponent(teamName)}`;
+        fetch(url).then(r => r.text()).then(res => {
+            alert(`SUCCESS!\n${event} Attendance Marked.`);
+            fetchParticipants();
+        });
+    }
+
+    function startWinnerScan() {
+        const reader = document.getElementById('reader');
+        reader.style.display = 'block';
+        html5QrCode.start({ facingMode: 'environment' }, { fps: 15, qrbox: 250 }, (mobile) => {
+            html5QrCode.stop().then(() => { reader.style.display = 'none'; processWinnerUpdate(mobile); });
+        });
+    }
+
+    function handleWinnerManualPrompt() {
+        const mob = prompt("Enter Participant Mobile:");
+        if(mob && mob.length >= 10) processWinnerUpdate(mob);
+    }
+
+    function processWinnerUpdate(mobile) {
+        const pos = document.getElementById('winnerPosition').value;
+        const event = document.getElementById('eventSelector').value;
+        fetch(`${scriptURL}?action=markWinner&mobile=${mobile}&position=${pos}&event=${event}`)
+            .then(r => r.text()).then(res => { alert(res); fetchParticipants(); });
+    }
+
+    function exportTablePDF(tableId, fileName) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('l', 'mm', 'a4');
+        const event = document.getElementById('eventSelector').value;
+        doc.setFontSize(18); doc.setTextColor(31, 193, 209);
+        doc.text(`SYNAPSE 2026: ${event}`, 14, 15);
+        const rows = [];
+        if (tableId === 'participantTable') {
+            currentData.forEach((p, i) => {
+                const isPresent = (p.eventStatus || "").includes(event + ": PRESENT");
+                rows.push([i+1, p.name, p.mobile, p.college, p.dept, p.teamName || 'N/A', isPresent ? 'PRESENT' : 'ABSENT']);
+            });
+            doc.autoTable({ head: [['SL', 'Name', 'Mobile', 'College', 'Dept', 'Team', 'Status']], body: rows, startY: 25, theme: 'grid', headStyles: { fillColor: [31, 193, 209], textColor: [0, 0, 0] } });
+        } else {
+            currentData.forEach((p, i) => {
+                if(p.winnerStatus) {
+                    const specificWin = p.winnerStatus.split('|').find(w => w.trim().startsWith(event + ":"));
+                    if(specificWin) rows.push([rows.length + 1, specificWin.trim(), p.name, p.mobile, p.college, p.teamName || 'N/A']);
+                }
+            });
+            doc.autoTable({ head: [['SL', 'Position', 'Name', 'Mobile', 'College', 'Team']], body: rows, startY: 25, theme: 'grid', headStyles: { fillColor: [255, 193, 7], textColor: [0, 0, 0] } });
+        }
+        doc.save(`${fileName}_${event}.pdf`);
+    }
+</script>
 </body>
 </html>
