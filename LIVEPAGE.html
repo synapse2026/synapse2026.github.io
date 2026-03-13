@@ -25,96 +25,82 @@
             background: rgba(0, 0, 0, 0.8); text-align: center; padding: 15px 10px; border-bottom: 2px solid var(--gold);
             font-family: 'Orbitron'; font-weight: 900; letter-spacing: 2px; 
             font-size: clamp(0.9rem, 2.5vw, 2.2rem); color: var(--gold);
-            text-shadow: 0 0 15px rgba(255, 234, 0, 0.5); animation: goldGlow 3s ease-in-out infinite;
-            text-transform: uppercase; z-index: 100; position: relative;
+            text-shadow: 0 0 15px rgba(255, 234, 0, 0.5); text-transform: uppercase; z-index: 100; position: relative;
         }
-        @keyframes goldGlow { 0%, 100% { text-shadow: 0 0 10px rgba(255, 234, 0, 0.5); } 50% { text-shadow: 0 0 25px var(--gold); } }
 
-        /* Dashboard Grid - Set to responsive columns */
         .dashboard { 
-            display: grid; 
-            grid-template-columns: 380px 1fr; 
-            grid-template-rows: auto 1fr auto; 
-            min-height: calc(100vh - 75px); 
-            gap: 15px; padding: 15px; box-sizing: border-box; 
+            display: grid; grid-template-columns: 380px 1fr; grid-template-rows: auto 1fr auto; 
+            min-height: calc(100vh - 75px); gap: 15px; padding: 15px; box-sizing: border-box; 
         }
 
         .header { 
             grid-column: 1 / span 2; background: var(--glass); border: 1px solid var(--poster-blue); 
             display: flex; align-items: center; justify-content: space-between; padding: 15px 30px; 
-            box-shadow: 0 0 30px rgba(31, 193, 209, 0.15); flex-wrap: wrap; gap: 15px;
         }
-        .logo { font-family: 'Orbitron'; font-size: clamp(1.2rem, 4vw, 3rem); font-weight: 900; color: var(--poster-blue); text-shadow: 0 0 20px var(--poster-blue); }
+        .logo { font-family: 'Orbitron'; font-size: 2.5rem; font-weight: 900; color: var(--poster-blue); text-shadow: 0 0 20px var(--poster-blue); }
         
-        /* RESPONSIVE MECHANICAL CLOCK */
-        .flip-clock { display: flex; gap: 4px; align-items: center; flex-wrap: nowrap; }
+        .flip-clock { display: flex; gap: 4px; align-items: center; }
         .flip-card {
-            position: relative; width: clamp(30px, 5vw, 45px); height: clamp(45px, 7vw, 65px);
+            position: relative; width: 45px; height: 65px;
             background: #111; border-radius: 4px; font-family: 'Orbitron';
-            font-size: clamp(1.5rem, 3vw, 2.8rem); font-weight: 900; color: #fff;
-            text-align: center; line-height: clamp(45px, 7vw, 65px); border: 1px solid #333;
+            font-size: 2.5rem; font-weight: 900; color: #fff;
+            text-align: center; line-height: 65px; border: 1px solid #333;
         }
         .flip-card::before { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 1.5px; background: #000; z-index: 10; }
-        .clock-sep { font-size: 1.5rem; color: var(--poster-blue); font-weight: bold; }
-        .am-pm { font-size: 0.8rem; color: var(--gold); font-family: 'Orbitron'; font-weight: 900; margin-left: 5px; background: #111; padding: 4px; border: 1px solid #333; }
 
-        /* Sidebar Stats */
         .sidebar { display: flex; flex-direction: column; gap: 15px; }
-        .stat-card { background: var(--glass); border-left: 6px solid var(--poster-pink); padding: 15px; flex: 1; display: flex; flex-direction: column; justify-content: center; border: 1px solid rgba(209, 31, 183, 0.2); }
-        .stat-label { font-size: 0.8rem; color: var(--poster-pink); text-transform: uppercase; }
-        .stat-val { font-family: 'Orbitron'; font-size: clamp(2rem, 5vw, 4.5rem); color: #fff; text-shadow: 0 0 15px var(--poster-pink); }
+        .stat-card { background: var(--glass); border-left: 6px solid var(--poster-pink); padding: 15px; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .stat-val { font-family: 'Orbitron'; font-size: 4rem; color: #fff; text-shadow: 0 0 15px var(--poster-pink); }
 
-        /* Stage */
-        .stage { position: relative; background: rgba(0,0,0,0.4); border: 1px solid rgba(31, 193, 209, 0.2); overflow: hidden; border-radius: 10px; min-height: 400px; }
-        .slide { position: absolute; inset: 0; padding: 20px; opacity: 0; transition: opacity 0.5s; display: flex; flex-direction: column; visibility: hidden; overflow-y: auto; }
-        .slide.active { opacity: 1; z-index: 5; visibility: visible; }
-        .stage-title { font-family: 'Orbitron'; font-size: clamp(1.2rem, 3vw, 2.5rem); color: var(--poster-blue); margin-bottom: 15px; border-bottom: 3px solid var(--poster-blue); width: fit-content; }
+        .stage { position: relative; background: rgba(0,0,0,0.4); border: 1px solid rgba(31, 193, 209, 0.2); overflow: hidden; border-radius: 10px; }
+        .slide { position: absolute; inset: 0; padding: 20px; opacity: 0; transition: opacity 0.5s; visibility: hidden; }
+        .slide.active { opacity: 1; visibility: visible; z-index: 5; }
+        .stage-title { font-family: 'Orbitron'; font-size: 2rem; color: var(--poster-blue); margin-bottom: 15px; border-bottom: 3px solid var(--poster-blue); width: fit-content; }
 
-        /* Schedule Grid */
+        /* WINNER MARATHON STYLES */
+        .winner-marathon { display: flex; align-items: center; justify-content: center; gap: 40px; height: 100%; animation: slideIn 0.8s ease-out; }
+        .winner-frame {
+            width: 320px; height: 420px; border: 5px solid var(--poster-pink);
+            border-radius: 15px; box-shadow: 0 0 30px var(--poster-pink);
+            padding: 10px; background: #000;
+        }
+        .winner-frame img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+        .winner-info-card { flex: 1; text-align: left; }
+        .winner-rank { font-family: 'Orbitron'; font-size: 2.2rem; color: var(--gold); margin-bottom: 10px; }
+        .winner-name { font-family: 'Orbitron'; font-size: 3rem; color: #fff; margin-bottom: 10px; text-transform: uppercase; line-height: 1.1; }
+        .winner-sub { font-size: 1.5rem; color: var(--poster-blue); }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* SCHEDULE ANIMATIONS */
         .schedule-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .sched-card {
-            background: rgba(209, 31, 183, 0.05); border: 1px solid rgba(209, 31, 183, 0.3);
-            border-radius: 10px; padding: 10px; opacity: 0; display: flex; justify-content: space-between; align-items: center;
+        .sched-card { 
+            background: rgba(209, 31, 183, 0.05); border: 1px solid rgba(209, 31, 183, 0.3); 
+            border-radius: 10px; padding: 12px; display: flex; justify-content: space-between; align-items: center;
+            opacity: 0; 
         }
         .sched-name { font-family: 'Orbitron'; font-size: 1rem; color: var(--poster-blue); font-weight: 800; }
-        .sched-desc { font-size: 0.7rem; color: #ddd; display: block; text-transform: uppercase; }
-        .sched-time { font-family: 'Orbitron'; color: var(--gold); font-size: 0.9rem; text-align: right; margin-left: 5px; }
-
-        /* Mobile Adjustments */
-        @media (max-width: 992px) {
-            .dashboard { grid-template-columns: 1fr; height: auto; }
-            .header { grid-column: 1; justify-content: center; text-align: center; }
-            .sidebar { flex-direction: row; }
-            .schedule-grid { grid-template-columns: 1fr; }
-            .stat-card { padding: 10px; }
-        }
-
-        @media (max-width: 480px) {
-            .sidebar { flex-direction: column; }
-            .logo { font-size: 1.5rem; }
-            .flip-clock { transform: scale(0.8); }
-        }
-
-        /* Confetti/Animations Styles kept as per requirements */
-        .group-tag { font-size: 0.5rem; background: var(--poster-pink); color: white; padding: 1px 4px; border-radius: 3px; margin-left: 4px; animation: blink 1s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .sched-time { font-family: 'Orbitron'; color: var(--gold); font-size: 0.9rem; }
+        
         @keyframes flyInLeft { from { opacity: 0; transform: translateX(-100px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes flyInRight { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
-        .fly-left { animation: flyInLeft 0.6s forwards; } .fly-right { animation: flyInRight 0.6s forwards; }
-        .list-item { font-size: clamp(1rem, 2vw, 1.5rem); padding: 10px; margin-bottom: 8px; background: rgba(31, 193, 209, 0.05); border-left: 4px solid var(--poster-blue); }
-        .winner-entry { border-left-color: var(--poster-pink); background: rgba(209, 31, 183, 0.1); }
+        .fly-left { animation: flyInLeft 0.6s forwards; } 
+        .fly-right { animation: flyInRight 0.6s forwards; }
+
+        .list-item { font-size: 1.5rem; padding: 10px; margin-bottom: 8px; background: rgba(31, 193, 209, 0.05); border-left: 5px solid var(--poster-blue); }
 
         .footer { grid-column: 1 / span 2; background: #000; border-top: 2px solid var(--poster-blue); display: flex; align-items: center; overflow: hidden; height: 100px; }
         .scroller { display: flex; align-items: center; white-space: nowrap; animation: scroll 40s linear infinite; }
-        .sponsor-pod { height: 60px; margin: 0 15px; padding: 5px 15px; background: rgba(255, 255, 255, 0.05); border-radius: 8px; display: flex; align-items: center; border: 1px solid rgba(31, 193, 209, 0.1); }
-        .sponsor-pod img { height: 35px; object-fit: contain; }
+        .sponsor-pod { height: 60px; margin: 0 20px; }
+        .sponsor-pod img { height: 40px; object-fit: contain; }
         @keyframes scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+        #gallery-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; filter: brightness(0.35); transition: opacity 0.8s; }
     </style>
 </head>
 <body>
 
 <div class="college-header">Govt. Residential Women's Polytechnic College Payyanur</div>
-
 <canvas id="neuralNet"></canvas>
 <div class="scanline"></div>
 
@@ -125,40 +111,43 @@
             <div class="flip-card" id="h1">0</div><div class="flip-card" id="h2">0</div>
             <div class="clock-sep">:</div>
             <div class="flip-card" id="m1">0</div><div class="flip-card" id="m2">0</div>
-            <div class="clock-sep">:</div>
-            <div class="flip-card" id="s1">0</div><div class="flip-card" id="s2">0</div>
             <div class="am-pm" id="ampm">AM</div>
         </div>
     </div>
 
     <aside class="sidebar">
         <div class="stat-card"><div class="stat-label">Check-ins</div><div class="stat-val" id="paidCount">0</div></div>
-        <div class="stat-card" style="border-color: var(--poster-blue);"><div class="stat-label" style="color: var(--poster-blue);">Winners</div><div class="stat-val" id="winCount">0</div></div>
+        <div class="stat-card" style="border-color: var(--poster-blue);"><div class="stat-label">Winners</div><div class="stat-val" id="winCount">0</div></div>
     </aside>
 
     <main class="stage">
+        <img id="gallery-img" src="">
+
         <div class="slide active" id="slide-photos">
-            <img id="gallery-img" src="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:-1; filter:brightness(0.35);">
             <div class="stage-title">LIVE MOMENTS</div>
+            <h2 id="live-moment-status" style="text-align: center; margin-top: 15%; color: var(--poster-blue);">CAPTURING THE VIBE...</h2>
+        </div>
+
+        <div class="slide" id="slide-winners">
+            <div class="stage-title">HALL OF FAME</div>
+            <div id="winner-marathon-area" style="height: 100%;"></div>
         </div>
 
         <div class="slide" id="slide-schedule">
             <div class="stage-title">TIMELINE</div>
             <div class="schedule-grid">
-                <div class="sched-card"><div><span class="sched-name">Glow Craft</span><span class="sched-desc">LED Arduino</span></div><div class="sched-time">10:00 AM</div></div>
-                <div class="sched-card"><div><span class="sched-name">Reverse X</span><span class="sched-desc">Circuitry</span></div><div class="sched-time">10:30 AM</div></div>
-                <div class="sched-card"><div><span class="sched-name">Trail Blaze <span class="group-tag">GRP</span></span><span class="sched-desc">Decode Clues</span></div><div class="sched-time">11:00 AM</div></div>
-                <div class="sched-card"><div><span class="sched-name">Brain 2 Bot</span><span class="sched-desc">AI Prompt</span></div><div class="sched-time">11:45 AM</div></div>
-                <div class="sched-card"><div><span class="sched-name">Titan Trials <span class="group-tag">GRP</span></span><span class="sched-desc">Mgmt Team</span></div><div class="sched-time">01:30 PM</div></div>
-                <div class="sched-card"><div><span class="sched-name">Pixel Clash</span><span class="sched-desc">Designing</span></div><div class="sched-time">02:15 PM</div></div>
-                <div class="sched-card"><div><span class="sched-name">Innosense <span class="group-tag">GRP</span></span><span class="sched-desc">Sensors</span></div><div class="sched-time">03:00 PM</div></div>
-                <div class="sched-card"><div><span class="sched-name">Seminar</span><span class="sched-desc">Tech Showcase</span></div><div class="sched-time">03:45 PM</div></div>
-                <div class="sched-card" style="grid-column: 1 / -1;"><div><span class="sched-name">Play Villa</span><span class="sched-desc">Vibe Room</span></div><div class="sched-time">04:30 PM</div></div>
+                <div class="sched-card"><div><span class="sched-name">Glow Craft</span></div><div class="sched-time">10:00 AM</div></div>
+                <div class="sched-card"><div><span class="sched-name">Reverse X</span></div><div class="sched-time">10:30 AM</div></div>
+                <div class="sched-card"><div><span class="sched-name">Trail Blaze</span></div><div class="sched-time">11:00 AM</div></div>
+                <div class="sched-card"><div><span class="sched-name">Brain 2 Bot</span></div><div class="sched-time">11:45 AM</div></div>
+                <div class="sched-card"><div><span class="sched-name">Titan Trials</span></div><div class="sched-time">01:30 PM</div></div>
+                <div class="sched-card"><div><span class="sched-name">Pixel Clash</span></div><div class="sched-time">02:15 PM</div></div>
+                <div class="sched-card"><div><span class="sched-name">Innosense</span></div><div class="sched-time">03:00 PM</div></div>
+                <div class="sched-card"><div><span class="sched-name">Seminar</span></div><div class="sched-time">03:45 PM</div></div>
             </div>
         </div>
 
-        <div class="slide" id="slide-winners"><div class="stage-title">HALL OF FAME</div><div id="winner-list"></div></div>
-        <div class="slide" id="slide-attendees"><div class="stage-title">ACTIVITY</div><div id="attendee-list"></div></div>
+        <div class="slide" id="slide-attendees"><div class="stage-title">ACTIVITY FEED</div><div id="attendee-list"></div></div>
     </main>
 
     <footer class="footer"><div class="scroller" id="sponsorScroller"></div></footer>
@@ -167,32 +156,38 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 <script>
     const scriptURL = 'https://script.google.com/macros/s/AKfycbzb97bG3GTT1wMH7M9j8RDXkoqoFD_MWXFkUZS0przdUO51s-7Zyutn0FbRSRnjjH8X5A/exec';
-    let isWinnerPageActive = false;
-
-    function updateClock() {
-        const now = new Date();
-        let hours = now.getHours();
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12 || 12;
-        const timeStr = String(hours).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0') + String(now.getSeconds()).padStart(2, '0');
-        ['h1','h2','m1','m2','s1','s2'].forEach((id, i) => {
-            const el = document.getElementById(id);
-            if(el.innerText !== timeStr[i]) {
-                el.style.transform = 'rotateX(90deg)';
-                setTimeout(() => { el.innerText = timeStr[i]; el.style.transform = 'rotateX(0deg)'; }, 150);
-            }
-        });
-        document.getElementById('ampm').innerText = ampm;
-    }
-    setInterval(updateClock, 1000);
+    let cachedData = null;
+    let isCyclingWinners = false;
 
     function fetchLiveData() {
         fetch(`${scriptURL}?action=getLiveTVData`).then(res => res.json()).then(data => {
+            cachedData = data;
             document.getElementById('paidCount').innerText = data.stats.paid || 0;
             document.getElementById('winCount').innerText = data.stats.winners || 0;
-            if(data.photos?.length > 0) document.getElementById('gallery-img').src = data.photos[Math.floor(Math.random()*data.photos.length)];
-            document.getElementById('winner-list').innerHTML = data.winnerDetails?.length > 0 ? data.winnerDetails.reverse().map(w => `<div class="list-item winner-entry">🏆 ${w}</div>`).join('') : '<div class="list-item">Syncing results...</div>';
-            document.getElementById('attendee-list').innerHTML = data.recentAttendees?.length > 0 ? [...new Set(data.recentAttendees)].reverse().slice(0, 6).map(a => `<div class="list-item">⚡ ${a}</div>`).join('') : '<div class="list-item">Gate active...</div>';
+
+            // --- IMPROVED LIVE MOMENTS LOGIC ---
+            // Show photos that ARE NOT tagged as specific competition winners
+            const eventCompetitions = ["Glow Craft", "Reverse X", "Trail Blaze", "Brain 2 Bot", "Titan Trials", "Pixel Clash", "Innosense", "Seminar Presentation", "Play villa"];
+            const livePhotos = data.photos.filter(p => {
+                const tag = p.event || "General";
+                return !eventCompetitions.includes(tag.trim());
+            });
+
+            if (livePhotos.length > 0) {
+                const latestThree = livePhotos.slice(-3); // Get 3 most recent non-winner photos
+                const randomPhoto = latestThree[Math.floor(Math.random() * latestThree.length)];
+                const galleryImg = document.getElementById('gallery-img');
+                
+                const imgLoader = new Image();
+                imgLoader.src = (randomPhoto.url || randomPhoto) + "&t=" + Date.now();
+                imgLoader.onload = () => {
+                    galleryImg.src = imgLoader.src;
+                    document.getElementById('live-moment-status').style.display = 'none';
+                };
+            }
+
+            document.getElementById('attendee-list').innerHTML = data.recentAttendees?.reverse().slice(0, 5).map(a => `<div class="list-item">⚡ ${a}</div>`).join('');
+            
             if(data.sponsors?.length > 0) {
                 const pods = data.sponsors.map(url => `<div class="sponsor-pod"><img src="${url}"></div>`).join('');
                 document.getElementById('sponsorScroller').innerHTML = pods + pods;
@@ -200,38 +195,96 @@
         });
     }
 
+    async function startWinnerMarathon() {
+        if (!cachedData || !cachedData.photos) return;
+        const marathonArea = document.getElementById('winner-marathon-area');
+        const winners = cachedData.photos.filter(p => typeof p === 'object' && p.event && p.event !== "General").reverse();
+        
+        if (winners.length === 0) {
+            marathonArea.innerHTML = "<h2 style='text-align:center; padding-top:100px;'>AWAITING RESULTS...</h2>";
+            await new Promise(r => setTimeout(r, 4000));
+        } else {
+            isCyclingWinners = true;
+            for (let winner of winners) {
+                const details = cachedData.winnerDetails.find(d => d.includes(winner.event)) || winner.event;
+                const [identity, rank] = details.split('|');
+
+                marathonArea.innerHTML = `
+                    <div class="winner-marathon">
+                        <div class="winner-frame"><img src="${winner.url}"></div>
+                        <div class="winner-info-card">
+                            <div class="winner-rank">${rank || "CHAMPION"}</div>
+                            <div class="winner-name">${identity || "Champion"}</div>
+                            <div class="winner-sub">${winner.event} | SYNAPSE 2026</div>
+                        </div>
+                    </div>
+                `;
+                
+                triggerFullCelebration();
+                await new Promise(r => setTimeout(r, 6000));
+            }
+            isCyclingWinners = false;
+        }
+        rotateSlides();
+    }
+
+    function triggerFullCelebration() {
+        const duration = 4 * 1000;
+        const end = Date.now() + duration;
+        (function frame() {
+            confetti({ particleCount: 7, angle: 60, spread: 55, origin: { x: 0, y: 0.8 }, colors: ['#1fc1d1', '#d11fb7', '#ffea00'] });
+            confetti({ particleCount: 7, angle: 120, spread: 55, origin: { x: 1, y: 0.8 }, colors: ['#1fc1d1', '#d11fb7', '#ffea00'] });
+            if (Date.now() < end) { requestAnimationFrame(frame); }
+        }());
+    }
+
     let currentSlide = 0;
     const slides = ['slide-photos', 'slide-schedule', 'slide-winners', 'slide-attendees'];
+    
     function rotateSlides() {
+        if (isCyclingWinners) return;
+
         document.getElementById(slides[currentSlide]).classList.remove('active');
-        document.querySelectorAll('.sched-card').forEach(c => c.className = 'sched-card');
         currentSlide = (currentSlide + 1) % slides.length;
         const nextId = slides[currentSlide];
         document.getElementById(nextId).classList.add('active');
+
+        // ANIMATION RESET FOR TIMELINE
         if(nextId === 'slide-schedule') {
-            document.querySelectorAll('.sched-card').forEach((card, i) => {
+            const cards = document.querySelectorAll('.sched-card');
+            cards.forEach((card, i) => {
+                card.classList.remove('fly-left', 'fly-right');
+                void card.offsetWidth; // Force Reflow
                 card.style.animationDelay = (i * 0.1) + 's';
                 card.classList.add(i % 2 === 0 ? 'fly-left' : 'fly-right');
             });
         }
-        isWinnerPageActive = (nextId === 'slide-winners');
-        if (isWinnerPageActive) throwConfetti();
-    }
-    setInterval(rotateSlides, 15000);
 
-    function throwConfetti() {
-        if (!isWinnerPageActive) return;
-        confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0, y: 0.8 }, colors: ['#1fc1d1', '#d11fb7'] });
-        confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1, y: 0.8 }, colors: ['#1fc1d1', '#d11fb7'] });
-        requestAnimationFrame(throwConfetti);
+        if (nextId === 'slide-winners') {
+            startWinnerMarathon();
+        }
     }
+
+    setInterval(rotateSlides, 15000); 
+    setInterval(fetchLiveData, 25000);
+    fetchLiveData();
+
+    setInterval(() => {
+        const d = new Date();
+        const h = d.getHours() % 12 || 12;
+        document.getElementById('h1').innerText = Math.floor(h/10);
+        document.getElementById('h2').innerText = h%10;
+        document.getElementById('m1').innerText = Math.floor(d.getMinutes()/10);
+        document.getElementById('m2').innerText = d.getMinutes()%10;
+        document.getElementById('ampm').innerText = d.getHours() >= 12 ? 'PM' : 'AM';
+    }, 1000);
 
     const canvas = document.getElementById('neuralNet');
     const ctx = canvas.getContext('2d');
     let pts = [];
     function init() {
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        pts = Array.from({length: 30}, () => ({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3 }));
+        pts = Array.from({length: 25}, () => ({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2 }));
     }
     function draw() {
         ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle = "#1fc1d1";
@@ -243,7 +296,6 @@
         requestAnimationFrame(draw);
     }
     window.onresize = init; init(); draw();
-    fetchLiveData(); setInterval(fetchLiveData, 25000);
 </script>
 </body>
 </html>
