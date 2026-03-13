@@ -192,39 +192,29 @@
     const gallery = document.getElementById('winnerGallery');
     gallery.innerHTML = "<div class='text-center w-100'><p class='small text-white-50'>🔍 Scanning media...</p></div>";
     
+    // Ensure we are looking for the trimmed name
+    const targetEvent = eventName.trim();
+
     fetch(`${scriptURL}?action=getLiveTVData`)
         .then(res => res.json())
         .then(data => {
             gallery.innerHTML = "";
-            const isGroup = groupEvents.includes(eventName);
+            const isGroup = groupEvents.includes(targetEvent);
             
-            // Filter based on the 'event' property stored in Column C
-            // We also keep a fallback to check the URL just in case some old data exists
             const filteredPhotos = data.photos.filter(item => {
-                // If the data is an object (new format)
-                if (typeof item === 'object' && item.url) {
-                    return item.event === eventName;
-                }
-                // If the data is just a string (old format fallback)
-                if (typeof item === 'string') {
-                    const cleanUrl = item.toLowerCase();
-                    const cleanEvent = eventName.toLowerCase().replace(/\s+/g, '');
-                    return cleanUrl.includes(eventName.toLowerCase().replace(/ /g, "_")) || 
-                           cleanUrl.includes(cleanEvent);
+                if (typeof item === 'object' && item.event) {
+                    // Match trimmed versions to ignore accidental spaces in the sheet
+                    return item.event.trim() === targetEvent;
                 }
                 return false;
             });
 
             if(filteredPhotos.length > 0) {
-                // Show latest photos first
                 filteredPhotos.reverse().forEach(item => {
-                    // Extract URL regardless of format
-                    const imgUrl = (typeof item === 'object') ? item.url : item;
-                    
                     gallery.innerHTML += `
                         <div class="gallery-item ${isGroup ? 'landscape' : ''}">
-                            <img src="${imgUrl}" alt="Winner" onerror="this.src='https://placehold.co/400x600?text=Image+Not+Found'">
-                            <div class="gallery-tag">${eventName}</div>
+                            <img src="${item.url}" alt="Winner" crossorigin="anonymous">
+                            <div class="gallery-tag">${targetEvent}</div>
                         </div>`;
                 });
             } else {
