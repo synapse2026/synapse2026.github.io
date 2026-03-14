@@ -2,12 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SYNAPSE 2026 | Launching Soon</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SYNAPSE 2026 | Registration</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
         :root {
@@ -17,390 +19,287 @@
             --background-dark: #07060f;
         }
 
-        body, html {
-            height: 100%;
-            margin: 0;
-            padding: 0;
+        body { 
             background-color: var(--background-dark);
-            color: white;
-            font-family: 'Segoe UI', sans-serif;
-            overflow-x: hidden; 
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
 
         #particles-js {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
+            position: fixed; width: 100%; height: 100%;
+            top: 0; left: 0; z-index: 1; pointer-events: none !important;
         }
 
-        .hero-section {
+        .glass-panel {
             position: relative;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
+            background: rgba(15, 12, 41, 0.4) !important;
+            border-radius: 25px;
+            border: 2px solid rgba(31, 193, 209, 0.4);
+            overflow: hidden;
+            z-index: 5;
+        }
+
+        .main-content { position: relative; z-index: 10; padding: 20px; }
+
+        h2 { color: var(--poster-blue); font-weight: 900; font-family: 'Orbitron', sans-serif; text-transform: uppercase; text-align: center; }
+
+        .form-label { 
+            color: #fff !important; font-weight: 800 !important; 
+            text-transform: uppercase; font-size: 0.85rem;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .form-control, .form-select { 
+            background: rgba(255, 255, 255, 0.05) !important; 
+            color: #fff !important;
+            font-weight: 700 !important; border: 1px solid rgba(255,255,255,0.2);
+            padding: 12px; border-radius: 10px;
+            opacity: 0;
+        }
+        
+        .form-select option {
+            background-color: #1a1a2e !important;
+            color: #fff !important;
+        }
+
+        .form-control::placeholder { color: rgba(255,255,255,0.4) !important; }
+
+        /* --- COUNTDOWN STYLES --- */
+        .countdown-container {
             text-align: center;
-            padding: 40px 15px;
-            background: radial-gradient(circle at center, rgba(116, 31, 209, 0.15) 0%, transparent 70%);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(31, 193, 209, 0.2);
         }
-
-        .glitch-title, #launch-notice {
-            visibility: hidden; 
-        }
-
-        .glitch-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: clamp(2.2rem, 8vw, 5rem);
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: clamp(3px, 1.5vw, 10px);
-            color: var(--poster-blue);
-            text-shadow: 0 0 20px var(--poster-blue);
-            margin-bottom: 10px;
-        }
-
-        #launch-notice {
-            font-family: 'Orbitron', sans-serif;
-            font-size: clamp(0.75rem, 3vw, 1.1rem);
-            color: #fff;
-            letter-spacing: 2px;
-            margin-bottom: 30px; 
-            text-shadow: 0 0 10px var(--poster-purple);
-        }
-
-        .subtitle {
-            font-family: 'Orbitron', sans-serif;
-            font-size: clamp(0.9rem, 4vw, 1.5rem);
-            color: var(--poster-pink);
-            letter-spacing: clamp(1px, 1vw, 5px);
-            text-transform: uppercase;
-            min-height: 1.6em;
-            margin-bottom: 10px;
-        }
-
-        .cursor {
-            display: inline-block;
-            width: 8px;
-            background-color: var(--poster-pink);
-            margin-left: 5px;
-            animation: blink 0.7s infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 0; }
-            50% { opacity: 1; }
-        }
-
-        .countdown-box {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(31, 193, 209, 0.3);
-            border-radius: 15px;
-            padding: clamp(10px, 4vw, 20px);
-            backdrop-filter: blur(10px);
-            display: inline-flex;
-            gap: clamp(8px, 2.5vw, 20px);
-            margin-top: 10px;
-            max-width: 100%;
-        }
-
-        .count-item { min-width: clamp(55px, 18vw, 85px); }
+        .countdown-box { display: inline-flex; gap: 15px; }
+        .count-item { min-width: 60px; }
         .count-number {
-            display: block;
-            font-size: clamp(1.4rem, 6vw, 2.5rem);
-            font-weight: 900;
-            font-family: 'Orbitron', sans-serif;
+            display: block; font-size: 1.8rem; font-weight: 900;
+            font-family: 'Orbitron', sans-serif; color: var(--poster-blue);
         }
         .count-label {
-            font-size: clamp(0.55rem, 2vw, 0.7rem);
-            text-transform: uppercase;
-            color: var(--poster-pink);
+            font-size: 0.6rem; text-transform: uppercase;
+            color: var(--poster-pink); font-family: 'Orbitron', sans-serif;
         }
 
-        .launch-btn {
-            background: linear-gradient(135deg, var(--poster-blue), var(--poster-purple));
-            border: none;
-            padding: 12px clamp(25px, 6vw, 40px);
-            color: white;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            font-size: clamp(0.85rem, 3vw, 1rem);
-            border-radius: 50px;
-            margin-top: 40px;
-            transition: 0.3s;
-            text-decoration: none;
-            display: inline-block;
+        /* ANIMATIONS */
+        @keyframes flyInRight { from { opacity: 0; transform: translateX(500px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes flyInLeft { from { opacity: 0; transform: translateX(-500px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes flyInBottom { from { opacity: 0; transform: translateY(500px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes flyInTop { from { opacity: 0; transform: translateY(-500px); } to { opacity: 1; transform: translateY(0); } }
+
+        .fly-right { animation: flyInRight 0.8s forwards; }
+        .fly-left { animation: flyInLeft 0.8s forwards; }
+        .fly-bottom { animation: flyInBottom 0.8s forwards; }
+        .fly-top { animation: flyInTop 0.8s forwards; }
+
+        .spinner-loader {
+            position: absolute; right: 15px; top: 12px;
+            width: 20px; height: 20px;
+            border: 3px solid rgba(31, 193, 209, 0.3);
+            border-top: 3px solid var(--poster-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+            z-index: 20;
         }
 
-        /* --- PROMINENT OFFICIAL SPONSOR ANIMATION --- */
-        .sponsor-section {
-            margin-top: 60px;
-            width: 100%;
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #eventSection, #termsSection { display: none; }
+
+        .event-grid { border: 2px solid var(--poster-pink); background: rgba(209, 31, 183, 0.05); border-radius: 20px; padding: 15px; }
+        
+        .event-card {
+            background: rgba(255, 255, 255, 0.03) !important; 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px; padding: 12px; height: 100%; 
+            animation-duration: 3s !important;
+            opacity: 0; cursor: pointer;
+            display: flex !important;
+            align-items: flex-start;
+            animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
         }
 
-        .sponsor-label {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.75rem;
-            letter-spacing: 5px;
-            color: var(--poster-pink);
-            text-transform: uppercase;
-            margin-bottom: 25px;
-            font-weight: bold;
+        .event-check {
+            flex-shrink: 0;
+            width: 18px;
+            height: 18px;
+            margin-top: 4px;
         }
 
-        .official-sponsor-container {
-            position: relative;
-            display: inline-block;
-            padding: 4px;
-            border-radius: 20px;
-            margin-bottom: 40px;
-            overflow: hidden;
-            background: #000;
-            /* Animated rotating border effect */
-            z-index: 1;
+        .event-title { 
+            font-family: 'Orbitron', sans-serif; 
+            color: var(--poster-blue); 
+            font-weight: 900; 
+            font-size: 0.8rem; 
+            text-transform: uppercase; 
+            display: block; 
+            margin-bottom: 3px;
+            word-wrap: break-word;
+        }
+        
+        .event-desc { color: #eee; font-size: 0.7rem; line-height: 1.2; display: block; }
+
+        .terms-container { 
+            background: rgba(0, 0, 0, 0.3); 
+            border-radius: 15px; padding: 20px; 
+            border: 1px solid var(--poster-purple); 
         }
 
-        .official-sponsor-container::before {
-            content: '';
-            position: absolute;
-            z-index: -2;
-            left: -50%;
-            top: -50%;
-            width: 200%;
-            height: 200%;
-            background-color: #399953;
-            background-repeat: no-repeat;
-            background-size: 50% 50%, 50% 50%;
-            background-position: 0 0, 100% 0, 100% 100%, 0 100%;
-            background-image: linear-gradient(var(--poster-blue), var(--poster-blue)), 
-                              linear-gradient(var(--poster-purple), var(--poster-purple)), 
-                              linear-gradient(var(--poster-pink), var(--poster-pink)), 
-                              linear-gradient(var(--poster-blue), var(--poster-blue));
-            animation: rotate-border 4s linear infinite;
+        .terms-list { font-size: 0.85rem; color: #fff; list-style-type: decimal; font-weight: 600; text-align: left; }
+
+        .btn-nav, .btn-submit { 
+            background: linear-gradient(135deg, var(--poster-blue), var(--poster-purple)); border: none; padding: 18px; 
+            font-weight: 900; font-family: 'Orbitron', sans-serif; letter-spacing: 1.5px;
+            display: none; width: 100%; margin-top: 20px; border-radius: 10px; color: #fff;
         }
 
-        .official-sponsor-container::after {
-            content: '';
-            position: absolute;
-            z-index: -1;
-            left: 6px;
-            top: 6px;
-            width: calc(100% - 12px);
-            height: calc(100% - 12px);
-            background: var(--background-dark);
-            border-radius: 15px;
+        .btn-submit { background: linear-gradient(135deg, var(--poster-pink), #741fd1); display: block; }
+
+        #successWrapper {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: var(--background-dark); z-index: 999999;
+            display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px;
         }
 
-        @keyframes rotate-border {
-            100% { transform: rotate(1turn); }
-        }
+        .success-card { background: rgba(15, 12, 41, 0.8); border: 2px solid var(--poster-blue); padding: 30px; border-radius: 20px; width: 100%; max-width: 450px; }
+        .is-invalid-custom { border-color: #ff4d4d !important; box-shadow: 0 0 10px rgba(255, 77, 77, 0.5) !important; }
+        .is-valid-custom { border-color: #2ecc71 !important; box-shadow: 0 0 10px rgba(46, 204, 113, 0.5) !important; }
+        /* Blinking animation for Group Event Tag */
+@keyframes blink-animation {
+    0% { opacity: 1; }
+    50% { opacity: 0.2; }
+    100% { opacity: 1; }
+}
 
-        .official-sponsor-inner {
-            padding: clamp(15px, 5vw, 30px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            /* Color shifting glow */
-            animation: glow-shift 6s infinite alternate;
-            border-radius: 18px;
-        }
-
-        @keyframes glow-shift {
-            0% { box-shadow: inset 0 0 20px var(--poster-blue); }
-            50% { box-shadow: inset 0 0 40px var(--poster-purple); }
-            100% { box-shadow: inset 0 0 20px var(--poster-pink); }
-        }
-
-        .official-logo {
-            max-width: 100%;
-            height: auto;
-            width: clamp(200px, 70vw, 280px);
-            mix-blend-mode: screen; 
-            filter: brightness(1.2);
-        }
-
-        /* --- CO-SPONSOR SCROLLER (NO FILTERS) --- */
-        .marquee-container {
-            width: 100%;
-            overflow: hidden;
-            white-space: nowrap;
-            position: relative;
-            padding: 30px 0;
-            background: rgba(255, 255, 255, 0.03);
-        }
-
-        .marquee-content {
-            display: inline-flex;
-            align-items: center;
-            animation: scroll 35s linear infinite;
-        }
-
-        .co-sponsor-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 0 80px;
-            text-align: center;
-            transform: scale(0.85); /* Scaled down slightly */
-        }
-
-        .co-sponsor-logo {
-            height: clamp(45px, 10vw, 65px);
-            width: auto;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            /* No color filter, keeping natural image colors */
-        }
-
-        .co-sponsor-caption-box {
-            display: flex;
-            flex-direction: column;
-            font-family: 'Orbitron', sans-serif;
-            line-height: 1.4;
-        }
-
-        .cap-main {
-            color: var(--poster-blue);
-            font-size: clamp(0.7rem, 2.8vw, 0.9rem);
-            font-weight: 800;
-            text-transform: uppercase;
-        }
-
-        .cap-sub {
-            color: var(--poster-pink);
-            font-size: clamp(0.6rem, 2.2vw, 0.75rem);
-            font-weight: 600;
-        }
-
-        @keyframes scroll {
-            from { transform: translateX(0); }
-            to { transform: translateX(-50%); }
-        }
-
-        .footer-credit {
-            margin-top: 50px;
-            font-size: 0.7rem;
-            color: #6c757d;
-            letter-spacing: 1px;
-        }
+.group-tag {
+    font-size: 0.6rem;
+    background-color: var(--poster-pink);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 8px;
+    font-family: 'Orbitron', sans-serif;
+    animation: blink-animation 1s infinite;
+    vertical-align: middle;
+    display: inline-block;
+}
     </style>
 </head>
 <body>
 
     <div id="particles-js"></div>
+    <div id="qrcode-hidden" style="display:none;"></div> 
 
-    <div class="hero-section container">
-        <div class="animate__animated animate__fadeIn w-100">
-            <p class="subtitle"><span id="typing-text"></span><span class="cursor">&nbsp;</span></p>
-            
-            <h1 id="main-heading" class="glitch-title">SYNAPSE 2026</h1>
-            
-            <div id="launch-notice">Official site will be launched soon</div>
-            
-            <div class="countdown-box animate__animated animate__zoomIn">
-                <div class="count-item"><span class="count-number" id="days">00</span><span class="count-label">Days</span></div>
-                <div class="count-item"><span class="count-number" id="hours">00</span><span class="count-label">Hours</span></div>
-                <div class="count-item"><span class="count-number" id="minutes">00</span><span class="count-label">Mins</span></div>
-                <div class="count-item"><span class="count-number" id="seconds">00</span><span class="count-label">Secs</span></div>
-            </div>
+    <div class="main-content container my-4" id="mainUI">
+        <div class="poster-container animate__animated animate__fadeInDown">
+            <img src="synapse-poster.jpeg" alt="Synapse 2026 Poster" class="poster-image" style="width:100%; height:auto; border-radius:10px;">
+        </div>
 
-            <br>
-            <a href="https://synapse2026.github.io/registration.html" class="launch-btn">PRE-REGISTER NOW</a>
-
-            <div class="sponsor-section">
-                <p class="sponsor-label">Official Sponsor</p>
-                <div class="official-sponsor-container animate__animated animate__fadeInUp">
-                    <div class="official-sponsor-inner">
-                        <img src="sponser.png" alt="Official Sponsor" class="official-logo">
-                    </div>
-                </div>
-
-                <p class="sponsor-label">Co-Sponsors</p>
-                <div class="marquee-container">
-                    <div class="marquee-content">
-                        <div class="co-sponsor-card">
-                            <img src="C1.jpeg" alt="TechCake" class="co-sponsor-logo">
-                            <div class="co-sponsor-caption-box">
-                                <span class="cap-main">DevOps, AWS Cloud & Linux</span>
-                                <span class="cap-sub">Learn, Build & Get Hired</span>
-                            </div>
-                        </div>
-
-                        <div class="co-sponsor-card">
-                            <span style="font-family: 'Orbitron'; color: rgba(255,255,255,0.1); letter-spacing: 5px;">More Joining Soon</span>
-                        </div>
-
-                        <div class="co-sponsor-card">
-                            <img src="C1.jpeg" alt="TechCake" class="co-sponsor-logo">
-                            <div class="co-sponsor-caption-box">
-                                <span class="cap-main">DevOps, AWS Cloud & Linux</span>
-                                <span class="cap-sub">Learn, Build & Get Hired</span>
-                            </div>
-                        </div>
-                        <div class="co-sponsor-card">
-                            <span style="font-family: 'Orbitron'; color: rgba(255,255,255,0.1); letter-spacing: 5px;">More Joining Soon</span>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card p-4 p-md-5 glass-panel">
+                    
+                    <div class="countdown-container animate__animated animate__fadeIn">
+                        <div class="countdown-box">
+                            <div class="count-item"><span class="count-number" id="days">00</span><span class="count-label">Days</span></div>
+                            <div class="count-item"><span class="count-number" id="hours">00</span><span class="count-label">Hrs</span></div>
+                            <div class="count-item"><span class="count-number" id="minutes">00</span><span class="count-label">Min</span></div>
+                            <div class="count-item"><span class="count-number" id="seconds">00</span><span class="count-label">Sec</span></div>
                         </div>
                     </div>
+
+                    <form id="regForm">
+                        <div id="regDataSection">
+                            <h2>Registration</h2>
+                            <div class="mb-4"><label class="form-label">Full Name</label><input type="text" id="name" class="form-control check-trigger fly-left" style="animation-delay: 0.2s" required></div>
+                            <div class="mb-4">
+                                <label class="form-label">Mobile Number</label>
+                                <div class="mobile-wrapper" style="position: relative;">
+                                    <input type="tel" id="mobile" class="form-control check-trigger fly-right" style="animation-delay: 0.4s" placeholder="10 digits" maxlength="10" required>
+                                    <div id="checkSpinner" class="spinner-loader"></div>
+                                </div>
+                                <div id="mobileError" class="status-msg error-text" style="display:none; color: #ff4d4d; font-size: 0.8rem; margin-top: 5px; font-weight: bold;">⚠️ Already registered!</div>
+                            </div>
+                            <div class="mb-4"><label class="form-label">Email Address</label><input type="email" id="email" class="form-control check-trigger fly-left" style="animation-delay: 0.6s" required></div>
+                            <div class="mb-4"><label class="form-label">College Name</label><input type="text" id="college" class="form-control check-trigger fly-right" style="animation-delay: 0.8s" required></div>
+                            <div class="row">
+                                <div class="col-md-7 mb-4"><label class="form-label">Department</label><select id="department" class="form-select check-trigger fly-left" style="animation-delay: 1s" required><option value="" disabled selected>Select</option><option>Computer Engg</option><option>Electronics Engg</option><option>Instrumentation Engg</option><option>Mechanical Engg</option><option>CABM</option><option>Electrical Engg</option><option>Auto Mobile Engg</option><option>Management</option><option>Others</option></select></div>
+                                <div class="col-md-5 mb-4">
+                                    <label class="form-label">Semester / Year</label>
+                                    <select id="semester" class="form-select check-trigger fly-right" style="animation-delay: 1.2s" required>
+                                        <option value="" disabled selected>Select</option>
+                                        <option disabled>── Semesters ──</option>
+                                        <option>S1</option><option>S2</option><option>S3</option>
+                                        <option>S4</option><option>S5</option><option>S6</option>
+                                        <option disabled>── Years ──</option>
+                                        <option>1st Year</option>
+                                        <option>2nd Year</option>
+                                        <option>3rd Year</option>
+                                        <option>4th Year</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="button" id="btnSelectEvents" class="btn-nav" onclick="showEvents()">SELECT EVENTS</button>
+                        </div>
+
+                        <div id="eventSection">
+                            <h2>Choose Events</h2>
+                            <div class="event-grid">
+                                <div class="row g-2">
+                                    <div class="col-6"><label class="event-card" for="c1" id="ec1"><input type="checkbox" class="event-check form-check-input me-2" value="Glow Craft" id="c1"><div><span class="event-title">Glow Craft</span><span class="event-desc">LED patterns- Arduino</span></div></label></div>
+                                    <div class="col-6"><label class="event-card" for="c2" id="ec2"><input type="checkbox" class="event-check form-check-input me-2" value="Reverse X" id="c2"><div><span class="event-title">Reverse X</span><span class="event-desc">Hardware to circuit</span></div></label></div>
+                                    <div class="col-6"><label class="event-card" for="c3" id="ec3"><input type="checkbox" class="event-check form-check-input me-2" value="Trail Blaze" id="c3"><div><span class="event-title">Trail Blaze <span class="group-tag">GROUP</span></span><span class="event-desc">Decode the clues</span></div></label></div>
+                                    <div class="col-6"><label class="event-card" for="c4" id="ec4"><input type="checkbox" class="event-check form-check-input me-2" value="Brain 2 Bot" id="c4"><div><span class="event-title">Brain 2 Bot</span><span class="event-desc">Smart AI prompt</span></div></label></div>
+                                    <div class="col-6"><label class="event-card" for="c5" id="ec5"><input type="checkbox" class="event-check form-check-input me-2" value="Titan Trials" id="c5"><div><span class="event-title">Titan Trials <span class="group-tag">GROUP</span></span><span class="event-desc">Best Management Team</span></div></label></div>
+                                    <div class="col-6"><label class="event-card" for="c6" id="ec6"><input type="checkbox" class="event-check form-check-input me-2" value="Pixel Clash" id="c6"><div><span class="event-title">Pixel Clash</span><span class="event-desc">Poster Designing</span></div></label></div>
+                                    <div class="col-6"><label class="event-card" for="c7" id="ec7"><input type="checkbox" class="event-check form-check-input me-2" value="Innosense" id="c7"><div><span class="event-title">Innosense <span class="group-tag">GROUP</span></span><span class="event-desc">Sensors make the sense</span></div></label></div>
+                                    <div class="col-6"><label class="event-card" for="c8" id="ec8"><input type="checkbox" class="event-check form-check-input me-2" value="Seminar Presentation" id="c8"><div><span class="event-title">Seminar Presentation</span><span class="event-desc">showcase the tech</span></div></label></div>
+                                    <div class="col-6"><label class="event-card" for="c9" id="ec9"><input type="checkbox" class="event-check form-check-input me-2" value="Play villa" id="c9"><div><span class="event-title">Play villa</span><span class="event-desc">let's play for vibe</span></div></label></div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-nav" style="display:block" onclick="showTerms()">View Terms & Conditions</button>
+                        </div>
+
+                        <div id="termsSection">
+                            <h2>Terms & Conditions</h2>
+                            <div class="terms-container">
+                                <ul class="terms-list">
+                                    <li>Students can participate in Multiple events.</li>
+                                    <li>One time Registration fee of Rs.50 to be paid at Registration Desk.</li>
+                                    <li>Ensure all registration details are correct, registration fee is non-refundable.</li>
+                                    <li>In case of event schedule conflicts, students need to pick any one.</li>
+                                    <li>In case of group events, each member has to register for that event.</li>
+                                    <li>All Decisions made by the organising committee will be final.</li>
+                                </ul>
+                                <div class="form-check text-center"><input class="form-check-input d-inline-block float-none" type="checkbox" id="agreeCheck" required><label class="form-check-label small text-white fw-bold ms-2" for="agreeCheck">I AGREE TO THE TERMS AND CONDITIONS</label></div>
+                            </div>
+                            <button type="submit" id="submitBtn" class="btn-submit">FINALIZE REGISTRATION</button>
+                        </div>
+                    </form>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <p class="footer-credit">WEBSITE POWERED BY TEAM CT, GRWPC</p>
+    <div id="successWrapper">
+        <div class="success-card animate__animated animate__zoomIn">
+            <h2 style="text-align: center; font-size: 1.5rem; margin-bottom: 20px;">Success!</h2>
+            <div id="details" class="border-top border-secondary pt-3 mt-2 text-light" style="text-align: left; font-weight:600;"></div>
+            <div style="font-size: 0.8rem; color: #fff; margin-top: 15px; font-weight:bold; text-align: left;">⚠️ Bring this QR code on event day!</div>
+            <div style="font-size: 0.8rem; color: #1fc1d1; margin-top: 10px; font-weight: bold; text-align: left;">Queries: 7994484172</div>
+            <div style="color: var(--poster-pink); font-weight: bold; font-size: 0.85rem; margin-top: 20px; font-family: 'Orbitron'; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">POWERED BY TEAM CT GRWPC</div>
+            <button id="finalDownloadBtn" onclick="downloadPDF()" class="btn-nav" style="display:block; background:#1fc1d1; color:#000; margin-top: 25px; margin-left: auto; margin-right: auto;">📥 DOWNLOAD PDF</button>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script>
-        particlesJS("particles-js", {
-            "particles": {
-                "number": { "value": 50 },
-                "color": { "value": ["#d11fb7", "#1fc1d1"] },
-                "shape": { "type": "circle" },
-                "opacity": { "value": 0.4 },
-                "size": { "value": 2.5 },
-                "line_linked": { "enable": true, "distance": 120, "color": "#741fd1", "opacity": 0.3, "width": 1 },
-                "move": { "enable": true, "speed": 2 }
-            }
-        });
-
-        const fullText = "Connecting Ideas. Creating Innovation.";
-        const triggerPhrase = "Connecting Ideas."; 
-        const typingElement = document.getElementById("typing-text");
-        const headingElement = document.getElementById("main-heading");
-        const launchNotice = document.getElementById("launch-notice");
-        
-        let isDeleting = false;
-        let charIndex = 0;
-        let hasHeadingLoaded = false;
-
-        function typeLoop() {
-            const currentDisplay = isDeleting 
-                ? fullText.substring(0, charIndex - 1) 
-                : fullText.substring(0, charIndex + 1);
-
-            typingElement.innerHTML = currentDisplay;
-            charIndex = isDeleting ? charIndex - 1 : charIndex + 1;
-
-            if (!isDeleting && currentDisplay.includes(triggerPhrase) && !hasHeadingLoaded) {
-                headingElement.style.visibility = "visible";
-                headingElement.classList.add("animate__animated", "animate__backInDown");
-                
-                setTimeout(() => {
-                    launchNotice.style.visibility = "visible";
-                    launchNotice.classList.add("animate__animated", "animate__fadeInUp");
-                }, 400);
-
-                hasHeadingLoaded = true;
-            }
-
-            let typeSpeed = isDeleting ? 40 : 80;
-            if (!isDeleting && charIndex === fullText.length) { isDeleting = true; typeSpeed = 2000; } 
-            else if (isDeleting && charIndex === 0) { isDeleting = false; typeSpeed = 500; }
-            setTimeout(typeLoop, typeSpeed);
-        }
-
-        window.onload = () => setTimeout(typeLoop, 800);
-
+        // COUNTDOWN LOGIC
         const launchDate = new Date("March 17, 2026 09:00:00").getTime();
         const timer = setInterval(function() {
             const now = new Date().getTime();
@@ -409,12 +308,208 @@
             const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const s = Math.floor((distance % (1000 * 60)) / 1000);
-            
             document.getElementById("days").innerHTML = d.toString().padStart(2, '0');
             document.getElementById("hours").innerHTML = h.toString().padStart(2, '0');
             document.getElementById("minutes").innerHTML = m.toString().padStart(2, '0');
             document.getElementById("seconds").innerHTML = s.toString().padStart(2, '0');
+            if (distance < 0) { clearInterval(timer); document.querySelector(".countdown-container").style.display = 'none'; }
         }, 1000);
+
+        particlesJS("particles-js", {
+            "particles": {
+                "number": { "value": 60 },
+                "color": { "value": ["#d11fb7", "#1fc1d1", "#741fd1"] },
+                "shape": { "type": "circle" },
+                "opacity": { "value": 0.8 },
+                "size": { "value": 4 },
+                "line_linked": { "enable": true, "distance": 120, "color": "#741fd1", "opacity": 0.4, "width": 1 },
+                "move": { "enable": true, "speed": 2, "out_mode": "out" }
+            }
+        });
+
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzb97bG3GTT1wMH7M9j8RDXkoqoFD_MWXFkUZS0przdUO51s-7Zyutn0FbRSRnjjH8X5A/exec';
+        let registrationData = {};
+        let isDuplicate = false;
+
+        const triggers = document.querySelectorAll('.check-trigger');
+        triggers.forEach(el => { el.addEventListener('input', checkAllFields); });
+
+        function checkAllFields() {
+            let allFilled = true;
+            triggers.forEach(t => { if(!t.value) allFilled = false; });
+            if(allFilled && document.getElementById('mobile').value.length === 10 && !isDuplicate) {
+                document.getElementById('btnSelectEvents').style.display = 'block';
+                document.getElementById('btnSelectEvents').classList.add('fly-bottom');
+            } else {
+                document.getElementById('btnSelectEvents').style.display = 'none';
+            }
+        }
+
+        function showEvents() {
+            document.getElementById('regDataSection').style.display = 'none';
+            document.getElementById('eventSection').style.display = 'block';
+            
+            const directions = ['fly-left', 'fly-right', 'fly-top', 'fly-bottom'];
+            const eventCards = document.querySelectorAll('.event-card');
+            
+            eventCards.forEach((card, index) => {
+                const dir = directions[index % directions.length];
+                card.classList.add(dir);
+                card.style.animationDelay = (index * 0.4) + 's';
+            });
+        }
+
+        function showTerms() {
+            const selected = Array.from(document.querySelectorAll('.event-check:checked'));
+            if(selected.length === 0) { alert("Please select an event!"); return; }
+            document.getElementById('eventSection').style.display = 'none';
+            document.getElementById('termsSection').style.display = 'block';
+        }
+
+        const mobileInput = document.getElementById('mobile');
+        mobileInput.addEventListener('input', function() {
+            isDuplicate = false; // Reset duplicate flag on typing
+            this.classList.remove('is-invalid-custom', 'is-valid-custom');
+            document.getElementById('mobileError').style.display = 'none';
+            checkAllFields();
+        });
+
+        mobileInput.addEventListener('blur', function() {
+            if(this.value.length === 10) {
+                const spin = document.getElementById('checkSpinner');
+                spin.style.display = 'block';
+                fetch(`${scriptURL}?action=search&mobile=${this.value}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        spin.style.display = 'none';
+                        if (data !== "NotFound") {
+                            isDuplicate = true;
+                            this.classList.add('is-invalid-custom');
+                            document.getElementById('mobileError').style.display = 'block';
+                            document.getElementById('btnSelectEvents').style.display = 'none';
+                        } else {
+                            isDuplicate = false;
+                            this.classList.add('is-valid-custom');
+                            checkAllFields();
+                        }
+                    })
+                    .catch(() => {
+                        spin.style.display = 'none';
+                        checkAllFields();
+                    });
+            }
+        });
+
+        document.getElementById('regForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true; btn.innerHTML = "WAIT...";
+            registrationData = {
+                name: document.getElementById('name').value,
+                mobile: document.getElementById('mobile').value,
+                email: document.getElementById('email').value,
+                college: document.getElementById('college').value,
+                department: document.getElementById('department').value,
+                semester: document.getElementById('semester').value,
+                events: Array.from(document.querySelectorAll('.event-check:checked')).map(c => c.value).join(", ")
+            };
+            fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(registrationData) });
+            setTimeout(() => {
+                document.getElementById('mainUI').style.display = 'none';
+                document.getElementById('successWrapper').style.display = 'flex';
+                document.getElementById('details').innerHTML = `Name: ${registrationData.name}<br>Phone: ${registrationData.mobile}`;
+                downloadPDF();
+            }, 1500);
+        });
+
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const qrContainer = document.createElement("div");
+            new QRCode(qrContainer, { text: registrationData.mobile, width: 256, height: 256 });
+            
+            setTimeout(() => {
+                const canvas = qrContainer.querySelector('canvas');
+                const qrImg = canvas.toDataURL("image/png");
+
+                // Background
+                doc.setFillColor(7, 6, 15); 
+                doc.rect(0, 0, 210, 297, 'F');
+
+                // Header Title
+                doc.setTextColor(31, 193, 209); 
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(26);
+                doc.text("SYNAPSE 2026", 105, 25, { align: "center" });
+
+                // QR Code Section
+                doc.setFillColor(255, 255, 255); 
+                doc.rect(75, 35, 60, 60, 'F');
+                doc.addImage(qrImg, 'PNG', 78, 38, 54, 54);
+
+                // Student Details Header
+                doc.setTextColor(209, 31, 183);
+                doc.setFontSize(14);
+                doc.text("REGISTRATION DETAILS", 20, 110);
+                doc.setDrawColor(209, 31, 183);
+                doc.line(20, 112, 85, 112); 
+
+                // Student Information
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(11);
+                
+                let yPos = 122;
+                const lineHeight = 8;
+                const details = [
+                    { label: "NAME:", value: registrationData.name },
+                    { label: "MOBILE:", value: registrationData.mobile },
+                    { label: "COLLEGE:", value: registrationData.college },
+                    { label: "DEPT:", value: registrationData.department },
+                    { label: "SEMESTER/YEAR:", value: registrationData.semester }
+                ];
+
+                details.forEach(item => {
+                    doc.setFont("helvetica", "bold");
+                    doc.text(item.label, 20, yPos);
+                    doc.setFont("helvetica", "normal");
+                    doc.text(String(item.value).toUpperCase(), 70, yPos); 
+                    yPos += lineHeight;
+                });
+
+                // Events Registered
+                doc.setFont("helvetica", "bold");
+                doc.text("EVENTS REGISTERED:", 20, yPos);
+                doc.setFont("helvetica", "normal");
+                const splitEvents = doc.splitTextToSize(registrationData.events.toUpperCase(), 120);
+                doc.text(splitEvents, 70, yPos);
+
+                // --- FOOTER SECTION ---
+                let footerY = yPos + (splitEvents.length * 6) + 20;
+                
+                // Instructional & Contact Text
+                doc.setFontSize(11);
+                doc.setTextColor(31, 193, 209);
+                doc.setFont("helvetica", "bold");
+                doc.text("Show this QR code at the Registration Desk", 105, footerY, { align: "center" });
+                
+                doc.setFontSize(10);
+                doc.setTextColor(255, 255, 255);
+                doc.setFont("helvetica", "normal");
+                doc.text("For any queries pls contact: 7994484172", 105, footerY + 8, { align: "center" });
+
+                // POWERED BY
+                let brandY = footerY + 35; 
+                doc.setTextColor(0, 255, 200); 
+                doc.setFontSize(13);
+                doc.setFont("courier", "bold");
+                doc.text("POWERED BY TEAM CT,GRWPC", 105, brandY, { 
+                    align: "center",
+                    charSpace: 0.4 
+                });
+
+                doc.save(`Synapse_${registrationData.name}.pdf`);
+            }, 400);
+        }
     </script>
 </body>
 </html>
