@@ -16,6 +16,7 @@
             --poster-purple: #741fd1;
             --background-dark: #07060f;
             --card-bg: rgba(255, 255, 255, 0.05);
+            --gold: #ffea00;
         }
 
         body, html {
@@ -66,6 +67,43 @@
             text-shadow: 0 0 15px rgba(209, 31, 183, 0.5);
         }
 
+        /* --- REGISTRATION CARD --- */
+        #registration-container {
+            position: relative;
+            z-index: 100;
+            max-width: 450px;
+            margin: 40px auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
+            border: 2px solid var(--poster-blue);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 0 30px rgba(31, 193, 209, 0.2);
+        }
+
+        .form-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            color: var(--poster-blue);
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .form-control, .form-select {
+            background: rgba(0, 0, 0, 0.6) !important;
+            border: 1px solid rgba(31, 193, 209, 0.3) !important;
+            color: #fff !important;
+            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 20px;
+            padding: 12px;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--poster-pink) !important;
+            box-shadow: 0 0 15px var(--poster-pink) !important;
+            outline: none;
+        }
+
         /* --- SONG CARDS --- */
         .song-card {
             background: var(--card-bg);
@@ -90,6 +128,7 @@
             font-weight: 700;
             color: #fff;
             margin-bottom: 2px;
+            font-size: 1.1rem;
         }
 
         .song-artist {
@@ -126,16 +165,17 @@
         .btn-vote:disabled {
             background: #444;
             opacity: 0.7;
+            box-shadow: none;
         }
 
-        /* --- PULSE ANIMATION --- */
+        /* --- ANIMATIONS --- */
         .pulse-up {
             animation: pulse-pink 0.6s ease-out;
         }
 
         @keyframes pulse-pink {
             0% { transform: scale(1); text-shadow: 0 0 0px var(--poster-pink); }
-            50% { transform: scale(1.3); text-shadow: 0 0 20px var(--poster-pink); }
+            50% { transform: scale(1.2); text-shadow: 0 0 20px var(--poster-pink); }
             100% { transform: scale(1); text-shadow: 0 0 0px var(--poster-pink); }
         }
 
@@ -147,12 +187,6 @@
             letter-spacing: 2px;
             position: relative;
             z-index: 10;
-        }
-
-        .powered-by {
-            color: var(--poster-blue);
-            text-decoration: none;
-            font-weight: bold;
         }
     </style>
 </head>
@@ -168,24 +202,55 @@
 
     <div class="container mt-4 mb-5">
         <h2 class="hero-title animate__animated animate__fadeInDown">CROWD DJ Control</h2>
-        <p class="text-center text-secondary mb-5 small">VOTE FOR THE NEXT TRACK TO PLAY IN THE MAIN HALL</p>
+        
+        <div id="registration-container" class="animate__animated animate__zoomIn">
+            <p class="text-center text-info font-monospace mb-4">⚡ ENTER THE BOOTH ⚡</p>
+            
+            <label class="form-label">FULL NAME</label>
+            <input type="text" id="voterName" class="form-control" placeholder="Type your name here...">
+            
+            <label class="form-label">DEPARTMENT / BRANCH</label>
+            <select id="voterBranch" class="form-select">
+                <option value="" disabled selected>Select Branch</option>
+                <option value="CT">Computer Engineering (CT)</option>
+                <option value="EC">Electronics (EC)</option>
+                <option value="IE">Instrumentation (IE)</option>
+                <option value="CABM">CABM</option>
+                <option value="Other">Other</option>
+            </select>
 
-        <div id="poll-container" class="row justify-content-center">
-            <div class="text-center py-5">
-                <div class="spinner-border text-info" role="status"></div>
-                <p class="mt-3 text-info font-monospace">SYNCING WITH DJ BOOTH...</p>
+            <label class="form-label">SEMESTER</label>
+            <select id="voterSem" class="form-select">
+                <option value="" disabled selected>Select Sem</option>
+                <option value="S1">S1</option>
+                <option value="S2">S2</option>
+                <option value="S3">S3</option>
+                <option value="S4">S4</option>
+                <option value="S5">S5</option>
+                <option value="S6">S6</option>
+            </select>
+            
+            <button class="btn btn-vote w-100 mt-3" onclick="startVoting()">ENTER & VOTE</button>
+        </div>
+
+        <div id="voting-ui" style="display: none;">
+            <p class="text-center text-secondary mb-5 small">VOTE FOR THE NEXT TRACK TO PLAY IN THE MAIN HALL</p>
+            <div id="poll-container" class="row justify-content-center">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-info" role="status"></div>
+                    <p class="mt-3 text-info font-monospace">SYNCING LIVE DATA...</p>
+                </div>
             </div>
         </div>
     </div>
 
     <footer>
         <p>WEBSITE POWERED BY TEAM CT, GRWPC<br>
-        DEVELOPED BY <a href="mailto:sarangsukumar@gmail.com" class="powered-by">SARANGSUKUMAR@GMAIL.COM</a></p>
+        DEVELOPED BY <a href="mailto:sarangsukumar@gmail.com" style="color:var(--poster-blue); text-decoration:none; font-weight:bold;">SARANGSUKUMAR@GMAIL.COM</a></p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script>
-        // Particles JS (Matched to your Registration Page)
         particlesJS("particles-js", {
             "particles": {
                 "number": { "value": 40 },
@@ -200,52 +265,82 @@
 
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzb97bG3GTT1wMH7M9j8RDXkoqoFD_MWXFkUZS0przdUO51s-7Zyutn0FbRSRnjjH8X5A/exec"; 
         let userVoted = false;
+        let voterData = { name: "", branch: "", sem: "" };
+
+        function startVoting() {
+            const name = document.getElementById('voterName').value.trim();
+            const branch = document.getElementById('voterBranch').value;
+            const sem = document.getElementById('voterSem').value;
+
+            if (name.length < 3 || !branch || !sem) {
+                alert("Please fill in your name, branch, and semester to continue.");
+                return;
+            }
+
+            voterData = { name, branch, sem };
+
+            // Transition Animation
+            document.getElementById('registration-container').classList.add('animate__animated', 'animate__zoomOut');
+            setTimeout(() => {
+                document.getElementById('registration-container').style.display = 'none';
+                document.getElementById('voting-ui').style.display = 'block';
+                loadSongs();
+            }, 500);
+        }
 
         async function loadSongs(isUpdate = false) {
-            try {
-                const response = await fetch(`${SCRIPT_URL}?action=getAllSongs`);
-                const songs = await response.json();
-                const container = document.getElementById('poll-container');
-                
-                if(isUpdate) {
-                    songs.forEach(song => {
-                        const safeId = song.uri.replace(/:/g, '');
-                        const el = document.getElementById(`count-${safeId}`);
-                        if(el && el.innerText != song.votes) {
-                            el.innerText = song.votes;
-                            el.classList.add('pulse-up');
-                            setTimeout(() => el.classList.remove('pulse-up'), 700);
-                        }
-                    });
-                    return;
+    try {
+        const response = await fetch(`${SCRIPT_URL}?action=getAllSongs`);
+        const data = await response.json();
+        
+        // --- THE CRITICAL FIX ---
+        // Since the Script now returns {songs: [...], recentVoter: "..."}, 
+        // we must target data.songs
+        const songs = data.songs || []; 
+        const container = document.getElementById('poll-container');
+        
+        if(isUpdate) {
+            songs.forEach(song => {
+                const safeId = song.uri.replace(/:/g, '');
+                const el = document.getElementById(`count-${safeId}`);
+                if(el && el.innerText != song.votes) {
+                    el.innerText = song.votes;
+                    el.classList.add('pulse-up');
+                    setTimeout(() => el.classList.remove('pulse-up'), 700);
                 }
-
-                container.innerHTML = '';
-                songs.forEach((song, index) => {
-                    const safeId = song.uri.replace(/:/g, '');
-                    container.innerHTML += `
-                        <div class="col-12 col-md-8 col-lg-6">
-                            <div class="song-card d-flex align-items-center justify-content-between animate__animated animate__fadeInUp" style="animation-delay: ${index * 0.1}s">
-                                <div>
-                                    <div class="song-title">${song.name}</div>
-                                    <div class="song-artist">${song.artist}</div>
-                                    <div class="mt-2">
-                                        <span id="count-${safeId}" class="vote-count">${song.votes}</span>
-                                        <span style="color:var(--poster-blue); font-size: 0.7rem; margin-left:5px;">VOTES</span>
-                                    </div>
-                                </div>
-                                <button class="btn btn-vote" onclick="castVote('${song.uri}', this, '${safeId}')">
-                                    VOTE
-                                </button>
-                            </div>
-                        </div>`;
-                });
-            } catch (e) { console.error(e); }
+            });
+            return;
         }
+
+        container.innerHTML = '';
+        songs.forEach((song, index) => {
+            const safeId = song.uri.replace(/:/g, '');
+            container.innerHTML += `
+                <div class="col-12 col-md-8 col-lg-6">
+                    <div class="song-card d-flex align-items-center justify-content-between animate__animated animate__fadeInUp" style="animation-delay: ${index * 0.1}s">
+                        <div>
+                            <div class="song-title">${song.name}</div>
+                            <div class="song-artist">${song.artist}</div>
+                            <div class="mt-2">
+                                <span id="count-${safeId}" class="vote-count">${song.votes}</span>
+                                <span style="color:var(--poster-blue); font-size: 0.7rem; margin-left:5px;">VOTES</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-vote" onclick="castVote('${song.uri}', this, '${safeId}')">
+                            VOTE
+                        </button>
+                    </div>
+                </div>`;
+        });
+    } catch (e) { 
+        console.error("Error loading songs:", e); 
+        document.getElementById('poll-container').innerHTML = `<p class="text-danger">Error: ${e.message}</p>`;
+    }
+}
 
         async function castVote(uri, btn, safeId) {
             if(userVoted) {
-                alert("You've already influenced the vibe for this round!");
+                alert("Your vote has already been registered for this round!");
                 return;
             }
             if (window.navigator.vibrate) window.navigator.vibrate(50);
@@ -254,7 +349,13 @@
             btn.innerHTML = '...';
             
             try {
-                const url = `${SCRIPT_URL}?action=voteSong&songUri=${encodeURIComponent(uri)}`;
+                // Construct URL with new user metadata
+                const url = `${SCRIPT_URL}?action=voteSong` + 
+                            `&songUri=${encodeURIComponent(uri)}` +
+                            `&voterName=${encodeURIComponent(voterData.name)}` +
+                            `&voterBranch=${encodeURIComponent(voterData.branch)}` +
+                            `&voterSem=${encodeURIComponent(voterData.sem)}`;
+
                 const response = await fetch(url);
                 const result = await response.text();
                 
@@ -265,15 +366,22 @@
                     countEl.innerText = parseInt(countEl.innerText) + 1;
                     countEl.classList.add('pulse-up');
                     setTimeout(() => loadSongs(true), 1000);
+                } else {
+                    throw new Error("Failed to record vote");
                 }
             } catch (e) {
                 btn.disabled = false;
                 btn.innerHTML = "VOTE";
+                alert("Connection lost. Please try voting again.");
             }
         }
 
-        loadSongs();
-        setInterval(() => loadSongs(true), 15000);
+        // Auto-refresh vote counts every 15 seconds if voting list is visible
+        setInterval(() => {
+            if (document.getElementById('voting-ui').style.display === 'block') {
+                loadSongs(true);
+            }
+        }, 15000);
     </script>
 </body>
 </html>
