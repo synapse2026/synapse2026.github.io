@@ -67,7 +67,7 @@
             <div class="col-6">
                 <div class="progress-check text-center">
                     <span class="label-cyber" style="font-size: 0.6rem;">ENTRY</span>
-                    <input type="checkbox" id="checkEntry" class="form-check-input" onchange="updateEventProgress('entry', this.checked)">
+                   <input type="checkbox" id="checkEntry" class="form-check-input" onchange="updateEventProgress('entry', this.checked)">
                 </div>
             </div>
             <div class="col-6">
@@ -80,7 +80,7 @@
         <div id="compStatus" class="text-center mt-2 small text-white-50" style="font-family: 'Orbitron'; font-size: 0.65rem;"></div>
     </div>
 
-    <div class="section-card d-none" id="attendanceSection">
+   <div class="section-card d-none" id="attendanceSection">
         <h5 class="mb-3" style="font-size: 0.9rem;">Paid Attendees List</h5>
         <div class="scrollable-container">
             <table class="table table-dark table-hover mb-0" id="participantTable">
@@ -89,6 +89,8 @@
             </table>
         </div>
         <button id="markAttBtn" class="btn btn-success w-100 mb-2 btn-cyber py-2" onclick="submitBulkAttendance()">✅ Mark Selected Present</button>
+        
+        <button class="btn btn-outline-info w-100 btn-cyber py-2" onclick="exportTablePDF('participantTable', 'Attendance_Report')">📥 Export Attendance PDF</button>
     </div>
 
     <div class="section-card">
@@ -358,24 +360,53 @@
         const selected = Array.from(document.querySelectorAll('.user-check:checked'));
         const mobiles = selected.map(c => c.value);
         const names = selected.map(c => c.getAttribute('data-name'));
+        const btn = document.getElementById('markAttBtn');
+
         if(!mobiles.length) return alert("Select students!");
+        
         let teamName = groupEvents.includes(event) ? prompt(`Enter Team Name for: ${names.join(", ")}`) : "";
         if(groupEvents.includes(event) && !teamName) return alert("Team name mandatory!");
-        document.getElementById('markAttBtn').innerText = "⌛ UPDATING...";
-        fetch(`${scriptURL}?action=bulkMarkAttendanceWithTeam&mobiles=${mobiles.join(",")}&event=${event}&team=${encodeURIComponent(teamName)}`)
-            .then(() => { alert("Attendance Updated!"); fetchParticipants(); });
-    }
+        
+        // 1. Set to loading state
+        btn.innerText = "⌛ UPDATING...";
+        btn.disabled = true;
 
+        fetch(`${scriptURL}?action=bulkMarkAttendanceWithTeam&mobiles=${mobiles.join(",")}&event=${event}&team=${encodeURIComponent(teamName)}`)
+            .then(res => res.text())
+            .then(result => {
+                // 2. Reset button state after success
+                alert("Attendance Updated!");
+                btn.innerText = "✅ Mark Selected Present";
+                btn.disabled = false;
+                fetchParticipants(); // Refresh the list
+            })
+            .catch(err => {
+                // 3. Handle errors
+                console.error(err);
+                alert("Error updating attendance.");
+                btn.innerText = "✅ Mark Selected Present";
+                btn.disabled = false;
+            });
+    }
     function submitTeamWinner() {
         const team = document.getElementById('teamWinnerSelector').value;
         const pos = document.getElementById('winnerPosition').value;
         const event = document.getElementById('eventSelector').value;
-        if(!team || team.includes("Select")) return alert("Select team!");
-        document.getElementById('teamWinnerBtn').innerText = "⌛ UPDATING...";
-        fetch(`${scriptURL}?action=markTeamWinner&team=${encodeURIComponent(team)}&position=${pos}&event=${event}`)
-            .then(() => { alert("Winners Marked!"); fetchParticipants(); });
-    }
+        const btn = document.getElementById('teamWinnerBtn');
 
+        if(!team || team.includes("Select")) return alert("Select team!");
+        
+        btn.innerText = "⌛ UPDATING...";
+        btn.disabled = true;
+
+        fetch(`${scriptURL}?action=markTeamWinner&team=${encodeURIComponent(team)}&position=${pos}&event=${event}`)
+            .then(() => { 
+                alert("Winners Marked!"); 
+                btn.innerText = "🏆 MARK TEAM AS WINNER";
+                btn.disabled = false;
+                fetchParticipants(); 
+            });
+    }
     function stopCamera() {
         if (videoStream) videoStream.getTracks().forEach(track => track.stop());
         document.getElementById('cameraWrapper').style.display = 'none';
