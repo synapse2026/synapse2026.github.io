@@ -74,7 +74,7 @@
     .winner-event-tag { font-family: 'Orbitron'; font-size: 2.8rem; color: var(--poster-blue); margin-bottom: 5px; text-transform: uppercase; }
     .winner-rank-tag { font-family: 'Orbitron'; font-size: 2rem; color: var(--gold); margin-bottom: 15px; }
     .winner-name-hero { font-family: 'Orbitron'; font-size: 5.5rem; color: #fff; text-transform: uppercase; line-height: 1; margin-bottom: 10px; }
-    .winner-college-tag { font-family: 'Share Tech Mono'; font-size: 1.8rem; color: #aaa; }
+    .winner-college-tag { font-family: 'Share Tech Mono'; font-size: 3.5rem; color: #aaa; }
 
     /* --- TIMELINE SCHEDULE --- */
     #timeline-scroll-container { height: calc(100vh - 350px); overflow-y: scroll; margin-top: 100px; padding-bottom: 500px; scrollbar-width: none; position: relative; }
@@ -135,6 +135,127 @@
     }
     .mini-event-tag { font-family: 'Orbitron'; font-size: 1.4rem; color: var(--poster-blue); margin: 0; text-transform: uppercase; letter-spacing: 1px; }
     .mini-name-hero { font-family: 'Orbitron'; font-size: 2.2rem; color: #fff; margin: 5px 0 0 0; text-transform: uppercase; }
+/* Individual Voter Ticker Animation */
+.voter-ticker-text {
+    display: inline-block;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--poster-blue);
+    text-transform: uppercase;
+    white-space: nowrap;
+    padding-left: 100%;
+    /* Increase time from 12s to 25s because the text is now longer */
+    animation: tickerMove 25s linear infinite; 
+}
+
+@keyframes tickerMove {
+    0%   { transform: translate(0, 0); }
+    100% { transform: translate(-100%, 0); }
+}
+
+/* Adjust the poll item to handle the extra text height */
+.poll-item {
+    background: var(--glass);
+    border-left: 8px solid var(--poster-pink);
+    padding: 15px;
+    border-radius: 0 15px 15px 0;
+    margin-bottom: 15px; /* Added spacing between bars */
+}
+/* Container for the Large Group Layout */
+.winner-marathon.group-layout {
+    flex-direction: column;
+    padding: 0;
+    justify-content: flex-start;
+}
+
+/* Make the frame take up almost the entire stage */
+/* Update this in your CSS block */
+.group-frame {
+    width: 100vw !important;
+    height: 85vh !important;
+    max-width: none !important;
+    position: relative;
+    background: #000;
+    overflow: hidden; /* Crucial to hide the zoomed edges */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.group-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Zoomed 20% (1.2) to give room for the pan */
+    transform: scale(1.0; 
+    object-position: center 30%;
+    /* Apply the panning animation */
+    animation: slowPan 10s ease-in-out infinite alternate;
+}
+
+/* The Panning Logic */
+@keyframes slowPan {
+    0% {
+        transform: scale(1.0) translateX(-5%);
+    }
+    100% {
+        transform: scale(1.0) translateX(5%);
+    }
+}
+
+/* Ensure the overlay stays on top and static */
+.group-overlay-card {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 50%, transparent 100%);
+    padding: 40px 60px;
+    z-index: 10; /* Keep it above the moving image */
+}
+
+/* Scale down the text slightly for the group overlay if needed */
+.group-overlay-card .winner-name-hero {
+    font-size: 4rem;
+    margin: 0;
+}
+
+/* --- UPDATED SCHEDULE STYLING --- */
+/* --- REFINED VENUE STYLING --- */
+.venue-icon {
+    width: 14px !important;
+    height: 14px !important;
+    display: inline-block !important;
+    vertical-align: middle;
+    fill: var(--poster-blue);
+    flex-shrink: 0;
+    margin-right: 4px;
+    /* This prevents the icon from taking up more space than its size */
+    line-height: 1;
+}
+
+.schedule-venue {
+    color: #a0a0a0;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    margin-top: 5px;
+    font-family: 'Share Tech Mono', monospace;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 5px;
+    /* Keeps the row height tight */
+    line-height: 1.2; 
+}
+
+/* Adjusting the card height for the extra info */
+.schedule-card {
+    background: var(--glass);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 25px;
+    width: 450px; /* Slightly wider to accommodate text */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
 </style>
 </head>
 <body>
@@ -207,17 +328,96 @@
             <div class="stage-title">EVENT TIMELINE</div>
             <div id="timeline-scroll-container">
                 <div class="timeline" id="hud-timeline">
-                    <div class="timeline-item left"><div class="timeline-dot"></div><div class="schedule-card"><span class="schedule-time">09:00 AM - 04:00 PM</span><h3 class="schedule-title">Project Expo</h3></div></div>
-                    <div class="timeline-item right"><div class="timeline-dot"></div><div class="schedule-card"><span class="schedule-time">10:00 AM - 11:00 AM</span><h3 class="schedule-title">Pixel Clash</h3></div></div>
-                    <div class="timeline-item left"><div class="timeline-dot"></div><div class="schedule-card"><span class="schedule-time">10:00 AM - 12:00 PM</span><h3 class="schedule-title">Glow Craft</h3></div></div>
-                    <div class="timeline-item right"><div class="timeline-dot"></div><div class="schedule-card"><span class="schedule-time">10:00 AM - 12:00 PM</span><h3 class="schedule-title">TrailBlaze</h3></div></div>
-                    <div class="timeline-item left"><div class="timeline-dot"></div><div class="schedule-card"><span class="schedule-time">10:00 AM - 01:00 PM</span><h3 class="schedule-title">Play Villa</h3></div></div>
-                    <div class="timeline-item right"><div class="timeline-dot"></div><div class="schedule-card"><span class="schedule-time">11:00 AM - 04:00 PM</span><h3 class="schedule-title">Titan Trials</h3></div></div>
-                    <div class="timeline-item left"><div class="timeline-dot"></div><div class="schedule-card"><span class="schedule-time">11:30 AM</span><h3 class="schedule-title">Idea Forum</h3></div></div>
-                    <div class="timeline-item right"><div class="timeline-dot"></div><div class="schedule-card"><span class="schedule-time">01:00 PM - 02:00 PM</span><h3 class="schedule-title">Brain2Bot</h3></div></div>
-                    <div class="timeline-item left"><div class="timeline-dot"></div><div class="schedule-card"><span class="schedule-time">01:00 PM - 03:00 PM</span><h3 class="schedule-title">ReverseX</h3></div></div>
-                    <div class="timeline-item right"><div class="timeline-dot"></div><div class="schedule-card"><span class="schedule-time">02:00 PM - 04:00 PM</span><h3 class="schedule-title">InnoSense</h3></div></div>
-                </div>
+    <div class="timeline-item left"><div class="timeline-dot"></div><div class="schedule-card">
+        <span class="schedule-time">09:00 AM - 04:00 PM</span>
+        <h3 class="schedule-title">Project Expo</h3>
+        <div class="schedule-venue">
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            S6 EC & CT Class Rooms
+        </div>
+    </div></div>
+
+    <div class="timeline-item right"><div class="timeline-dot"></div><div class="schedule-card">
+        <span class="schedule-time">10:00 AM - 11:00 AM</span>
+        <h3 class="schedule-title">Pixel Clash</h3>
+        <div class="schedule-venue">
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            CABM Lab
+        </div>
+    </div></div>
+
+    <div class="timeline-item left"><div class="timeline-dot"></div><div class="schedule-card">
+        <span class="schedule-time">10:00 AM - 12:00 PM</span>
+        <h3 class="schedule-title">Glow Craft</h3>
+        <div class="schedule-venue">
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Embedded System Lab
+        </div>
+    </div></div>
+
+    <div class="timeline-item right"><div class="timeline-dot"></div><div class="schedule-card">
+        <span class="schedule-time">10:00 AM - 12:00 PM</span>
+        <h3 class="schedule-title">TrailBlaze</h3>
+        <div class="schedule-venue">
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Software Lab 2
+        </div>
+    </div></div>
+
+    <div class="timeline-item left"><div class="timeline-dot"></div><div class="schedule-card">
+        <span class="schedule-time">10:00 AM - 01:00 PM</span>
+        <h3 class="schedule-title">Play Villa</h3>
+        <div class="schedule-venue">
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            S6 IE Class Room
+        </div>
+    </div></div>
+
+    <div class="timeline-item right"><div class="timeline-dot"></div><div class="schedule-card">
+        <span class="schedule-time">11:00 AM - 04:00 PM</span>
+        <h3 class="schedule-title">Titan Trials</h3>
+        <div class="schedule-venue">
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Resource Centre
+        </div>
+    </div></div>
+
+    <div class="timeline-item left"><div class="timeline-dot"></div><div class="schedule-card">
+        <span class="schedule-time">11:30 AM</span>
+        <h3 class="schedule-title">Idea Forum</h3>
+        <div class="schedule-venue">
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Mini Auditorium
+        </div>
+    </div></div>
+
+    <div class="timeline-item right"><div class="timeline-dot"></div><div class="schedule-card">
+        <span class="schedule-time">01:00 PM - 02:00 PM</span>
+        <h3 class="schedule-title">Brain2Bot</h3>
+        <div class="schedule-venue">
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Software Lab 1
+        </div>
+    </div></div>
+
+    <div class="timeline-item left"><div class="timeline-dot"></div><div class="schedule-card">
+        <span class="schedule-time">01:00 PM - 03:00 PM</span>
+        <h3 class="schedule-title">ReverseX</h3>
+        <div class="schedule-venue">
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Basic Electronics Lab
+        </div>
+    </div></div>
+
+    <div class="timeline-item right"><div class="timeline-dot"></div><div class="schedule-card">
+        <span class="schedule-time">02:00 PM - 04:00 PM</span>
+        <h3 class="schedule-title">InnoSense</h3>
+        <div class="schedule-venue">
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Software Lab
+        </div>
+    </div></div>
+</div>
             </div>
         </div>
 
@@ -267,18 +467,41 @@ function syncVolumeWithSpotify() {
 // Check every 5 seconds
 setInterval(syncVolumeWithSpotify, 5000);
 
-    function updateMusicPoll() {
-        fetch(`${scriptURL}?action=getAllSongs`).then(res => res.json()).then(songs => {
-            const container = document.getElementById('poll-bars-container');
-            container.innerHTML = '';
-            const sorted = songs.sort((a,b) => b.votes - a.votes).slice(0, 4);
-            const maxVotes = Math.max(...sorted.map(s => s.votes), 1);
-            sorted.forEach((song, i) => {
-                const width = (song.votes / maxVotes) * 100;
-                container.innerHTML += `<div class="poll-item" style="animation-delay:${i*0.1}s"><div class="poll-label"><span>${song.name}</span><span style="color:var(--gold)">${song.votes} VOTES</span></div><div class="progress-track"><div class="progress-fill" style="width:${width}%"></div></div></div>`;
-            });
+   function updateMusicPoll() {
+    fetch(`${scriptURL}?action=getAllSongs`)
+    .then(res => res.json())
+    .then(response => {
+        const container = document.getElementById('poll-bars-container');
+        container.innerHTML = '';
+        
+        // Extract the songs array from the response object
+        const songs = response.songs || []; 
+        const sorted = songs.sort((a,b) => b.votes - a.votes).slice(0, 4);
+        const maxVotes = Math.max(...sorted.map(s => s.votes), 1);
+
+        sorted.forEach((song, i) => {
+            const width = (song.votes / maxVotes) * 100;
+            // Use lastVoter info we added to the Apps Script
+            const voterDisplay = song.lastVoter ? `LATEST VOTE: ${song.lastVoter}` : "WAITING FOR VOTES...";
+
+            container.innerHTML += `
+                <div class="poll-item" style="animation-delay:${i*0.1}s; height: auto; padding-bottom: 10px;">
+                    <div class="poll-label">
+                        <span>${song.name}</span>
+                        <span style="color:var(--gold)">${song.votes} VOTES</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" style="width:${width}%"></div>
+                    </div>
+                    <div style="overflow: hidden; white-space: nowrap; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 4px;">
+                        <div class="voter-ticker-text">
+                            ${voterDisplay}
+                        </div>
+                    </div>
+                </div>`;
         });
-    }
+    });
+}
 
     function checkMusicSignal() {
         fetch(`${scriptURL}?action=checkMusicSignal`).then(res => res.json()).then(data => {
@@ -316,7 +539,7 @@ setInterval(syncVolumeWithSpotify, 5000);
     function smoothScroll() {
         const container = document.getElementById('timeline-scroll-container');
         if (slides[currentSlide] === 'slide-schedule' && container) {
-            scrollPos += 0.8;
+            scrollPos += 1.5;
             container.scrollTop = scrollPos;
             const maxScroll = container.scrollHeight - container.offsetHeight;
             if (scrollPos >= maxScroll + 50) { 
@@ -340,10 +563,9 @@ setInterval(syncVolumeWithSpotify, 5000);
         
         let counter = 0;
         for (let winner of winners) {
-            // CRITICAL CHECK: If the slide has changed, stop immediately
             if (slides[currentSlide] !== 'slide-winners') { 
                 stopAllCeremonyAudio(); 
-                isCyclingWinners = false; // Release the lock
+                isCyclingWinners = false;
                 return; 
             }
 
@@ -356,18 +578,50 @@ setInterval(syncVolumeWithSpotify, 5000);
             const rankInfo = parts[1] ? parts[1].split(':')[1] || "WINNER" : "WINNER";
             const nameOnly = nameCollege.split('(')[0].trim();
             const collegeOnly = nameCollege.includes('(') ? nameCollege.split('(')[1].replace(')', '') : "";
-            const reverseClass = (counter % 2 === 1) ? "reverse" : "";
             
-            marathonArea.innerHTML = `<div class="winner-marathon ${reverseClass}"><div class="winner-info-card"><div class="winner-event-tag">${winner.event}</div><div class="winner-rank-tag">${rankInfo.trim()}</div><div class="winner-name-hero">${nameOnly}</div><div class="winner-college-tag">${collegeOnly}</div></div><div class="winner-frame"><img src="${winner.url}"></div></div>`;
+            // --- NEW: Detect Group/Landscape Layout ---
+            // We create a temporary image object to check dimensions
+            const tempImg = new Image();
+            tempImg.src = winner.url;
+            await tempImg.decode(); // Wait for image to load to get dimensions
+            const isLandscape = tempImg.width > tempImg.height;
+
+            if (isLandscape) {
+                // LARGE GROUP LAYOUT
+                // Inside the isLandscape block
+marathonArea.innerHTML = `
+    <div class="winner-marathon group-layout">
+        <div class="winner-frame group-frame">
+            <img src="${winner.url}">
+            <div class="group-overlay-card">
+                <div class="winner-event-tag" style="color:var(--gold)">${winner.event}</div>
+                <div class="winner-rank-tag">${rankInfo.trim()}</div>
+                <div class="winner-name-hero">${nameOnly}</div>
+                <div class="winner-college-tag">${collegeOnly}</div>
+            </div>
+        </div>
+    </div>`;
+            } else {
+                // STANDARD SINGLE LAYOUT
+                const reverseClass = (counter % 2 === 1) ? "reverse" : "";
+                marathonArea.innerHTML = `
+                    <div class="winner-marathon ${reverseClass}">
+                        <div class="winner-info-card">
+                            <div class="winner-event-tag">${winner.event}</div>
+                            <div class="winner-rank-tag">${rankInfo.trim()}</div>
+                            <div class="winner-name-hero">${nameOnly}</div>
+                            <div class="winner-college-tag">${collegeOnly}</div>
+                        </div>
+                        <div class="winner-frame">
+                            <img src="${winner.url}">
+                        </div>
+                    </div>`;
+            }
             
             triggerFullConfetti();
             counter++;
-            
-            // Wait for 10 seconds before showing the next winner
             await new Promise(r => setTimeout(r, 10000));
         }
-        
-        // Final stop when the list is finished
         stopAllCeremonyAudio();
         isCyclingWinners = false;
     }
@@ -540,7 +794,31 @@ const slides = [
     fetchLiveData();
     setInterval(fetchLiveData, 10000);
     setInterval(checkMusicSignal, 3000);
-    setInterval(rotateSlides, 25000);
+   // Remove the old setInterval(rotateSlides, 25000);
+// Use this custom function to handle variable slide times:
+
+function startCustomRotation() {
+    let slideTime = 25000; // Default 25 seconds for most slides
+
+    // Increase time if the NEXT slide is Music or Photos
+    const nextSlideName = slides[currentSlide]; 
+    
+    if (nextSlideName === 'slide-music') {
+        slideTime = 60000; // Stay for 60 seconds on the Music Voting slide
+    } else if (nextSlideName === 'slide-winners') {
+        // Winners slide timing is handled by the startWinnerMarathon function
+        // so we don't need a high number here, but let's keep it safe
+        slideTime = 30000; 
+    }
+
+    setTimeout(() => {
+        rotateSlides();
+        startCustomRotation(); // Recurse with new timing
+    }, slideTime);
+}
+
+// Start the sequence
+startCustomRotation();
     requestAnimationFrame(smoothScroll);
 
     setInterval(() => {
