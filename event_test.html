@@ -218,21 +218,23 @@
                     // Build Checkboxes
                     const container = document.getElementById('event-checkbox-container');
                     container.innerHTML = "";
-                    const registered = data.events.split(',').map(e => e.trim());
-                    
-                    let count = 0;
-                    MASTER_EVENT_LIST.forEach((evt, i) => {
-                        if (!registered.includes(evt)) {
-                            const item = document.createElement('div');
-                            item.className = "event-item";
-                            item.innerHTML = `
-                                <input type="checkbox" class="event-chk-input" value="${evt}" id="chk_${i}" onchange="updateCount()">
-                                <label for="chk_${i}" style="width:100%; cursor:pointer;">${evt}</label>
-                            `;
-                            container.appendChild(item);
-                            count++;
-                        }
-                    });
+                   // Replace the checkbox loop inside handleData in your HTML
+const registered = data.events.split(',').map(e => e.trim().toLowerCase()); // Cleaned array
+
+let count = 0;
+MASTER_EVENT_LIST.forEach((evt, i) => {
+    // Case-insensitive check to see if they are already registered
+    if (!registered.includes(evt.trim().toLowerCase())) {
+        const item = document.createElement('div');
+        item.className = "event-item";
+        item.innerHTML = `
+            <input type="checkbox" class="event-chk-input" value="${evt}" id="chk_${i}" onchange="updateCount()">
+            <label for="chk_${i}" style="width:100%; cursor:pointer; margin-bottom:0; padding-left:10px;">${evt}</label>
+        `;
+        container.appendChild(item);
+        count++;
+    }
+});
 
                     const qrArea = document.getElementById("qr-preview-area");
                     qrArea.innerHTML = "";
