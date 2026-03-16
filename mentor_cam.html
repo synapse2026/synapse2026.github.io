@@ -4,195 +4,177 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MENTOR CAM | SYNAPSE 2026</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
-        :root { --neon-blue: #1fc1d1; --neon-pink: #d11fb7; --dark-bg: #07060f; }
-        body { background: var(--dark-bg); color: #fff; font-family: 'Rajdhani', sans-serif; min-height: 100vh; overflow-x: hidden; }
-        .hero-title { font-family: 'Orbitron'; color: var(--neon-blue); text-align: center; margin-top: 20px; letter-spacing: 2px; text-shadow: 0 0 10px var(--neon-blue); }
+        :root { --neon-blue: #1fc1d1; --neon-pink: #d11fb7; --dark-bg: #07060f; --glass: rgba(255, 255, 255, 0.05); }
         
-        /* Camera Container - 3:4 Vertical */
-        #camera-container { 
-            width: 90%; 
-            max-width: 450px; 
-            margin: 20px auto; 
-            border: 2px solid rgba(255,255,255,0.1); 
-            border-radius: 20px; 
-            overflow: hidden; 
-            position: relative; 
-            aspect-ratio: 3/4; 
-            background: #000; 
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
-        }
+        body, html { margin: 0; padding: 0; min-height: 100vh; background-color: var(--dark-bg); color: #fff; font-family: 'Rajdhani', sans-serif; overflow-x: hidden; }
 
+        /* Background Particles */
+        #particles-js { position: fixed; width: 100%; height: 100%; z-index: 1; top: 0; left: 0; pointer-events: none; }
+
+        .content-wrapper { position: relative; z-index: 10; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+
+        .hero-title { font-family: 'Orbitron'; color: var(--neon-blue); text-align: center; font-weight: 900; letter-spacing: 3px; text-shadow: 0 0 15px var(--neon-blue); margin-bottom: 5px; }
+        .sub-tag { font-size: 0.8rem; color: var(--neon-pink); font-family: 'Orbitron'; letter-spacing: 2px; margin-bottom: 30px; }
+
+        /* Setup Card */
+        #setup-form { background: var(--glass); border: 2px solid var(--neon-blue); padding: 30px; border-radius: 20px; backdrop-filter: blur(15px); width: 100%; max-width: 400px; box-shadow: 0 0 30px rgba(31, 193, 209, 0.2); }
+
+        .form-label { font-family: 'Orbitron'; font-size: 0.75rem; color: var(--neon-blue); margin-bottom: 8px; letter-spacing: 1px; }
+        .form-control, .form-select { background: rgba(0, 0, 0, 0.6) !important; border: 1px solid rgba(31, 193, 209, 0.3) !important; color: #fff !important; font-family: 'Rajdhani'; padding: 12px; margin-bottom: 20px; font-weight: 600; }
+        .form-control:focus, .form-select:focus { border-color: var(--neon-pink) !important; box-shadow: 0 0 15px var(--neon-pink) !important; outline: none; }
+
+        /* Camera UI */
+        #camera-container { width: 100%; max-width: 400px; margin: 10px auto; border: 3px solid var(--neon-pink); border-radius: 20px; overflow: hidden; position: relative; aspect-ratio: 3/4; background: #000; box-shadow: 0 0 40px rgba(209, 31, 183, 0.4); }
         video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
         #preview-img { width: 100%; height: 100%; object-fit: contain; display: none; position: relative; z-index: 50; }
 
-        /* --- PROFESSIONAL VIEWFINDER --- */
-        .viewfinder-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 10;
-            /* Creates the darkened crop area */
-            border: 35px solid rgba(0, 0, 0, 0.6); 
-        }
+        /* Viewfinder */
+        .viewfinder-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; border: 35px solid rgba(0, 0, 0, 0.7); }
+        .viewfinder-frame { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 2px solid var(--neon-pink); }
+        .scan-line { position: absolute; width: 100%; height: 2px; background: var(--neon-blue); box-shadow: 0 0 15px var(--neon-blue); top: 0; animation: scanMove 3s linear infinite; }
 
-        .viewfinder-frame {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            border: 2px solid var(--neon-pink);
-            box-shadow: inset 0 0 20px rgba(209, 31, 183, 0.2);
-        }
+        @keyframes scanMove { 0% { top: 0%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
 
-        .scan-line {
-            position: absolute;
-            width: 100%; height: 2px;
-            background: var(--neon-blue);
-            box-shadow: 0 0 15px var(--neon-blue);
-            top: 0;
-            animation: scanMove 4s linear infinite;
-        }
+        /* Buttons */
+        .btn-action { background: linear-gradient(135deg, var(--neon-blue), #741fd1); color: white; font-family: 'Orbitron'; font-weight: 700; border: none; padding: 15px; border-radius: 12px; box-shadow: 0 0 20px rgba(31, 193, 209, 0.4); width: 100%; transition: 0.3s; }
+        .btn-capture { background: linear-gradient(135deg, var(--neon-pink), #741fd1); box-shadow: 0 0 20px rgba(209, 31, 183, 0.4); margin-top: 15px; }
+        .btn-action:active { transform: scale(0.95); }
 
-        @keyframes scanMove {
-            0% { top: 0%; opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { top: 100%; opacity: 0; }
-        }
-
-        /* Capture UI */
-        .btn-capture { background: linear-gradient(135deg, var(--neon-pink), #741fd1); color: white; font-family: 'Orbitron'; font-weight: 700; border: none; padding: 18px; border-radius: 50px; box-shadow: 0 0 25px rgba(209, 31, 183, 0.4); transition: 0.3s; margin-top: 15px; }
-        .btn-capture:active { transform: scale(0.92); }
-        .form-control, .form-select { background: rgba(255,255,255,0.05) !important; border: 1px solid var(--neon-blue) !important; color: #fff !important; margin-bottom: 12px; padding: 12px; }
-        
-        /* Flash Effect */
         .flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; pointer-events: none; z-index: 9999; }
         @keyframes cameraFlash { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
         
-        .retake-link { color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.9rem; margin-top: 15px; display: inline-block; }
+        .size-indicator { font-size: 0.8rem; color: var(--neon-blue); margin-top: 10px; font-family: 'Orbitron'; text-align: center; }
     </style>
 </head>
 <body>
+    <div id="particles-js"></div>
     <div id="flash-effect" class="flash"></div>
 
-    <div class="container py-4">
-        <h2 class="hero-title">MENTOR CAM</h2>
-        <p class="text-center text-white-50 small mb-4">ULTRA-HD SELFIE PORTAL</p>
+    <div class="content-wrapper">
+        <h1 class="hero-title animate__animated animate__fadeInDown">SYNAPSE '26</h1>
+        <p class="sub-tag animate__animated animate__fadeInUp">MENTOR SELFIE PORTAL</p>
         
-        <div id="setup-form" class="px-3">
-            <input type="text" id="stuName" class="form-control" placeholder="STUDENT NAME">
+        <div id="setup-form" class="animate__animated animate__zoomIn">
+            <label class="form-label">FULL NAME</label>
+            <input type="text" id="stuName" class="form-control" placeholder="Enter Name...">
+            
+            <label class="form-label">DEPARTMENT</label>
             <select id="stuDept" class="form-select">
-                <option value="" disabled selected>DEPARTMENT</option>
-                <option value="CT">CT</option>
-                <option value="EC">EC</option>
-                <option value="IE">IE</option>
+                <option value="" disabled selected>Select Department</option>
+                <option value="CT">Computer Engineering (CT)</option>
+                <option value="EC">Electronics (EC)</option>
+                <option value="IE">Instrumentation (IE)</option>
                 <option value="CABM">CABM</option>
+                <option value="Other">Other</option>
             </select>
-            <input type="text" id="stuSem" class="form-control" placeholder="SEMESTER (e.g., S6)">
-            <button onclick="startCam()" class="btn btn-info w-100 py-3 fw-bold mt-2">INITIALIZE CAMERA</button>
+
+            <label class="form-label">SEMESTER</label>
+            <select id="stuSem" class="form-select">
+                <option value="" disabled selected>Select Sem</option>
+                <option value="S1">S1</option><option value="S2">S2</option>
+                <option value="S3">S3</option><option value="S4">S4</option>
+                <option value="S5">S5</option><option value="S6">S6</option>
+            </select>
+
+            <button onclick="startCam()" class="btn-action">INITIALIZE CAMERA</button>
         </div>
 
-        <div id="cam-ui" style="display:none;">
+        <div id="cam-ui" style="display:none; width: 100%; max-width: 400px;">
             <div id="camera-container">
                 <video id="video" autoplay playsinline></video>
-                
                 <div id="viewfinder-ui" class="viewfinder-overlay">
-                    <div class="viewfinder-frame">
-                        <div class="scan-line"></div>
-                    </div>
+                    <div class="viewfinder-frame"><div class="scan-line"></div></div>
                 </div>
-                
                 <img id="preview-img">
             </div>
             
-            <div class="text-center px-4">
-                <button id="captureBtn" onclick="takePhoto()" class="btn btn-capture w-100">📸 CAPTURE MOMENT</button>
-                
-                <div id="upload-controls" style="display:none;">
-                    <button id="uploadBtn" onclick="uploadPhoto()" class="btn btn-success w-100 py-3 fw-bold mt-3">📤 UPLINK TO LIVE HUD</button>
-                    <a href="javascript:location.reload()" class="retake-link">← Not happy? Retake photo</a>
-                </div>
+            <button id="captureBtn" onclick="takePhoto()" class="btn-action btn-capture">📸 SNAP SELFIE</button>
+            
+            <div id="upload-controls" style="display:none;">
+                <div id="file-info" class="size-indicator"></div>
+                <button id="uploadBtn" onclick="uploadPhoto()" class="btn-action mt-3" style="background: #28a745; box-shadow: 0 0 20px rgba(40, 167, 69, 0.4);">📤 UPLINK TO HUD</button>
+                <button onclick="location.reload()" class="btn btn-link text-white-50 w-100 mt-2 text-decoration-none small">Retake Photo</button>
             </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script>
+        // Match Registration Page Particles
+        particlesJS("particles-js", {
+            "particles": {
+                "number": { "value": 50 },
+                "color": { "value": ["#d11fb7", "#1fc1d1"] },
+                "opacity": { "value": 0.4 },
+                "size": { "value": 3 },
+                "line_linked": { "enable": true, "distance": 150, "color": "#1fc1d1", "opacity": 0.2, "width": 1 },
+                "move": { "enable": true, "speed": 2 }
+            }
+        });
+
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzb97bG3GTT1wMH7M9j8RDXkoqoFD_MWXFkUZS0przdUO51s-7Zyutn0FbRSRnjjH8X5A/exec";
         let stream;
 
         async function startCam() {
             const name = document.getElementById('stuName').value;
-            if(!name) return alert("Please enter your name");
+            const dept = document.getElementById('stuDept').value;
+            const sem = document.getElementById('stuSem').value;
+            if(!name || !dept || !sem) return alert("Please fill all fields!");
 
             document.getElementById('setup-form').style.display = 'none';
             document.getElementById('cam-ui').style.display = 'block';
 
             try {
-                // Request maximum raw hardware resolution
-                const constraints = { 
-                    video: { 
-                        facingMode: "user", 
-                        width: { ideal: 4096 }, 
-                        height: { ideal: 2160 } 
-                    } 
-                };
-                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "user", width: { ideal: 1920 }, height: { ideal: 1080 } } 
+                });
                 document.getElementById('video').srcObject = stream;
             } catch (err) {
-                // Fallback to standard HD if 4K fails
-                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
-                document.getElementById('video').srcObject = stream;
+                alert("Camera error: " + err.message);
             }
         }
 
         function takePhoto() {
-            // Screen Flash
             const flash = document.getElementById('flash-effect');
             flash.style.animation = 'cameraFlash 0.3s';
             setTimeout(() => { flash.style.animation = ''; }, 300);
 
             const video = document.getElementById('video');
             const canvas = document.createElement('canvas');
-            
-            // ULTRA RESOLUTION: 2160 x 2880 (6.2 Megapixels)
-            canvas.width = 2160;
-            canvas.height = 2880;
+            canvas.width = 1200;
+            canvas.height = 1600;
             const ctx = canvas.getContext('2d');
 
-            // Exact center-crop math for 3:4 ratio
             const vW = video.videoWidth;
             const vH = video.videoHeight;
             const targetAspect = 3/4;
             let sX, sY, sW, sH;
 
             if ((vW/vH) > targetAspect) {
-                sW = vH * targetAspect;
-                sH = vH;
-                sX = (vW - sW) / 2;
-                sY = 0;
+                sW = vH * targetAspect; sH = vH; sX = (vW - sW) / 2; sY = 0;
             } else {
-                sW = vW;
-                sH = vW / targetAspect;
-                sX = 0;
-                sY = (vH - sH) / 2;
+                sW = vW; sH = vW / targetAspect; sX = 0; sY = (vH - sH) / 2;
             }
 
-            // Mirror image and draw at High Quality
             ctx.translate(canvas.width, 0);
             ctx.scale(-1, 1);
-            ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = 'high';
-            
             ctx.drawImage(video, sX, sY, sW, sH, 0, 0, canvas.width, canvas.height);
             
-            // Switch UI to preview mode
+            // Dynamic compression to stay < 600KB
+            let quality = 0.6;
+            let dataUrl = canvas.toDataURL('image/jpeg', quality);
+            let sizeInKB = Math.round((dataUrl.length * 3 / 4) / 1024);
+            
+            document.getElementById('file-info').innerText = `OPTIMIZED FOR HUD: ${sizeInKB} KB`;
             video.style.display = 'none';
             document.getElementById('viewfinder-ui').style.display = 'none';
             const preview = document.getElementById('preview-img');
-            preview.src = canvas.toDataURL('image/jpeg', 0.95);
+            preview.src = dataUrl;
             preview.style.display = 'block';
-            
             document.getElementById('captureBtn').style.display = 'none';
             document.getElementById('upload-controls').style.display = 'block';
         }
@@ -200,11 +182,9 @@
         async function uploadPhoto() {
             const btn = document.getElementById('uploadBtn');
             btn.disabled = true; 
-            btn.innerText = "UPLINKING ULTRA-HD DATA...";
+            btn.innerText = "UPLINKING DATA...";
             
-            const rawImg = document.getElementById('preview-img').src;
-            const blob = rawImg.split(',')[1];
-            
+            const blob = document.getElementById('preview-img').src.split(',')[1];
             const meta = {
                 name: document.getElementById('stuName').value,
                 dept: document.getElementById('stuDept').value,
@@ -216,10 +196,10 @@
                 mode: "no-cors",
                 body: JSON.stringify({ action: "mentorSelfie", img: blob, ...meta })
             }).then(() => {
-                alert("Selfie Uplinked! It will appear on the HUD shortly.");
+                alert("Selfie Uplinked! Check the Dashboard.");
                 location.reload();
-            }).catch(err => {
-                alert("Network error. Please try again.");
+            }).catch(() => {
+                alert("Network error.");
                 btn.disabled = false;
                 btn.innerText = "RETRY UPLINK";
             });
