@@ -160,31 +160,30 @@
     canvas.height = 1440;
     const ctx = canvas.getContext('2d');
 
-    // --- UPDATED ROTATION & MIRROR LOGIC ---
+    // --- UPDATED ROTATION & VERTICAL FLIP LOGIC ---
     // 1. Move to the center of the canvas
     ctx.translate(canvas.width / 2, canvas.height / 2);
     
     // 2. Rotate the canvas to match the landscape UI
     ctx.rotate(90 * Math.PI / 180); 
     
-    // 3. Mirror the image HORIZONTALLY (scale -1 on the X-axis)
-    // This is applied relative to the rotation we just did.
-    ctx.scale(-1, 1);
+    // 3. APPLY VERTICAL FLIP (scale -1 on the Y-axis)
+    // We use (1, -1) to flip vertically relative to the current rotation.
+    ctx.scale(1, -1);
     
     // 4. Draw the image, offset back to the center
-    // We swap width/height here because of the 90deg rotation
+    // We swap width/height here because of the 90deg turn
     ctx.drawImage(video, -canvas.height / 2, -canvas.width / 2, canvas.height, canvas.width);
     
     const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
     
-    // Update UI
+    // UI Update
     video.style.display = 'none';
     const preview = document.getElementById('preview-img');
     preview.src = dataUrl;
     preview.style.display = 'block';
     
-    // The preview is now based on the final, correctly oriented image,
-    // so we make sure the preview IMG element itself isn't being mirrored/rotated.
+    // Reset preview transform
     preview.style.transform = 'none'; 
     
     document.getElementById('captureBtn').style.display = 'none';
