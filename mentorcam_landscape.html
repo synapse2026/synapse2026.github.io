@@ -146,41 +146,45 @@
             } catch (err) { alert("Camera Error: " + err.message); }
         }
 
-        function takePhoto() {
-            // Flash Effect
-            const flash = document.getElementById('flash-effect');
-            flash.style.opacity = '1';
-            setTimeout(() => { flash.style.opacity = '0'; }, 150);
+       function takePhoto() {
+    // Flash Effect
+    const flash = document.getElementById('flash-effect');
+    flash.style.opacity = '1';
+    setTimeout(() => { flash.style.opacity = '0'; }, 150);
 
-            const video = document.getElementById('video');
-            const canvas = document.createElement('canvas');
-            
-            // Hardcoded 2K Landscape dimensions
-            canvas.width = 2560;
-            canvas.height = 1440;
-            const ctx = canvas.getContext('2d');
+    const video = document.getElementById('video');
+    const canvas = document.createElement('canvas');
+    
+    // Hardcoded 2K Landscape dimensions
+    canvas.width = 2560;
+    canvas.height = 1440;
+    const ctx = canvas.getContext('2d');
 
-            // --- CRITICAL ROTATION FIX ---
-            // Sensors are vertical, we need to draw it horizontal
-            ctx.translate(canvas.width / 2, canvas.height / 2);
-            ctx.rotate(90 * Math.PI / 180); 
-            ctx.scale(-1, 1); // Fix Mirroring
-            
-            // Draw swapping width/height due to 90deg rotation
-            ctx.drawImage(video, -canvas.height / 2, -canvas.width / 2, canvas.height, canvas.width);
-            
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
-            
-            // Update UI
-            video.style.display = 'none';
-            const preview = document.getElementById('preview-img');
-            preview.src = dataUrl;
-            preview.style.display = 'block';
-            
-            document.getElementById('captureBtn').style.display = 'none';
-            document.getElementById('upload-group').style.display = 'flex';
-            document.getElementById('status-text').innerText = "SNAP SECURED";
-        }
+    // --- UPDATED ROTATION LOGIC (NO FLIP) ---
+    // Move to center
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    
+    // Rotate to match the landscape UI
+    ctx.rotate(90 * Math.PI / 180); 
+    
+    // IMPORTANT: Removed scale(-1, 1) to prevent the "flipped" look on upload
+    // If the image is upside down, change 90 to -90 above.
+    
+    // Draw image swapping width/height due to 90deg rotation
+    ctx.drawImage(video, -canvas.height / 2, -canvas.width / 2, canvas.height, canvas.width);
+    
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+    
+    // Update UI
+    video.style.display = 'none';
+    const preview = document.getElementById('preview-img');
+    preview.src = dataUrl;
+    preview.style.display = 'block';
+    
+    document.getElementById('captureBtn').style.display = 'none';
+    document.getElementById('upload-group').style.display = 'flex';
+    document.getElementById('status-text').innerText = "SNAP SECURED";
+}
 
         async function uploadPhoto() {
             document.getElementById('status-text').innerText = "UPLINKING...";
