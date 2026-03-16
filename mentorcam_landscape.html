@@ -29,16 +29,20 @@
         }
 
         /* --- THE ROTATION MAGIC --- */
+        /* This forces the UI to be horizontal even if phone is vertical */
         .landscape-mode {
-            position: fixed; top: 0; left: 0; width: 100vh; height: 100vw;
-            transform: rotate(90deg); transform-origin: top left;
-            left: 100vw; z-index: 100; background: var(--dark-bg);
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100vh; height: 100vw; /* Swap dimensions */
+            transform: rotate(90deg) translateY(-100vw);
+            transform-origin: top left;
+            z-index: 100; background: var(--dark-bg);
             display: none; flex-direction: row; align-items: center; justify-content: center;
             padding: 20px; box-sizing: border-box;
         }
 
         #camera-container { 
-            width: 75%; aspect-ratio: 16 / 9; 
+            width: 70%; aspect-ratio: 16 / 9; 
             border: 4px solid var(--neon-pink); border-radius: 15px; 
             overflow: hidden; position: relative; background: #000;
             display: flex; align-items: center; justify-content: center;
@@ -46,7 +50,7 @@
 
         video { 
             min-width: 100%; min-height: 100%; 
-            /* Fix: Rotate video element to stand upright in the sideways container */
+            /* Rotate the stream to match the horizontal frame */
             transform: rotate(-90deg) scaleX(-1); 
             object-fit: cover; 
         }
@@ -57,26 +61,23 @@
         }
 
         .controls-sidebar {
-            width: 25%; display: flex; flex-direction: column; 
-            gap: 15px; padding-left: 20px; align-items: center;
+            width: 30%; display: flex; flex-direction: column; 
+            gap: 15px; padding-left: 30px; align-items: center;
         }
 
         .btn-capture { 
             background: linear-gradient(135deg, var(--neon-pink), #741fd1); 
             font-family: 'Orbitron'; font-weight: 700; border: none; padding: 20px; 
-            border-radius: 50%; width: 80px; height: 80px; font-size: 1.5rem;
-            box-shadow: 0 0 20px var(--neon-pink);
+            border-radius: 50%; width: 90px; height: 90px; font-size: 1.8rem;
+            box-shadow: 0 0 30px var(--neon-pink);
         }
 
         .btn-upload {
             background: #28a745; font-family: 'Orbitron'; border: none;
-            padding: 12px; border-radius: 10px; color: #fff; font-weight: bold; width: 100%;
+            padding: 15px; border-radius: 10px; color: #fff; font-weight: bold; width: 100%;
         }
 
-        .viewfinder-overlay { position: absolute; inset: 0; border: 2px solid var(--neon-blue); pointer-events: none; z-index: 5; }
-        
         .form-control, .form-select { background: rgba(0, 0, 0, 0.6) !important; color: #fff !important; border: 1px solid #444; margin-bottom: 15px; }
-
         .flash { position: fixed; inset: 0; background: white; opacity: 0; pointer-events: none; z-index: 9999; }
     </style>
 </head>
@@ -85,10 +86,10 @@
     <div id="flash-effect" class="flash"></div>
 
     <div class="setup-wrapper" id="vertical-ui">
-        <h2 style="font-family:'Orbitron'; color:var(--neon-blue); margin-bottom:10px;">SYNAPSE '26</h2>
-        <p style="color:var(--neon-pink); font-family:'Orbitron'; font-size:0.8rem; margin-bottom:20px;">MENTOR PORTAL</p>
+        <h1 style="font-family:'Orbitron'; color:var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue);">SYNAPSE '26</h1>
+        <p style="color:var(--neon-pink); font-family:'Orbitron'; letter-spacing: 2px;">MENTOR PORTAL</p>
         <div id="setup-form">
-            <input type="text" id="stuName" class="form-control" placeholder="FULL NAME">
+            <input type="text" id="stuName" class="form-control" placeholder="STUDENT NAME">
             <select id="stuDept" class="form-select">
                 <option value="" disabled selected>BRANCH</option>
                 <option value="CT">Computer Engineering</option>
@@ -102,24 +103,23 @@
                 <option value="S3">S3</option><option value="S4">S4</option>
                 <option value="S5">S5</option><option value="S6">S6</option>
             </select>
-            <button onclick="switchToLandscape()" class="btn btn-info w-100 fw-bold py-3" style="font-family:'Orbitron'">OPEN CAMERA</button>
+            <button onclick="switchToLandscape()" class="btn btn-info w-100 fw-bold py-3" style="font-family:'Orbitron'">ACTIVATE CAM</button>
         </div>
     </div>
 
     <div class="landscape-mode" id="horizontal-ui">
         <div id="camera-container">
             <video id="video" autoplay playsinline></video>
-            <div class="viewfinder-overlay"></div>
             <img id="preview-img">
         </div>
 
         <div class="controls-sidebar">
-            <div id="status-text" style="font-size:0.7rem; color:var(--neon-blue); font-family:'Orbitron'; text-align:center;">STABILIZING...</div>
+            <div id="status-text" style="font-size:0.9rem; color:var(--neon-blue); font-family:'Orbitron'; margin-bottom:10px;">READY</div>
             <button id="captureBtn" onclick="takePhoto()" class="btn-capture">📸</button>
             
-            <div id="upload-group" style="display:none; flex-direction:column; gap:10px; width:100%;">
+            <div id="upload-group" style="display:none; flex-direction:column; gap:12px; width:100%;">
                 <button onclick="uploadPhoto()" class="btn-upload">UPLINK 2K</button>
-                <button onclick="location.reload()" class="btn btn-sm btn-outline-light">RETAKE</button>
+                <button onclick="location.reload()" class="btn btn-outline-light">RETAKE</button>
             </div>
         </div>
     </div>
@@ -130,7 +130,7 @@
         let stream;
 
         async function switchToLandscape() {
-            if(!document.getElementById('stuName').value) return alert("Enter name!");
+            if(!document.getElementById('stuName').value) return alert("Please enter name!");
             document.getElementById('vertical-ui').style.display = 'none';
             document.getElementById('horizontal-ui').style.display = 'flex';
             startCam();
@@ -138,15 +138,16 @@
 
         async function startCam() {
             try {
+                // Request max resolution
                 stream = await navigator.mediaDevices.getUserMedia({ 
                     video: { facingMode: "user", width: { ideal: 3840 }, height: { ideal: 2160 } } 
                 });
                 document.getElementById('video').srcObject = stream;
-                document.getElementById('status-text').innerText = "READY";
             } catch (err) { alert("Camera Error: " + err.message); }
         }
 
         function takePhoto() {
+            // Flash Effect
             const flash = document.getElementById('flash-effect');
             flash.style.opacity = '1';
             setTimeout(() => { flash.style.opacity = '0'; }, 150);
@@ -154,21 +155,23 @@
             const video = document.getElementById('video');
             const canvas = document.createElement('canvas');
             
-            // 2K LANDSCAPE SPECS
+            // Hardcoded 2K Landscape dimensions
             canvas.width = 2560;
             canvas.height = 1440;
             const ctx = canvas.getContext('2d');
 
-            // --- THE ROTATION CORRECTION ---
+            // --- CRITICAL ROTATION FIX ---
+            // Sensors are vertical, we need to draw it horizontal
             ctx.translate(canvas.width / 2, canvas.height / 2);
-            ctx.rotate(90 * Math.PI / 180); // Correct for mobile sensor
-            ctx.scale(-1, 1); // Mirror correction
-
-            // Draw image swapping width/height due to 90deg turn
+            ctx.rotate(90 * Math.PI / 180); 
+            ctx.scale(-1, 1); // Fix Mirroring
+            
+            // Draw swapping width/height due to 90deg rotation
             ctx.drawImage(video, -canvas.height / 2, -canvas.width / 2, canvas.height, canvas.width);
             
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
             
+            // Update UI
             video.style.display = 'none';
             const preview = document.getElementById('preview-img');
             preview.src = dataUrl;
