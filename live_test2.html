@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYNAPSE 2026 | LIVE HUD</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+    /* --- CORE ROOT & BASE STYLES --- */
+    :root { --poster-pink: #d11fb7; --poster-blue: #1fc1d1; --poster-purple: #741fd1; --bg: #07060f; --glass: rgba(15, 12, 41, 0.85); --gold: #ffea00; }
+    body, html { margin: 0; padding: 0; min-height: 100vh; background: var(--bg); color: #fff; font-family: 'Share Tech Mono', monospace; overflow: hidden; }
+    #particles-js { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+    .scanline { position: fixed; top: 0; left: 0; width: 100%; height: 10px; background: rgba(31, 193, 209, 0.05); z-index: 10; animation: scan 8s linear infinite; pointer-events: none; }
+    @keyframes scan { from { top: -10%; } to { top: 110%; } }
+
+    .college-header { background: rgba(0, 0, 0, 0.9); text-align: center; padding: 15px; border-bottom: 3px solid var(--gold); font-family: 'Orbitron'; font-size: clamp(1rem, 2vw, 2.5rem); color: var(--gold); text-transform: uppercase; z-index: 100; position: relative; letter-spacing: 4px; }
+    .dashboard { display: grid; grid-template-rows: auto 1fr 120px; height: calc(100vh - 55px); gap: 10px; padding: 15px; box-sizing: border-box; position: relative; z-index: 1; }
+
+    .header { background: var(--glass); border: 2px solid var(--poster-blue); display: flex; align-items: center; justify-content: space-between; padding: 15px 40px; z-index: 20; }
+    .logo { font-family: 'Orbitron'; font-size: 3.5rem; font-weight: 900; color: var(--poster-blue); text-shadow: 0 0 20px var(--poster-blue); }
+    .flip-clock { display: flex; gap: 5px; align-items: center; }
+    .flip-card { position: relative; width: 55px; height: 85px; background: #111; border-radius: 6px; font-family: 'Orbitron'; font-size: 3.5rem; font-weight: 900; color: #fff; text-align: center; line-height: 85px; border: 1px solid #444; }
+    .am-pm { font-size: 1.4rem; margin-left: 10px; color: var(--poster-blue); font-weight: bold; }
+
+    .stats-overlay { position: absolute; top: 25px; right: 25px; z-index: 50; display: flex; gap: 15px; }
+    .stat-card { background: var(--glass); border: 2px solid var(--poster-pink); padding: 12px 25px; border-radius: 12px; backdrop-filter: blur(8px); min-width: 140px; text-align: center; }
+    .stat-val { font-family: 'Orbitron'; font-size: 3rem; color: #fff; text-shadow: 0 0 15px var(--poster-pink); line-height: 1; }
+
+    .stage { position: relative; background: transparent; overflow: hidden; border-radius: 15px; }
+    .slide { position: absolute; inset: 0; padding: 30px; opacity: 0; transition: opacity 0.5s; visibility: hidden; }
+    .slide.active { opacity: 1; visibility: visible; z-index: 5; }
+    .stage-title { position: absolute; top: 30px; left: 30px; font-family: 'Orbitron'; font-size: 2.5rem; color: var(--poster-blue); z-index: 10; background: rgba(0,0,0,0.7); padding: 10px 25px; border-left: 8px solid var(--poster-blue); letter-spacing: 2px; }
+
+    /* --- NOW PLAYING POPUP --- */
+    .now-playing {
+        position: fixed; bottom: 130px; left: 30px;
+        transform: translateX(-120%);
+        background: rgba(0, 0, 0, 0.95);
+        border: 2px solid var(--poster-blue);
+        padding: 25px; border-radius: 15px;
+        display: flex; flex-direction: column; gap: 8px;
+        transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        z-index: 9999;
+        box-shadow: 0 0 30px rgba(31, 193, 209, 0.4);
+        width: 450px;
+        border-left: 10px solid var(--poster-blue);
+        animation: borderGlow 4s infinite;
+    }
+    .now-playing.active { transform: translateX(0); }
+    @keyframes borderGlow {
+        0%, 100% { border-color: var(--poster-blue); box-shadow: 0 0 20px var(--poster-blue); }
+        50% { border-color: var(--poster-pink); box-shadow: 0 0 20px var(--poster-pink); }
+    }
+    .np-label { color: var(--gold); font-family: 'Orbitron'; font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase; }
+    #np-song { font-family: 'Orbitron'; font-size: 2.2rem; color: #fff; text-transform: uppercase; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #np-artist { color: var(--poster-blue); font-size: 1.4rem; font-weight: bold; }
+    .np-time { font-family: 'Share Tech Mono'; color: #888; font-size: 1.1rem; border-top: 1px solid #333; padding-top: 8px; margin-top: 5px; display: flex; justify-content: space-between; }
+
+    /* --- DJ POLL (SCALED 50% & QR 100%) --- */
+    .poll-layout {
+        display: grid;
+        grid-template-columns: 1fr 500px;
+        gap: 60px;
+        height: 80%;
+        margin-top: 100px;
+    }
+
+    .poll-bars {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        align-content: center;
+    }
+
+    .poll-item {
+        background: var(--glass);
+        border-left: 12px solid var(--poster-pink);
+        padding: 22px;
+        border-radius: 0 20px 20px 0;
+        margin-bottom: 22px;
+        animation: slideIn 0.5s ease-out forwards;
+        opacity: 0;
+    }
+
+    @keyframes slideIn { from { transform: translateX(-30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    .poll-label {
+        display: flex;
+        justify-content: space-between;
+        font-family: 'Orbitron';
+        margin-bottom: 12px;
+        font-size: 1.65rem;
+        color: #fff;
+        text-shadow: 0 0 10px rgba(209, 31, 183, 0.8);
+    }
+
+    .progress-track {
+        background: rgba(255,255,255,0.1);
+        height: 30px;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--poster-blue), var(--poster-pink));
+        transition: width 1s;
+    }
+
+    .qr-card {
+        text-align: center;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 20px;
+        border-radius: 20px;
+        border: 1px solid rgba(31, 193, 209, 0.3);
+    }
+
+    .qr-card img {
+        width: 480px !important;
+        height: 480px !important;
+        border-radius: 15px;
+        box-shadow: 0 0 40px rgba(31, 193, 209, 0.6);
+        border: 5px solid white;
+    }
+
+    .qr-text {
+        font-family: 'Orbitron';
+        font-size: 2.2rem !important;
+        font-weight: 900;
+        margin-top: 20px;
+        color: var(--gold) !important;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        animation: textPulse 2s infinite;
+    }
+
+    /* Individual Voter Ticker scaled 50% */
+    .voter-ticker-text {
+        display: inline-block;
+        font-family: 'Share Tech Mono', monospace;
+        font-size: 1.3rem;
+        color: var(--poster-blue);
+        text-transform: uppercase;
+        white-space: nowrap;
+        padding-left: 100%;
+        animation: tickerMove 25s linear infinite;
+    }
+
+    @keyframes textPulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(1.05); }
+    }
+
+    /* --- WINNER PAGE (HALL OF FAME) --- */
+    .winner-marathon { display: flex; align-items: center; justify-content: center; gap: 50px; height: 100%; width: 100%; }
+    .winner-marathon.reverse { flex-direction: row-reverse; }
+    .winner-frame { height: 75vh; aspect-ratio: 4/5; border: 8px solid var(--poster-pink); border-radius: 30px; background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 50px var(--poster-pink); }
+    .winner-frame img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .winner-info-card { background: rgba(0,0,0,0.9); padding: 50px; border-radius: 30px; border-left: 15px solid var(--gold); min-width: 550px; }
+    .winner-event-tag { font-family: 'Orbitron'; font-size: 2.8rem; color: var(--poster-blue); margin-bottom: 5px; text-transform: uppercase; }
+    .winner-rank-tag { font-family: 'Orbitron'; font-size: 2rem; color: var(--gold); margin-bottom: 15px; }
+    .winner-name-hero { font-family: 'Orbitron'; font-size: 5.5rem; color: #fff; text-transform: uppercase; line-height: 1; margin-bottom: 10px; }
+    .winner-college-tag { font-family: 'Share Tech Mono'; font-size: 3.5rem; color: #aaa; }
+
+    /* --- TIMELINE SCHEDULE --- */
+    #timeline-scroll-container { height: calc(100vh - 350px); overflow-y: scroll; margin-top: 100px; padding-bottom: 500px; scrollbar-width: none; position: relative; }
+    #timeline-scroll-container::-webkit-scrollbar { display: none; }
+    .timeline { position: relative; max-width: 1200px; margin: 0 auto; padding: 50px 0; }
+    .timeline::after { content: ''; position: absolute; width: 6px; background: linear-gradient(to bottom, var(--poster-blue), var(--poster-pink), var(--poster-purple)); top: 0; bottom: 0; left: 50%; margin-left: -3px; border-radius: 10px; }
+    .timeline-item { padding: 40px 0; position: relative; width: 50%; opacity: 0; transition: 1s; display: flex; align-items: center; box-sizing: border-box; }
+    .timeline-item.left { left: 0; padding-right: 80px; justify-content: flex-end; transform: translateX(-50px); }
+    .timeline-item.right { left: 50%; padding-left: 80px; justify-content: flex-start; transform: translateX(50px); }
+    .slide.active .timeline-item { opacity: 1; transform: translateX(0); }
+    .timeline-dot { position: absolute; background: #07060f; border: 5px solid; top: 50%; transform: translateY(-50%); border-radius: 50%; z-index: 10; width: 22px; height: 22px; }
+    .timeline-item.left .timeline-dot { right: -74px; border-color: var(--poster-blue); }
+    .timeline-item.right .timeline-dot { left: -74px; border-color: var(--poster-pink); }
+    .schedule-card { background: var(--glass); border: 2px solid rgba(255, 255, 255, 0.2); border-radius: 20px; padding: 25px; width: 450px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .schedule-time { color: var(--gold); font-family: 'Orbitron'; font-size: 1.3rem; font-weight: 900; display: block; margin-bottom: 10px; letter-spacing: 1px; }
+    .schedule-title { font-family: 'Orbitron'; font-size: 2.2rem; color: #fff; margin: 0; line-height: 1.2; }
+
+    /* --- AIRPORT BOARD (50% SIZE INCREASE + GLOW) --- */
+    .airport-board {
+        margin-top: 70px;
+        padding: 0 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+    }
+
+    .event-row {
+        background: rgba(0, 0, 0, 0.8);
+        border: 1px solid #333;
+        border-radius: 12px;
+        display: grid;
+        grid-template-columns: 480px 280px 1fr;
+        align-items: center;
+        padding: 22px 35px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .event-row::before {
+        content: "";
+        position: absolute;
+        left: 0; top: 0; bottom: 0;
+        width: 8px;
+        background: var(--poster-blue);
+    }
+
+    .event-name-cell {
+        font-family: 'Orbitron';
+        font-size: 2.7rem;
+        color: #fff;
+        letter-spacing: 2px;
+        font-weight: 700;
+        text-shadow: 0 0 10px rgba(31, 193, 209, 0.8),
+                     0 0 20px rgba(31, 193, 209, 0.4);
+    }
+
+    .status-badge {
+        font-family: 'Orbitron';
+        padding: 8px 22px;
+        border-radius: 6px;
+        font-size: 1.35rem;
+        text-align: center;
+        font-weight: bold;
+        width: 210px;
+    }
+
+    .status-not-started { color: #555; border: 1px solid #333; }
+
+    .status-entry {
+        color: var(--poster-blue);
+        border: 1.5px solid var(--poster-blue);
+        animation: blink 2s infinite;
+    }
+
+    .status-ongoing {
+        color: var(--poster-pink);
+        border: 1.5px solid var(--poster-pink);
+        animation: blink 1s infinite;
+        text-shadow: 0 0 8px var(--poster-pink);
+        box-shadow: 0 0 15px rgba(209, 31, 183, 0.3);
+    }
+
+    .status-completed {
+        color: var(--gold);
+        border: 1.5px solid var(--gold);
+        background: rgba(255, 234, 0, 0.1);
+    }
+
+    .activity-scroller {
+        font-family: 'Share Tech Mono';
+        font-size: 1.8rem;
+        color: #aaa;
+        white-space: nowrap;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .scroll-text {
+        display: inline-block;
+        animation: airportTicker 15s linear infinite;
+        padding-left: 100%;
+    }
+
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    @keyframes airportTicker { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+
+    /* --- FOOTER SCROLLER --- */
+    .footer { background: #000; border-top: 3px solid var(--poster-blue); height: 100px; z-index: 20; overflow: hidden; }
+    .scroller { display: flex; align-items: center; width: max-content; animation: scrollTicker 30s linear infinite; height: 100%; }
+    @keyframes scrollTicker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    .sponsor-pod { height: 70px; margin: 0 60px; flex-shrink: 0; }
+    .sponsor-pod img { height: 60px; }
+
+    /* --- MAXIMIZED PHOTO SIZE LOGIC --- */
+    .media-container-hero { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; position: relative; }
+    .winner-frame.max-view {
+        height: 85vh;
+        width: 95vw;
+        border: 4px solid var(--poster-blue);
+        border-radius: 20px;
+        box-shadow: 0 0 30px rgba(31, 193, 209, 0.5);
+    }
+    .caption-mini {
+        position: absolute; bottom: 40px; right: 60px;
+        background: rgba(0, 0, 0, 0.85); padding: 15px 25px;
+        border-radius: 12px; border-right: 8px solid var(--poster-blue);
+        z-index: 100; backdrop-filter: blur(5px);
+    }
+    .mini-event-tag { font-family: 'Orbitron'; font-size: 1.4rem; color: var(--poster-blue); margin: 0; text-transform: uppercase; letter-spacing: 1px; }
+    .mini-name-hero { font-family: 'Orbitron'; font-size: 2.2rem; color: #fff; margin: 5px 0 0 0; text-transform: uppercase; }
+
+    /* Individual Voter Ticker Animation */
+    .voter-ticker-text {
+        display: inline-block;
+        font-family: 'Share Tech Mono', monospace;
+        font-size: 0.85rem;
+        color: var(--poster-blue);
+        text-transform: uppercase;
+        white-space: nowrap;
+        padding-left: 100%;
+        animation: tickerMove 25s linear infinite;
+    }
+
+    @keyframes tickerMove {
+        0%   { transform: translate(0, 0); }
+        100% { transform: translate(-100%, 0); }
+    }
+
+    /* --- GROUP LAYOUT --- */
+    .winner-marathon.group-layout {
+        flex-direction: column;
+        padding: 0;
+        justify-content: flex-start;
+    }
+
+    .group-frame {
+        width: 100vw !important;
+        height: 85vh !important;
+        max-width: none !important;
+        position: relative;
+        background: #000;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .group-frame img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transform: scale(1.0);  /* ✅ FIXED: was scale(1.0; — missing closing parenthesis */
+        object-position: center 30%;
+        animation: slowPan 10s ease-in-out infinite alternate;
+    }
+
+    @keyframes slowPan {
+        0%   { transform: scale(1.0) translateX(-5%); }
+        100% { transform: scale(1.0) translateX(5%); }
+    }
+
+    .group-overlay-card {
+        position: absolute;
+        bottom: 0; left: 0; right: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 50%, transparent 100%);
+        padding: 40px 60px;
+        z-index: 10;
+    }
+
+    .group-overlay-card .winner-name-hero {
+        font-size: 4rem;
+        margin: 0;
+    }
+
+    /* --- REFINED VENUE STYLING --- */
+    .venue-icon {
+        width: 14px !important;
+        height: 14px !important;
+        display: inline-block !important;
+        vertical-align: middle;
+        fill: var(--poster-blue);
+        flex-shrink: 0;
+        margin-right: 4px;
+        line-height: 1;
+    }
+
+    .schedule-venue {
+        color: #a0a0a0;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        margin-top: 5px;
+        font-family: 'Share Tech Mono', monospace;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 5px;
+        line-height: 1.2;
+    }
+
+/* --- MENTOR CAM FIXED SELFIE FRAME --- */
+.mentor-hero-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    padding: 30px 0;
+    box-sizing: border-box;
+    perspective: 2000px;
+    overflow: hidden;
+}
+
+.mentor-polaroid-frame {
+    width: min(32vw, 420px);
+    aspect-ratio: 3 / 4.2;
+    background: #ffffff;
+    padding: 14px 14px 90px 14px;
+    border-radius: 18px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border: 6px solid var(--poster-blue);
+    box-shadow: 0 0 40px rgba(31, 193, 209, 0.35);
+    animation:
+        mentorEntrance 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
+        mentorFloat 6s ease-in-out infinite alternate 1.2s,
+        borderGlowCycle 4s infinite alternate;
+    transform-origin: center center;
+}
+
+.mentor-image-container {
+    width: 100%;
+    height: calc(100% - 10px);
+    background: #0a0a0a;
+    overflow: hidden;
+    border-radius: 10px;
+    border: 2px solid #d8d8d8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mentor-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center center;
+    display: block;
+    background: #000;
+}
+
+.mentor-caption-area {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 90px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #ffffff;
+    border-radius: 0 0 18px 18px;
+    padding: 10px 12px;
+    box-sizing: border-box;
+}
+
+.mentor-stu-name {
+    font-family: 'Orbitron';
+    color: #07060f !important;
+    font-size: clamp(1.2rem, 2vw, 2rem);
+    font-weight: 900;
+    text-transform: uppercase;
+    margin: 0;
+    letter-spacing: 0;
+    text-align: center;
+    line-height: 1.1;
+    text-shadow: 2px 2px 0 rgba(31, 193, 209, 0.15);
+}
+
+.mentor-badge {
+    position: absolute;
+    top: 28px;
+    right: -52px;
+    background: var(--poster-pink);
+    color: #fff;
+    padding: 10px 65px;
+    transform: rotate(45deg);
+    font-family: 'Orbitron';
+    font-weight: 900;
+    font-size: 1rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    z-index: 100;
+}
+
+#mentor-content {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    /* --- ANIMATIONS --- */
+    @keyframes mentorEntrance {
+        0%   { transform: scale(0.3) rotateX(-45deg) translateY(600px); opacity: 0; }
+        100% { transform: scale(1) rotateX(0deg) translateY(0); opacity: 1; }
+    }
+
+    @keyframes mentorFloat {
+        0%   { transform: translateY(0) rotateZ(0deg); }
+        50%  { transform: translateY(-20px) rotateZ(1deg); }
+        100% { transform: translateY(0) rotateZ(-1deg); }
+    }
+
+    @keyframes borderGlowCycle {
+        0%   { border-color: var(--poster-blue); box-shadow: 0 0 30px var(--poster-blue); }
+        100% { border-color: var(--poster-pink); box-shadow: 0 0 50px var(--poster-pink); }
+    }
+</style>
+
+</head>
+<body>
+
+<audio id="fanfareAudio" src="winner_theme.mp3" preload="auto"></audio>
+<audio id="clappingAudio" src="clapping.mp3" loop preload="auto"></audio>
+
+<div class="college-header">Govt. Residential Women's Polytechnic College Payyanur</div>
+<div id="particles-js"></div>
+<div class="scanline"></div>
+
+<div id="now-playing" class="now-playing">
+    <div class="np-label">⚡ MUSIC TIME: TOP PICK</div>
+    <div id="np-song">SONG NAME</div>
+    <div id="np-artist">ARTIST NAME</div>
+    <div class="np-time">
+        <span>STATUS: LIVE VOTE WINNER</span>
+        <span id="np-votes" style="color: var(--gold);">🏆 0 VOTES</span>
+    </div>
+</div>
+
+<div class="dashboard">
+    <header class="header">
+        <div class="logo">SYNAPSE '26</div>
+        <div class="flip-clock">
+            <div class="flip-card" id="h1">0</div><div class="flip-card" id="h2">0</div>
+            <div class="clock-sep" style="font-size: 4rem; padding: 0 10px;">:</div>
+            <div class="flip-card" id="m1">0</div><div class="flip-card" id="m2">0</div>
+            <div class="am-pm" id="ampm">AM</div>
+        </div>
+    </header>
+
+    <main class="stage">
+        <div class="stats-overlay">
+            <div class="stat-card"><div class="stat-val" id="paidCount">0</div><div class="stat-label">Check-ins</div></div>
+            <div class="stat-card" style="border-color: var(--poster-blue);"><div class="stat-val" id="winCount">0</div><div class="stat-label">Winners</div></div>
+        </div>
+        <div class="slide active" id="slide-status">
+    <div class="stage-title">LIVE EVENT TRACKER</div>
+    <div class="airport-board" id="airport-board">
+        </div>
+</div>
+<div class="slide" id="slide-mentor">
+    <div class="stage-title">MENTOR MOMENTS</div>
+    <div id="mentor-content" style="height: 100%; width: 100%;"></div>
+</div>
+        <div class="slide" id="slide-music">
+    <div class="stage-title">VOTE FOR UR FAV MUSIC</div>
+    <div class="poll-layout">
+        <div class="poll-bars" id="poll-bars-container"></div>
+        
+        <div class="qr-card" style="margin-top: 50px;">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://synapse2026.github.io/vote_your_song.html" alt="QR">
+            <div class="qr-text" style="color:#000; font-family:Orbitron; font-weight:900; margin-top:10px; text-align:center;">SCAN TO VOTE</div>
+        </div>
+    </div>
+</div>
+
+        <div class="slide " id="slide-photos">
+            <div class="stage-title" id="live-title">LIVE SNAP</div>
+            <div id="live-media-content" style="height: 100%; width: 100%;"></div>
+            <h2 id="live-moment-status" style="text-align: center; margin-top: 20%; color: var(--poster-blue); font-size: 4rem;">UPLINKING...</h2>
+        </div>
+        <div class="slide" id="slide-achievements">
+    <div class="stage-title">SPECIAL ACHIEVEMENTS</div>
+    <div id="achievement-content" style="height: 100%; width: 100%;"></div>
+</div>
+        <div class="slide" id="slide-winners">
+            <div class="stage-title">HALL OF FAME</div>
+            <div id="winner-marathon-area" style="height: 100%; width: 100%;"></div>
+        </div>
+
+        <div class="slide" id="slide-schedule">
+            <div class="stage-title">EVENT TIMELINE</div>
+            <div id="timeline-scroll-container">
+                <div class="timeline" id="hud-timeline">
+    <div class="timeline-item left"><div class="timeline-dot"></div><div class="schedule-card">
+        <span class="schedule-time">09:00 AM - 04:00 PM</span>
+        <h3 class="schedule-title">Project Expo</h3>
+        <div class="schedule-venue">
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            S6 EC & CT Class Rooms
+        </div>
+    </div></div>
+
+    <div class="timeline-item right"><div class="timeline-dot"></div><div class="schedule-card">
+        <span class="schedule-time">10:00 AM - 11:00 AM</span>
+        <h3 class="schedule-title">Pixel Clash</h3>
+        <div class="schedule-venue">
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            CABM Lab
+        </div>
+    </div></div>
+
+    <div class="timeline-item left"><div class="timeline-dot"></div><div class="schedule-card">
+        <span class="schedule-time">10:00 AM - 12:00 PM</span>
+        <h3 class="schedule-title">Glow Craft</h3>
+        <div class="schedule-venue">
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Embedded System Lab
+        </div>
+    </div></div>
+
+    <div class="timeline-item right"><div class="timeline-dot"></div><div class="schedule-card">
+        <span class="schedule-time">10:00 AM - 12:00 PM</span>
+        <h3 class="schedule-title">TrailBlaze</h3>
+        <div class="schedule-venue">
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Software Lab 2
+        </div>
+    </div></div>
+
+    <div class="timeline-item left"><div class="timeline-dot"></div><div class="schedule-card">
+        <span class="schedule-time">10:00 AM - 01:00 PM</span>
+        <h3 class="schedule-title">Play Villa</h3>
+        <div class="schedule-venue">
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            S6 IE Class Room
+        </div>
+    </div></div>
+
+    <div class="timeline-item right"><div class="timeline-dot"></div><div class="schedule-card">
+        <span class="schedule-time">11:00 AM - 04:00 PM</span>
+        <h3 class="schedule-title">Titan Trials</h3>
+        <div class="schedule-venue">
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Resource Centre
+        </div>
+    </div></div>
+
+    <div class="timeline-item left"><div class="timeline-dot"></div><div class="schedule-card">
+        <span class="schedule-time">11:30 AM</span>
+        <h3 class="schedule-title">Idea Forum</h3>
+        <div class="schedule-venue">
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Mini Auditorium
+        </div>
+    </div></div>
+
+    <div class="timeline-item right"><div class="timeline-dot"></div><div class="schedule-card">
+        <span class="schedule-time">01:00 PM - 02:00 PM</span>
+        <h3 class="schedule-title">Brain2Bot</h3>
+        <div class="schedule-venue">
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Software Lab 1
+        </div>
+    </div></div>
+
+    <div class="timeline-item left"><div class="timeline-dot"></div><div class="schedule-card">
+        <span class="schedule-time">01:00 PM - 03:00 PM</span>
+        <h3 class="schedule-title">ReverseX</h3>
+        <div class="schedule-venue">
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Basic Electronics Lab
+        </div>
+    </div></div>
+
+    <div class="timeline-item right"><div class="timeline-dot"></div><div class="schedule-card">
+        <span class="schedule-time">02:00 PM - 04:00 PM</span>
+        <h3 class="schedule-title">InnoSense</h3>
+        <div class="schedule-venue">
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Software Lab
+        </div>
+    </div></div>
+</div>
+            </div>
+        </div>
+
+        <div class="slide" id="slide-attendees"><div class="stage-title">ACTIVITY FEED</div><div id="attendee-list" style="margin-top:50px;"></div></div>
+    </main>
+    <footer class="footer"><div class="scroller" id="sponsorScroller"></div></footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+
+<script>
+const allEvents = ["Glow Craft", "Reverse X", "Trail Blaze", "Brain 2 Bot", "Titan Trials", "Pixel Clash", "Innosense", "Seminar Presentation", "Play villa"];
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzb97bG3GTT1wMH7M9j8RDXkoqoFD_MWXFkUZS0przdUO51s-7Zyutn0FbRSRnjjH8X5A/exec';
+    let cachedData = null, isCyclingWinners = false, lastWinnerUri = "", lastSignalReceived = 0, scrollPos = 0;
+
+    particlesJS("particles-js", { "particles": { "number": { "value": 60 }, "color": { "value": ["#d11fb7", "#1fc1d1"] }, "opacity": { "value": 0.5 }, "size": { "value": 4 }, "line_linked": { "enable": true, "distance": 180, "color": "#741fd1", "opacity": 0.4, "width": 2 }, "move": { "enable": true, "speed": 1.5 } } });
+
+    function stopAllCeremonyAudio() {
+    const fan = document.getElementById('fanfareAudio');
+    const clap = document.getElementById('clappingAudio');
+    // Only stop if we are NOT on the winners slide
+    if (slides[currentSlide] !== 'slide-winners') {
+        if (fan) { fan.pause(); fan.currentTime = 0; }
+        if (clap) { clap.pause(); clap.currentTime = 0; }
+    }
+}
+function syncVolumeWithSpotify() {
+    fetch(`${scriptURL}?action=getMusicState`)
+        .then(res => res.text())
+        .then(state => {
+            const fan = document.getElementById('fanfareAudio');
+            const clap = document.getElementById('clappingAudio');
+            
+            if (state.trim() === "playing") {
+                // Reduce volume to 20% if Spotify is active
+                if (fan) fan.volume = 0.2;
+                if (clap) clap.volume = 0.2;
+            } else {
+                // Restore full volume
+                if (fan) fan.volume = 1.0;
+                if (clap) clap.volume = 1.0;
+            }
+        });
+}
+
+// Check every 5 seconds
+setInterval(syncVolumeWithSpotify, 5000);
+
+   function updateMusicPoll() {
+    fetch(`${scriptURL}?action=getAllSongs`)
+    .then(res => res.json())
+    .then(response => {
+        const container = document.getElementById('poll-bars-container');
+        container.innerHTML = '';
+        
+        // Extract the songs array from the response object
+        const songs = response.songs || []; 
+        const sorted = songs.sort((a,b) => b.votes - a.votes).slice(0, 4);
+        const maxVotes = Math.max(...sorted.map(s => s.votes), 1);
+
+        sorted.forEach((song, i) => {
+            const width = (song.votes / maxVotes) * 100;
+            // Use lastVoter info we added to the Apps Script
+            const voterDisplay = song.lastVoter ? `LATEST VOTE: ${song.lastVoter}` : "WAITING FOR VOTES...";
+
+            container.innerHTML += `
+                <div class="poll-item" style="animation-delay:${i*0.1}s; height: auto; padding-bottom: 10px;">
+                    <div class="poll-label">
+                        <span>${song.name}</span>
+                        <span style="color:var(--gold)">${song.votes} VOTES</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" style="width:${width}%"></div>
+                    </div>
+                    <div style="overflow: hidden; white-space: nowrap; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 4px;">
+                        <div class="voter-ticker-text">
+                            ${voterDisplay}
+                        </div>
+                    </div>
+                </div>`;
+        });
+    });
+}
+
+    function checkMusicSignal() {
+        fetch(`${scriptURL}?action=checkMusicSignal`).then(res => res.json()).then(data => {
+            if (data.signalTime && data.signalTime > lastSignalReceived) {
+                if (lastSignalReceived !== 0) forceShowNowPlaying();
+                lastSignalReceived = data.signalTime;
+            }
+        });
+    }
+
+    function forceShowNowPlaying() {
+        fetch(`${scriptURL}?action=getTopSong`).then(res => res.json()).then(data => {
+            if (data.uri !== "none" && data.votes > 0) {
+                document.getElementById('np-song').innerText = data.name;
+                document.getElementById('np-artist').innerText = data.artist || "Synapse DJ Pick";
+                document.getElementById('np-votes').innerText = `🏆 ${data.votes} VOTES`;
+                const card = document.getElementById('now-playing');
+                card.classList.add('active');
+                triggerFullConfetti();
+                setTimeout(() => card.classList.remove('active'), 15000);
+            }
+        });
+    }
+
+    function triggerFullConfetti() {
+        const end = Date.now() + (3 * 1000);
+        const colors = ['#d11fb7', '#1fc1d1', '#ffea00'];
+        (function frame() {
+            confetti({ particleCount: 7, angle: 60, spread: 55, origin: { x: 0 }, colors });
+            confetti({ particleCount: 7, angle: 120, spread: 55, origin: { x: 1 }, colors });
+            if (Date.now() < end) requestAnimationFrame(frame);
+        }());
+    }
+
+    function smoothScroll() {
+        const container = document.getElementById('timeline-scroll-container');
+        if (slides[currentSlide] === 'slide-schedule' && container) {
+            scrollPos += 1.5;
+            container.scrollTop = scrollPos;
+            const maxScroll = container.scrollHeight - container.offsetHeight;
+            if (scrollPos >= maxScroll + 50) { 
+                scrollPos = -50; 
+            }
+        }
+        requestAnimationFrame(smoothScroll);
+    }
+
+  async function startWinnerMarathon() {
+    if (!cachedData || !cachedData.photos) return;
+    const marathonArea = document.getElementById('winner-marathon-area');
+    const winners = cachedData.photos.filter(p => p.event && p.event !== "General" && p.type === "PHOTO").reverse();
+    
+    if (winners.length === 0) {
+        marathonArea.innerHTML = "<h1 style='text-align:center; margin-top:150px;'>AWAITING RESULTS...</h1>";
+        await new Promise(r => setTimeout(r, 4000));
+    } else {
+        isCyclingWinners = true;
+        document.getElementById('clappingAudio').play().catch(()=>{});
+        
+        let counter = 0;
+        for (let winner of winners) {
+            if (slides[currentSlide] !== 'slide-winners') { 
+                stopAllCeremonyAudio(); 
+                isCyclingWinners = false;
+                return; 
+            }
+
+            document.getElementById('fanfareAudio').currentTime = 0;
+            document.getElementById('fanfareAudio').play().catch(()=>{});
+
+            const details = cachedData.winnerDetails.find(d => d.includes(winner.event)) || winner.event;
+            const parts = details.split('|');
+            const nameCollege = parts[0].trim();
+            const rankInfo = parts[1] ? parts[1].split(':')[1] || "WINNER" : "WINNER";
+            const nameOnly = nameCollege.split('(')[0].trim();
+            const collegeOnly = nameCollege.includes('(') ? nameCollege.split('(')[1].replace(')', '') : "";
+            
+            // --- NEW: Detect Group/Landscape Layout ---
+            // We create a temporary image object to check dimensions
+            const tempImg = new Image();
+            tempImg.src = winner.url;
+            await tempImg.decode(); // Wait for image to load to get dimensions
+            const isLandscape = tempImg.width > tempImg.height;
+
+            if (isLandscape) {
+                // LARGE GROUP LAYOUT
+                // Inside the isLandscape block
+marathonArea.innerHTML = `
+    <div class="winner-marathon group-layout">
+        <div class="winner-frame group-frame">
+            <img src="${winner.url}">
+            <div class="group-overlay-card">
+                <div class="winner-event-tag" style="color:var(--gold)">${winner.event}</div>
+                <div class="winner-rank-tag">${rankInfo.trim()}</div>
+                <div class="winner-name-hero">${nameOnly}</div>
+                <div class="winner-college-tag">${collegeOnly}</div>
+            </div>
+        </div>
+    </div>`;
+            } else {
+                // STANDARD SINGLE LAYOUT
+                const reverseClass = (counter % 2 === 1) ? "reverse" : "";
+                marathonArea.innerHTML = `
+                    <div class="winner-marathon ${reverseClass}">
+                        <div class="winner-info-card">
+                            <div class="winner-event-tag">${winner.event}</div>
+                            <div class="winner-rank-tag">${rankInfo.trim()}</div>
+                            <div class="winner-name-hero">${nameOnly}</div>
+                            <div class="winner-college-tag">${collegeOnly}</div>
+                        </div>
+                        <div class="winner-frame">
+                            <img src="${winner.url}">
+                        </div>
+                    </div>`;
+            }
+            
+            triggerFullConfetti();
+            counter++;
+            await new Promise(r => setTimeout(r, 10000));
+        }
+        stopAllCeremonyAudio();
+        isCyclingWinners = false;
+    }
+    rotateSlides();
+}
+
+    async function startMediaMarathon(type, title, containerId) {
+    if (!cachedData || !cachedData.photos) return;
+    const container = document.getElementById(containerId);
+    const assets = cachedData.photos.filter(p => p.type === type).reverse();
+    
+    if (assets.length === 0) {
+        container.innerHTML = `<h2 style="text-align:center; margin-top:20%; color:var(--poster-blue); font-family:'Orbitron';">AWAITING ${title}...</h2>`;
+        return;
+    }
+
+    isCyclingWinners = true;
+    for (let item of assets) {
+        // Exit check
+        if (slides[currentSlide] !== 'slide-photos' && 
+            slides[currentSlide] !== 'slide-achievements' && 
+            slides[currentSlide] !== 'slide-mentor') {
+            break;
+        }
+
+        if (type === "MENTOR_SELFIE") {
+            // THE CINEMATIC POLAROID INJECTION
+            container.innerHTML = `
+    <div class="mentor-hero-container">
+        <div class="mentor-polaroid-frame">
+            <div class="mentor-badge">MENTOR CAM</div>
+            <div class="mentor-image-container">
+                <img src="${item.url}" alt="${item.event || 'Mentor selfie'}">
+            </div>
+            <div class="mentor-caption-area">
+                <div class="mentor-stu-name">${item.event || "MENTOR MOMENT"}</div>
+            </div>
+        </div>
+    </div>`;
+        } else {
+            // STANDARD LAYOUT FOR OTHERS
+            container.innerHTML = `
+                <div class="media-container-hero">
+                    <div class="winner-frame max-view">
+                        <img src="${item.url}" style="width:100%; height:100%; object-fit:contain;">
+                    </div>
+                    <div class="caption-mini">
+                        <div class="mini-event-tag">${title}</div>
+                        <div class="mini-name-hero">${item.event || "SYNAPSE '26"}</div>
+                    </div>
+                </div>`;
+        }
+        
+        await new Promise(r => setTimeout(r, 8000));
+    }
+    isCyclingWinners = false;
+}
+let currentEventPage = 0;
+const eventsPerPage = 5;
+
+function fetchLiveData() {
+    // 1. Fetch Global Stats & Recent Attendees
+    fetch(`${scriptURL}?action=getLiveTVData`).then(res => res.json()).then(data => {
+        cachedData = data;
+        document.getElementById('paidCount').innerText = data.stats.paid || 0;
+        document.getElementById('winCount').innerText = data.stats.winners || 0;
+        
+        // --- ADDED: ACTIVITY FEED LOGIC ---
+        // Filters for participants with completed payments and maps them to styled rows
+        const attendeeContainer = document.getElementById('attendee-list');
+        if (attendeeContainer && data.recentAttendees && data.recentAttendees.length > 0) {
+            attendeeContainer.innerHTML = data.recentAttendees
+                .reverse() // Show newest admissions first
+                .slice(0, 5) // Limit to top 5 for screen space
+                .map(attendee => `
+                    <div class="list-item" style="
+                        font-family: 'Orbitron';
+                        font-size: 2.2rem; 
+                        padding: 30px; 
+                        margin-bottom: 20px;
+                        background: rgba(31, 193, 209, 0.1); 
+                        border-left: 15px solid var(--poster-blue);
+                        border-radius: 0 15px 15px 0;
+                        animation: slideIn 0.5s ease-out;
+                    ">
+                        <span style="color: var(--gold);">⚡ ADMITTED:</span> ${attendee.toUpperCase()}
+                    </div>
+                `).join('');
+        }
+        
+        if(data.sponsors?.length > 0) {
+            const pods = data.sponsors.map(url => `<div class="sponsor-pod"><img src="${url.trim()}"></div>`).join('');
+            document.getElementById('sponsorScroller').innerHTML = pods + pods;
+        }
+    });
+
+    // 2. Fetch Event Progress for the Airport Board
+    fetch(`${scriptURL}?action=getEventStatusBoard`).then(res => res.json()).then(statusData => {
+        const board = document.getElementById('airport-board');
+        if (!board) return;
+        
+        // --- THE FIX: MERGE WITH ALL EVENTS ---
+        const mergedEvents = allEvents.map(evtName => {
+            const found = statusData.find(s => s.name === evtName);
+            return found || { name: evtName, entry: false, started: false, completed: false, attendees: [] };
+        });
+
+        // --- PAGINATION LOGIC ---
+        const startIndex = currentEventPage * eventsPerPage;
+        const pageEvents = mergedEvents.slice(startIndex, startIndex + eventsPerPage);
+
+        if (startIndex + eventsPerPage >= mergedEvents.length) {
+            currentEventPage = 0;
+        } else {
+            currentEventPage++;
+        }
+
+        board.innerHTML = ''; 
+        pageEvents.forEach(event => {
+            let statusHtml = '';
+            let activityHtml = '';
+
+            if (event.completed) {
+                statusHtml = '<div class="status-badge status-completed">COMPLETED</div>';
+                const winners = cachedData?.winnerDetails?.filter(w => w.includes(event.name)) || [];
+                activityHtml = winners.length > 0 ? `🏆 WINNERS: ${winners.join(" • ")}` : "RESULTS FINALIZED";
+            } 
+            else if (event.started || event.entry) {
+                statusHtml = event.started ? 
+                    '<div class="status-badge status-ongoing">ONGOING</div>' : 
+                    '<div class="status-badge status-entry">ENTRY OPEN</div>';
+                
+                activityHtml = event.attendees && event.attendees.length > 0 ? 
+                    `LATEST CHECK-INS: ${event.attendees.join(" • ")}` : 
+                    "AWAITING PARTICIPANTS TO REPORT...";
+            } 
+            else {
+                statusHtml = '<div class="status-badge status-not-started">NOT STARTED</div>';
+                activityHtml = "WAITING FOR THE EVENT TO START...";
+            }
+
+            board.innerHTML += `
+                <div class="event-row">
+                    <div class="event-name-cell">${event.name.toUpperCase()}</div>
+                    <div>${statusHtml}</div>
+                    <div class="activity-scroller">
+                        <div class="scroll-text">${activityHtml}</div>
+                    </div>
+                </div>
+            `;
+        });
+    });
+}
+
+    let currentSlide = 0;
+const slides = [
+    'slide-status',
+    'slide-mentor',
+    'slide-schedule',
+    'slide-achievements',
+    'slide-winners',
+     // New dedicated slide
+    'slide-music',
+    'slide-photos',
+    'slide-attendees'
+];
+    
+    async function rotateSlides() {
+    if (isCyclingWinners) return;
+    
+    // 1. Stop any active audio from previous slides
+    stopAllCeremonyAudio();
+    
+    // 2. Switch classes
+    document.getElementById(slides[currentSlide]).classList.remove('active');
+    currentSlide = (currentSlide + 1) % slides.length;
+    const activeSlideId = slides[currentSlide];
+    document.getElementById(activeSlideId).classList.add('active');
+
+    // 3. Logic based on which slide just became active
+    if (!cachedData) return;
+
+    switch (activeSlideId) {
+        case 'slide-mentor':
+            // The first argument "MENTOR_SELFIE" must match the 'Type' column in your Assets sheet
+            await startMediaMarathon("MENTOR_SELFIE", "MENTOR MOMENT", "mentor-content");
+            break;
+        case 'slide-music':
+            updateMusicPoll();
+            break;
+
+        case 'slide-schedule':
+            scrollPos = -50; // Reset scroll position for the timeline
+            break;
+
+        case 'slide-winners':
+            await startWinnerMarathon();
+            break;
+
+        case 'slide-achievements':
+            await startMediaMarathon("ACHIEVEMENT", "ACHIEVEMENTS", "achievement-content");
+            break;
+
+        case 'slide-photos':
+            await startMediaMarathon("LIVE_MOMENT", "LIVE SNAP", "live-media-content");
+            break;
+    }
+}
+    fetchLiveData();
+    setInterval(fetchLiveData, 10000);
+    setInterval(checkMusicSignal, 3000);
+   // Remove the old setInterval(rotateSlides, 25000);
+// Use this custom function to handle variable slide times:
+
+function startCustomRotation() {
+    let slideTime = 25000; // Default 25 seconds for most slides
+
+    // Increase time if the NEXT slide is Music or Photos
+    const nextSlideName = slides[currentSlide]; 
+    
+    if (nextSlideName === 'slide-music') {
+        slideTime = 120000; // Stay for 60 seconds on the Music Voting slide
+    } else if (nextSlideName === 'slide-winners') {
+        // Winners slide timing is handled by the startWinnerMarathon function
+        // so we don't need a high number here, but let's keep it safe
+        slideTime = 30000; 
+    }
+
+    setTimeout(() => {
+        rotateSlides();
+        startCustomRotation(); // Recurse with new timing
+    }, slideTime);
+}
+
+// Start the sequence
+startCustomRotation();
+    requestAnimationFrame(smoothScroll);
+
+    setInterval(() => {
+        const d = new Date(), h = d.getHours() % 12 || 12;
+        document.getElementById('h1').innerText = Math.floor(h/10);
+        document.getElementById('h2').innerText = h%10;
+        document.getElementById('m1').innerText = Math.floor(d.getMinutes()/10);
+        document.getElementById('m2').innerText = d.getMinutes()%10;
+        document.getElementById('ampm').innerText = d.getHours() >= 12 ? 'PM' : 'AM';
+    }, 1000);
+
+    document.body.addEventListener('click', () => {
+        document.getElementById('fanfareAudio').play().then(() => document.getElementById('fanfareAudio').pause());
+        document.getElementById('clappingAudio').play().then(() => document.getElementById('clappingAudio').pause());
+    }, {once: true});
+</script>
+</body>
+</html>
