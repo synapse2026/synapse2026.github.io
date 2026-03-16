@@ -8,78 +8,171 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         :root { --neon-blue: #1fc1d1; --neon-pink: #d11fb7; --dark-bg: #07060f; }
-        body { background: var(--dark-bg); color: #fff; font-family: 'Rajdhani', sans-serif; min-height: 100vh; }
-        .hero-title { font-family: 'Orbitron'; color: var(--neon-blue); text-align: center; margin-top: 20px; letter-spacing: 2px; }
-        #camera-container { width: 100%; max-width: 400px; margin: 20px auto; border: 3px solid var(--neon-pink); border-radius: 20px; overflow: hidden; position: relative; aspect-ratio: 3/4; background: #000; }
-        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); /* Mirror effect for selfie */ }
-        canvas { display: none; }
-        .btn-capture { background: linear-gradient(135deg, var(--neon-pink), #741fd1); color: white; font-family: 'Orbitron'; font-weight: 700; border: none; padding: 15px; border-radius: 50px; box-shadow: 0 0 20px rgba(209, 31, 183, 0.5); }
-        .form-control { background: rgba(255,255,255,0.05); border: 1px solid var(--neon-blue); color: #fff; margin-bottom: 10px; }
-        #preview-img { width: 100%; border-radius: 15px; display: none; margin-bottom: 15px; border: 2px solid var(--neon-blue); }
+        body { background: var(--dark-bg); color: #fff; font-family: 'Rajdhani', sans-serif; min-height: 100vh; overflow-x: hidden; }
+        .hero-title { font-family: 'Orbitron'; color: var(--neon-blue); text-align: center; margin-top: 20px; letter-spacing: 2px; text-shadow: 0 0 10px var(--neon-blue); }
+        
+        /* Camera Container */
+        #camera-container { 
+            width: 90%; 
+            max-width: 400px; 
+            margin: 20px auto; 
+            border: 2px solid rgba(255,255,255,0.2); 
+            border-radius: 20px; 
+            overflow: hidden; 
+            position: relative; 
+            aspect-ratio: 3/4; 
+            background: #000; 
+        }
+
+        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        #preview-img { width: 100%; height: 100%; object-fit: contain; display: none; position: relative; z-index: 5; }
+
+        /* --- VIEWFINDER OVERLAY --- */
+        .viewfinder {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            border: 40px solid rgba(0, 0, 0, 0.5); /* Dims the crop area */
+        }
+
+        .viewfinder-corners {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            border: 2px solid var(--neon-pink);
+            box-shadow: inset 0 0 20px rgba(209, 31, 183, 0.3);
+        }
+
+        /* Scanning Line Animation */
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: var(--neon-blue);
+            box-shadow: 0 0 15px var(--neon-blue);
+            top: 0;
+            animation: scanMove 3s linear infinite;
+        }
+
+        @keyframes scanMove {
+            0% { top: 0%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        .btn-capture { background: linear-gradient(135deg, var(--neon-pink), #741fd1); color: white; font-family: 'Orbitron'; font-weight: 700; border: none; padding: 15px; border-radius: 50px; box-shadow: 0 0 20px rgba(209, 31, 183, 0.5); transition: 0.3s; margin-top: 10px; }
+        .form-control, .form-select { background: rgba(255,255,255,0.05) !important; border: 1px solid var(--neon-blue) !important; color: #fff !important; margin-bottom: 15px; }
+        
+        .flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; pointer-events: none; z-index: 9999; }
+        @keyframes cameraFlash { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
     </style>
 </head>
 <body>
+    <div id="flash-effect" class="flash"></div>
+
     <div class="container py-4">
-        <h2 class="hero-title">MENTOR SELFIE</h2>
+        <h2 class="hero-title">MENTOR CAM</h2>
+        <p class="text-center text-white-50 small">PLEASE FIT FACE INSIDE THE PINK FRAME</p>
         
         <div id="setup-form">
             <input type="text" id="stuName" class="form-control" placeholder="STUDENT NAME">
-            <select id="stuDept" class="form-select mb-2 bg-dark text-white border-info">
+            <select id="stuDept" class="form-select border-info">
                 <option value="" disabled selected>DEPARTMENT</option>
                 <option value="CT">CT</option><option value="EC">EC</option><option value="IE">IE</option>
             </select>
             <input type="text" id="stuSem" class="form-control" placeholder="SEMESTER (e.g. S6)">
-            <button onclick="startCam()" class="btn btn-info w-100 fw-bold">OPEN CAMERA</button>
+            <button onclick="startCam()" class="btn btn-info w-100 py-3 fw-bold">START CAPTURE</button>
         </div>
 
         <div id="cam-ui" style="display:none;">
             <div id="camera-container">
                 <video id="video" autoplay playsinline></video>
+                
+                <div id="viewfinder-ui" class="viewfinder">
+                    <div class="viewfinder-corners">
+                        <div class="scan-line"></div>
+                    </div>
+                </div>
+                
                 <img id="preview-img">
             </div>
             <div class="text-center">
-                <button id="captureBtn" onclick="takePhoto()" class="btn btn-capture w-75">📸 SNAP SELFIE</button>
-                <button id="uploadBtn" onclick="uploadPhoto()" class="btn btn-success w-75 mt-2" style="display:none;">📤 UPLINK TO HUD</button>
-                <button onclick="location.reload()" class="btn btn-link text-white-50 mt-2">Retake</button>
+                <button id="captureBtn" onclick="takePhoto()" class="btn btn-capture w-75 py-3">📸 TAKE SELFIE</button>
+                <button id="uploadBtn" onclick="uploadPhoto()" class="btn btn-success w-75 mt-2 py-3 fw-bold" style="display:none;">📤 UPLINK PHOTO</button>
+                <button onclick="location.reload()" class="btn btn-link text-white-50 mt-2 text-decoration-none">← Retake</button>
             </div>
         </div>
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzb97bG3GTT1wMH7M9j8RDXkoqoFD_MWXFkUZS0przdUO51s-7Zyutn0FbRSRnjjH8X5A/exec"; // Paste your script URL here
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzb97bG3GTT1wMH7M9j8RDXkoqoFD_MWXFkUZS0przdUO51s-7Zyutn0FbRSRnjjH8X5A/exec";
         let stream;
 
         async function startCam() {
             if(!document.getElementById('stuName').value) return alert("Enter Name");
             document.getElementById('setup-form').style.display = 'none';
             document.getElementById('cam-ui').style.display = 'block';
-            stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 1706 } } 
-            });
-            document.getElementById('video').srcObject = stream;
+
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "user", width: { ideal: 1920 }, height: { ideal: 1080 } } 
+                });
+                document.getElementById('video').srcObject = stream;
+            } catch (err) {
+                alert("Camera error: " + err.message);
+            }
         }
 
         function takePhoto() {
+            // Flash Effect
+            const flash = document.getElementById('flash-effect');
+            flash.style.animation = 'cameraFlash 0.3s';
+            setTimeout(() => { flash.style.animation = ''; }, 300);
+
             const video = document.getElementById('video');
             const canvas = document.createElement('canvas');
-            // Fixed 3:4 Aspect Ratio
-            canvas.width = 720;
-            canvas.height = 960;
-            const ctx = canvas.getContext('2d');
-            ctx.translate(canvas.width, 0); ctx.scale(-1, 1); // Maintain mirror look
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             
-            document.getElementById('video').style.display = 'none';
+            // Set capture to high-res 3:4 ratio
+            canvas.width = 1200;
+            canvas.height = 1600;
+            const ctx = canvas.getContext('2d');
+
+            // Smart Crop logic
+            const vW = video.videoWidth;
+            const vH = video.videoHeight;
+            const targetAspect = 3/4;
+            let sX, sY, sW, sH;
+
+            if ((vW/vH) > targetAspect) {
+                sW = vH * targetAspect;
+                sH = vH;
+                sX = (vW - sW) / 2;
+                sY = 0;
+            } else {
+                sW = vW;
+                sH = vW / targetAspect;
+                sX = 0;
+                sY = (vH - sH) / 2;
+            }
+
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(video, sX, sY, sW, sH, 0, 0, canvas.width, canvas.height);
+            
+            video.style.display = 'none';
+            document.getElementById('viewfinder-ui').style.display = 'none';
             const preview = document.getElementById('preview-img');
-            preview.src = canvas.toDataURL('image/jpeg', 0.8);
+            preview.src = canvas.toDataURL('image/jpeg', 0.9);
             preview.style.display = 'block';
+            
             document.getElementById('captureBtn').style.display = 'none';
             document.getElementById('uploadBtn').style.display = 'inline-block';
         }
 
         async function uploadPhoto() {
             const btn = document.getElementById('uploadBtn');
-            btn.disabled = true; btn.innerText = "UPLOADING...";
+            btn.disabled = true; btn.innerText = "UPLINKING...";
             
             const blob = document.getElementById('preview-img').src.split(',')[1];
             const meta = {
@@ -90,11 +183,10 @@
 
             fetch(SCRIPT_URL, {
                 method: "POST",
+                mode: "no-cors",
                 body: JSON.stringify({ action: "mentorSelfie", img: blob, ...meta })
-            })
-            .then(res => res.text())
-            .then(data => {
-                alert("Selfie Uplinked! Check the main screen.");
+            }).then(() => {
+                alert("Selfie Uplinked! Check the HUD.");
                 location.reload();
             });
         }
