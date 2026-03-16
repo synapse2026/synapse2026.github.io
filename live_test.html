@@ -60,7 +60,7 @@
     /* --- DJ POLL (SCALED 50% & QR 100%) --- */
     .poll-layout { 
         display: grid; 
-        grid-template-columns: 1fr 480px; /* Increased from 380px to fit double-size QR */
+        grid-template-columns: 1fr 500px; /* Widened to ensure giant QR doesn't overlap bars */
         gap: 60px; 
         height: 80%; 
         margin-top: 100px; 
@@ -69,14 +69,14 @@
     .poll-bars { 
         display: grid; 
         grid-template-columns: 1fr 1fr; 
-        gap: 30px; /* Increased gap by 50% */
+        gap: 30px; /* 1.5x gap */
         align-content: center; 
     }
 
     .poll-item { 
         background: var(--glass); 
-        border-left: 12px solid var(--poster-pink); /* 8px * 1.5 */
-        padding: 22px; /* 15px * 1.5 */
+        border-left: 12px solid var(--poster-pink); /* 1.5x thickness */
+        padding: 22px; /* 1.5x padding */
         border-radius: 0 20px 20px 0; 
         margin-bottom: 22px; 
         animation: slideIn 0.5s ease-out forwards; 
@@ -91,7 +91,8 @@
         font-family: 'Orbitron'; 
         margin-bottom: 12px; 
         font-size: 1.65rem; /* 1.1rem * 1.5 */
-        text-shadow: 0 0 10px rgba(209, 31, 183, 0.5); /* Added subtle glow */
+        color: #fff;
+        text-shadow: 0 0 10px rgba(209, 31, 183, 0.8); /* Stronger glow to match HUD */
     }
 
     .progress-track { 
@@ -108,16 +109,48 @@
     }
 
     /* Target the QR card for Double Size */
+    .qr-card {
+        text-align: center;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 20px;
+        border-radius: 20px;
+        border: 1px solid rgba(31, 193, 209, 0.3);
+    }
+
     .qr-card img {
-        width: 450px !important; /* Approximately double size */
-        height: 450px !important;
+        width: 480px !important; /* Double the visual size */
+        height: 480px !important;
         border-radius: 15px;
-        box-shadow: 0 0 30px rgba(31, 193, 209, 0.4);
+        box-shadow: 0 0 40px rgba(31, 193, 209, 0.6);
+        border: 5px solid white; /* Makes it easier to scan from distance */
     }
 
     .qr-text {
-        font-size: 2rem !important; /* Scaled up for readability */
-        margin-top: 15px;
+        font-family: 'Orbitron';
+        font-size: 2.2rem !important; /* Scaled up for readability */
+        font-weight: 900;
+        margin-top: 20px;
+        color: var(--gold) !important;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        animation: textPulse 2s infinite;
+    }
+
+    /* Individual Voter Ticker scaled 50% */
+    .voter-ticker-text {
+        display: inline-block;
+        font-family: 'Share Tech Mono', monospace;
+        font-size: 1.3rem; /* 0.85rem * 1.5 */
+        color: var(--poster-blue);
+        text-transform: uppercase;
+        white-space: nowrap;
+        padding-left: 100%;
+        animation: tickerMove 25s linear infinite; 
+    }
+
+    @keyframes textPulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(1.05); }
     }
 
     /* --- WINNER PAGE (HALL OF FAME) --- */
