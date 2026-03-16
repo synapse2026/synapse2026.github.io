@@ -38,32 +38,42 @@
         }
 
         #camera-container { 
-            width: 70%; aspect-ratio: 16 / 9; 
+            width: 75%; aspect-ratio: 16 / 9; 
             border: 4px solid var(--neon-pink); border-radius: 15px; 
             overflow: hidden; position: relative; background: #000;
+            display: flex; align-items: center; justify-content: center;
         }
 
-        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-        #preview-img { width: 100%; height: 100%; object-fit: contain; display: none; }
+        video { 
+            min-width: 100%; min-height: 100%; 
+            /* Fix: Rotate video element to stand upright in the sideways container */
+            transform: rotate(-90deg) scaleX(-1); 
+            object-fit: cover; 
+        }
+
+        #preview-img { 
+            width: 100%; height: 100%; object-fit: contain; 
+            display: none; position: absolute; z-index: 10;
+        }
 
         .controls-sidebar {
             width: 25%; display: flex; flex-direction: column; 
-            gap: 15px; padding-left: 20px;
+            gap: 15px; padding-left: 20px; align-items: center;
         }
 
         .btn-capture { 
             background: linear-gradient(135deg, var(--neon-pink), #741fd1); 
             font-family: 'Orbitron'; font-weight: 700; border: none; padding: 20px; 
             border-radius: 50%; width: 80px; height: 80px; font-size: 1.5rem;
-            box-shadow: 0 0 20px var(--neon-pink); align-self: center;
+            box-shadow: 0 0 20px var(--neon-pink);
         }
 
         .btn-upload {
             background: #28a745; font-family: 'Orbitron'; border: none;
-            padding: 12px; border-radius: 10px; color: #fff; font-weight: bold;
+            padding: 12px; border-radius: 10px; color: #fff; font-weight: bold; width: 100%;
         }
 
-        .viewfinder-overlay { position: absolute; inset: 0; border: 2px solid var(--neon-blue); pointer-events: none; }
+        .viewfinder-overlay { position: absolute; inset: 0; border: 2px solid var(--neon-blue); pointer-events: none; z-index: 5; }
         
         .form-control, .form-select { background: rgba(0, 0, 0, 0.6) !important; color: #fff !important; border: 1px solid #444; margin-bottom: 15px; }
 
@@ -75,7 +85,8 @@
     <div id="flash-effect" class="flash"></div>
 
     <div class="setup-wrapper" id="vertical-ui">
-        <h2 style="font-family:'Orbitron'; color:var(--neon-blue); margin-bottom:20px;">MENTOR PORTAL</h2>
+        <h2 style="font-family:'Orbitron'; color:var(--neon-blue); margin-bottom:10px;">SYNAPSE '26</h2>
+        <p style="color:var(--neon-pink); font-family:'Orbitron'; font-size:0.8rem; margin-bottom:20px;">MENTOR PORTAL</p>
         <div id="setup-form">
             <input type="text" id="stuName" class="form-control" placeholder="FULL NAME">
             <select id="stuDept" class="form-select">
@@ -91,8 +102,7 @@
                 <option value="S3">S3</option><option value="S4">S4</option>
                 <option value="S5">S5</option><option value="S6">S6</option>
             </select>
-            <button onclick="switchToLandscape()" class="btn btn-info w-100 fw-bold py-3" style="font-family:'Orbitron'">GO TO CAMERA</button>
-            <p class="text-center text-info small mt-3">Rotate phone for best view after clicking</p>
+            <button onclick="switchToLandscape()" class="btn btn-info w-100 fw-bold py-3" style="font-family:'Orbitron'">OPEN CAMERA</button>
         </div>
     </div>
 
@@ -104,10 +114,10 @@
         </div>
 
         <div class="controls-sidebar">
-            <div id="status-text" style="font-size:0.8rem; color:var(--neon-blue); font-family:'Orbitron';">READY</div>
+            <div id="status-text" style="font-size:0.7rem; color:var(--neon-blue); font-family:'Orbitron'; text-align:center;">STABILIZING...</div>
             <button id="captureBtn" onclick="takePhoto()" class="btn-capture">📸</button>
             
-            <div id="upload-group" style="display:none; flex-direction:column; gap:10px;">
+            <div id="upload-group" style="display:none; flex-direction:column; gap:10px; width:100%;">
                 <button onclick="uploadPhoto()" class="btn-upload">UPLINK 2K</button>
                 <button onclick="location.reload()" class="btn btn-sm btn-outline-light">RETAKE</button>
             </div>
@@ -121,19 +131,8 @@
 
         async function switchToLandscape() {
             if(!document.getElementById('stuName').value) return alert("Enter name!");
-            
-            // Toggle UI
             document.getElementById('vertical-ui').style.display = 'none';
-            const horiz = document.getElementById('horizontal-ui');
-            horiz.style.display = 'flex';
-
-            // Attempt to lock orientation (Chrome/Android)
-            try {
-                if (screen.orientation && screen.orientation.lock) {
-                    await screen.orientation.lock('landscape');
-                }
-            } catch(e) { console.log("Orientation lock not supported"); }
-
+            document.getElementById('horizontal-ui').style.display = 'flex';
             startCam();
         }
 
@@ -143,11 +142,11 @@
                     video: { facingMode: "user", width: { ideal: 3840 }, height: { ideal: 2160 } } 
                 });
                 document.getElementById('video').srcObject = stream;
+                document.getElementById('status-text').innerText = "READY";
             } catch (err) { alert("Camera Error: " + err.message); }
         }
 
         function takePhoto() {
-            // Flash Effect
             const flash = document.getElementById('flash-effect');
             flash.style.opacity = '1';
             setTimeout(() => { flash.style.opacity = '0'; }, 150);
@@ -155,43 +154,33 @@
             const video = document.getElementById('video');
             const canvas = document.createElement('canvas');
             
-            // FORCED 2K LANDSCAPE RESOLUTION
+            // 2K LANDSCAPE SPECS
             canvas.width = 2560;
             canvas.height = 1440;
             const ctx = canvas.getContext('2d');
 
-            const vW = video.videoWidth;
-            const vH = video.videoHeight;
-            const targetAspect = 16/9;
-            let sX, sY, sW, sH;
+            // --- THE ROTATION CORRECTION ---
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate(90 * Math.PI / 180); // Correct for mobile sensor
+            ctx.scale(-1, 1); // Mirror correction
 
-            if ((vW/vH) > targetAspect) {
-                sW = vH * targetAspect; sH = vH; sX = (vW - sW) / 2; sY = 0;
-            } else {
-                sW = vW; sH = vW / targetAspect; sX = 0; sY = (vH - sH) / 2;
-            }
-
-            // Draw and Mirror Correct
-            ctx.translate(canvas.width, 0);
-            ctx.scale(-1, 1);
-            ctx.drawImage(video, sX, sY, sW, sH, 0, 0, canvas.width, canvas.height);
+            // Draw image swapping width/height due to 90deg turn
+            ctx.drawImage(video, -canvas.height / 2, -canvas.width / 2, canvas.height, canvas.width);
             
             const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
             
-            // UI Update
             video.style.display = 'none';
             const preview = document.getElementById('preview-img');
             preview.src = dataUrl;
             preview.style.display = 'block';
+            
             document.getElementById('captureBtn').style.display = 'none';
             document.getElementById('upload-group').style.display = 'flex';
             document.getElementById('status-text').innerText = "SNAP SECURED";
         }
 
         async function uploadPhoto() {
-            const status = document.getElementById('status-text');
-            status.innerText = "UPLINKING...";
-            
+            document.getElementById('status-text').innerText = "UPLINKING...";
             const blob = document.getElementById('preview-img').src.split(',')[1];
             const meta = {
                 name: document.getElementById('stuName').value,
