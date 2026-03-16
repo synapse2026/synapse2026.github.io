@@ -1499,54 +1499,28 @@ const sponsorVideos = [
 	
 	
 ];
-// Function to trigger the 30-minute sponsor break
-function triggerSponsorBreak() {
-    console.log("30 Minute Mark: Starting Sponsor Break...");
-    
-    // 1. Force the current slide to hide
-    document.getElementById(slides[currentSlide]).classList.remove('active');
-    
-    // 2. Show the video slide
-    const videoSlide = document.getElementById('slide-video');
-    videoSlide.classList.add('active');
-    
-    // 3. Start the video marathon
-    // This function will automatically call rotateSlides() when finished, 
-    // returning the dashboard to the normal loop.
-    startSponsorMarathon();
-}
 
-// Set the timer (30 minutes = 30 * 60 * 1000 milliseconds)
-setInterval(triggerSponsorBreak, 2 * 60 * 1000);
 // 2. The Video Marathon Function
 async function startSponsorMarathon() {
     const container = document.getElementById('sponsor-video-container');
-    if (!container) return;
-
-    // Lock the rotation so the 30-minute break isn't interrupted
     isCyclingWinners = true;
 
     for (let sponsor of sponsorVideos) {
-        // Safety check: Ensure the video slide is still the one "intended" to be seen
-        // (Though in a 30-min interrupt, this is usually guaranteed)
-        const videoSlide = document.getElementById('slide-video');
-        if (!videoSlide.classList.contains('active')) break;
+        if (slides[currentSlide] !== 'slide-video') break;
 
-        // CHECK: Does this sponsor have a valid video file?
+        // Check if video exists
         const hasVideo = sponsor.vid && sponsor.vid.trim() !== "";
         
-        // Define the content for the right-hand column
-        const rightColumnHTML = hasVideo 
+        // Define what goes in the right column
+        const rightColumnContent = hasVideo 
             ? `<video id="activeSponsorVid" class="sponsor-main-video" autoplay>
                     <source src="${sponsor.vid}" type="video/mp4">
                </video>`
             : `<div class="sponsor-video-placeholder">
                     <div class="placeholder-icon">★</div>
                     <div class="placeholder-text">OFFICIAL PARTNER</div>
-                    <div style="font-size: 0.8rem; color: rgba(255,255,255,0.3); margin-top:10px;">SYNAPSE '26</div>
                </div>`;
 
-        // INJECT THE TWO-COLUMN LAYOUT
         container.innerHTML = `
             <div class="sponsor-spotlight-grid">
                 <div class="sponsor-branding-panel">
@@ -1556,39 +1530,25 @@ async function startSponsorMarathon() {
                 </div>
 
                 <div class="sponsor-video-panel">
-                    ${rightColumnHTML}
+                    ${rightColumnContent}
                 </div>
             </div>`;
 
         if (hasVideo) {
             const vidElement = document.getElementById('activeSponsorVid');
-            
-            // Set a consistent volume for the festival floor
             vidElement.volume = 0.8;
-
-            // Wait for the video to actually finish or fail
             await new Promise((resolve) => {
                 vidElement.onended = resolve;
-                vidElement.onerror = () => {
-                    console.error("Failed to load video:", sponsor.vid);
-                    resolve();
-                };
-                // Safety timeout: If a video is stuck/extremely long, move on after 60s
-                setTimeout(resolve, 60000); 
+                vidElement.onerror = resolve; 
+                setTimeout(resolve, 30000); // 30s safety
             });
         } else {
-            // Static Sponsors (Logo only) stay on screen for 10 seconds
-            await new Promise(r => setTimeout(r, 10000));
+            // Stay for 8 seconds if no video is present
+            await new Promise(r => setTimeout(r, 8000));
         }
     }
 
-    // Cleanup and return to normal HUD rotation
     isCyclingWinners = false;
-    
-    // Hide the video slide manually (since it was an interrupt)
-    document.getElementById('slide-video').classList.remove('active');
-    
-    // Resume the normal loop
     rotateSlides(); 
 }
 
@@ -2206,13 +2166,17 @@ const slides = [
     'slide-status',
 	
 
-    'slide-mentor',
+    
 
     'slide-schedule',
+	
+	'slide-mentor',
 
-    'slide-achievements',
+   
 
     'slide-winners',
+	
+	 'slide-achievements',
 
      // New dedicated slide
 
@@ -2222,6 +2186,7 @@ const slides = [
 
     'slide-attendees',
 	'slide-video'
+	
 
 ];
 
