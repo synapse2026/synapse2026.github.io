@@ -1,0 +1,2360 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SYNAPSE 2026 | LIVE HUD</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<style>
+
+    /* --- CORE ROOT & BASE STYLES --- */
+
+    :root { --poster-pink: #d11fb7; --poster-blue: #1fc1d1; --poster-purple: #741fd1; --bg: #07060f; --glass: rgba(15, 12, 41, 0.85); --gold: #ffea00; }
+
+    body, html { margin: 0; padding: 0; min-height: 100vh; background: var(--bg); color: #fff; font-family: 'Share Tech Mono', monospace; overflow: hidden; }
+
+    #particles-js { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+
+    .scanline { position: fixed; top: 0; left: 0; width: 100%; height: 10px; background: rgba(31, 193, 209, 0.05); z-index: 10; animation: scan 8s linear infinite; pointer-events: none; }
+
+    @keyframes scan { from { top: -10%; } to { top: 110%; } }
+
+
+
+    .college-header { background: rgba(0, 0, 0, 0.9); text-align: center; padding: 15px; border-bottom: 3px solid var(--gold); font-family: 'Orbitron'; font-size: clamp(1rem, 2vw, 2.5rem); color: var(--gold); text-transform: uppercase; z-index: 100; position: relative; letter-spacing: 4px; }
+
+    .dashboard { display: grid; grid-template-rows: auto 1fr 120px; height: calc(100vh - 55px); gap: 10px; padding: 15px; box-sizing: border-box; position: relative; z-index: 1; }
+
+
+
+    .header { background: var(--glass); border: 2px solid var(--poster-blue); display: flex; align-items: center; justify-content: space-between; padding: 15px 40px; z-index: 20; }
+
+    .logo { font-family: 'Orbitron'; font-size: 3.5rem; font-weight: 900; color: var(--poster-blue); text-shadow: 0 0 20px var(--poster-blue); }
+
+    .flip-clock { display: flex; gap: 5px; align-items: center; }
+
+    .flip-card { position: relative; width: 55px; height: 85px; background: #111; border-radius: 6px; font-family: 'Orbitron'; font-size: 3.5rem; font-weight: 900; color: #fff; text-align: center; line-height: 85px; border: 1px solid #444; }
+
+    .am-pm { font-size: 1.4rem; margin-left: 10px; color: var(--poster-blue); font-weight: bold; }
+
+
+
+    .stats-overlay { position: absolute; top: 25px; right: 25px; z-index: 50; display: flex; gap: 15px; }
+
+    .stat-card { background: var(--glass); border: 2px solid var(--poster-pink); padding: 12px 25px; border-radius: 12px; backdrop-filter: blur(8px); min-width: 140px; text-align: center; }
+
+    .stat-val { font-family: 'Orbitron'; font-size: 3rem; color: #fff; text-shadow: 0 0 15px var(--poster-pink); line-height: 1; }
+
+
+
+    .stage { position: relative; background: transparent; overflow: hidden; border-radius: 15px; }
+
+    .slide { position: absolute; inset: 0; padding: 30px; opacity: 0; transition: opacity 0.5s; visibility: hidden; }
+
+    .slide.active { opacity: 1; visibility: visible; z-index: 5; }
+
+    .stage-title { position: absolute; top: 30px; left: 30px; font-family: 'Orbitron'; font-size: 2.5rem; color: var(--poster-blue); z-index: 10; background: rgba(0,0,0,0.7); padding: 10px 25px; border-left: 8px solid var(--poster-blue); letter-spacing: 2px; }
+
+
+
+/* --- MASSIVE NOW PLAYING HUD --- */
+.now-playing {
+    position: fixed;
+    bottom: 50px; /* Lowered slightly for better screen balance */
+    left: 40px;
+    transform: translateX(-120%);
+    background: rgba(0, 0, 0, 0.98);
+    border: 4px solid var(--poster-blue);
+    padding: 50px; /* Increased padding */
+    border-radius: 30px;
+    display: flex; 
+    align-items: center;
+    gap: 50px;
+    transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 9999;
+    box-shadow: 0 0 60px rgba(31, 193, 209, 0.6);
+    width: 1000px; /* Much wider */
+    border-left: 20px solid var(--poster-blue);
+    backdrop-filter: blur(20px);
+}
+
+.now-playing.active { transform: translateX(0); }
+
+/* Left Side: Text Elements */
+.np-info-content { flex: 1; display: flex; flex-direction: column; gap: 15px; }
+
+.np-label {
+    font-size: 1.5rem;
+    letter-spacing: 5px;
+    color: var(--poster-blue);
+    font-weight: 800;
+}
+
+#np-song {
+    font-size: 4.5rem; /* Massive Song Title */
+    font-weight: 900;
+    line-height: 1.1;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(255,255,255,0.3);
+}
+
+#np-artist {
+    font-size: 2.2rem; /* Clear Artist Name */
+    color: var(--poster-pink);
+    margin-bottom: 10px;
+}
+
+.np-time {
+    font-size: 1.4rem;
+    display: flex;
+    justify-content: space-between;
+    border-top: 2px solid rgba(255,255,255,0.1);
+    padding-top: 15px;
+}
+
+/* Right Side: QR Container */
+.np-qr-container {
+    background: #fff;
+    padding: 20px; /* More white space for easier scanning */
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 6px solid var(--gold);
+    animation: qrPulse 2s infinite ease-in-out;
+}
+
+.np-qr-container img { 
+    width: 220px; /* Large QR Code */
+    height: 220px; 
+}
+
+.np-qr-label {
+    color: #000;
+    font-family: 'Orbitron';
+    font-size: 1.2rem; /* Bigger Label */
+    font-weight: 900;
+    margin-top: 10px;
+}
+
+@keyframes qrPulse {
+    0% { box-shadow: 0 0 20px rgba(255, 234, 0, 0.4); transform: scale(1); }
+    50% { box-shadow: 0 0 50px rgba(255, 234, 0, 0.8); transform: scale(1.05); }
+    100% { box-shadow: 0 0 20px rgba(255, 234, 0, 0.4); transform: scale(1); }
+}
+
+    /* --- DJ POLL (SCALED 50% & QR 100%) --- */
+
+    .poll-layout {
+
+        display: grid;
+
+        grid-template-columns: 1fr 500px;
+
+        gap: 60px;
+
+        height: 80%;
+
+        margin-top: 100px;
+
+    }
+
+
+
+    .poll-bars {
+
+        display: grid;
+
+        grid-template-columns: 1fr 1fr;
+
+        gap: 30px;
+
+        align-content: center;
+
+    }
+
+
+
+    .poll-item {
+
+        background: var(--glass);
+
+        border-left: 12px solid var(--poster-pink);
+
+        padding: 22px;
+
+        border-radius: 0 20px 20px 0;
+
+        margin-bottom: 22px;
+
+        animation: slideIn 0.5s ease-out forwards;
+
+        opacity: 0;
+
+    }
+
+
+
+    @keyframes slideIn { from { transform: translateX(-30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+
+
+    .poll-label {
+
+        display: flex;
+
+        justify-content: space-between;
+
+        font-family: 'Orbitron';
+
+        margin-bottom: 12px;
+
+        font-size: 1.65rem;
+
+        color: #fff;
+
+        text-shadow: 0 0 10px rgba(209, 31, 183, 0.8);
+
+    }
+
+
+
+    .progress-track {
+
+        background: rgba(255,255,255,0.1);
+
+        height: 30px;
+
+        border-radius: 8px;
+
+        overflow: hidden;
+
+    }
+
+
+
+    .progress-fill {
+
+        height: 100%;
+
+        background: linear-gradient(90deg, var(--poster-blue), var(--poster-pink));
+
+        transition: width 1s;
+
+    }
+
+
+
+    .qr-card {
+
+        text-align: center;
+
+        background: rgba(255, 255, 255, 0.05);
+
+        padding: 20px;
+
+        border-radius: 20px;
+
+        border: 1px solid rgba(31, 193, 209, 0.3);
+
+    }
+
+
+
+    .qr-card img {
+
+        width: 300px !important;
+
+        height: 300px !important;
+
+        border-radius: 15px;
+
+        box-shadow: 0 0 40px rgba(31, 193, 209, 0.6);
+
+        border: 5px solid white;
+
+    }
+
+
+
+    .qr-text {
+
+        font-family: 'Orbitron';
+
+        font-size: 2.2rem !important;
+
+        font-weight: 900;
+
+        margin-top: 20px;
+
+        color: var(--gold) !important;
+
+        text-transform: uppercase;
+
+        letter-spacing: 2px;
+
+        animation: textPulse 2s infinite;
+
+    }
+
+
+
+    /* Individual Voter Ticker scaled 50% */
+
+    .voter-ticker-text {
+
+        display: inline-block;
+
+        font-family: 'Share Tech Mono', monospace;
+
+        font-size: 1.3rem;
+
+        color: var(--poster-blue);
+
+        text-transform: uppercase;
+
+        white-space: nowrap;
+
+        padding-left: 100%;
+
+        animation: tickerMove 25s linear infinite;
+
+    }
+
+
+
+    @keyframes textPulse {
+
+        0%, 100% { opacity: 1; transform: scale(1); }
+
+        50% { opacity: 0.7; transform: scale(1.05); }
+
+    }
+
+
+
+    /* --- WINNER PAGE (HALL OF FAME) --- */
+
+    .winner-marathon { display: flex; align-items: center; justify-content: center; gap: 50px; height: 100%; width: 100%; }
+
+    .winner-marathon.reverse { flex-direction: row-reverse; }
+
+    .winner-frame { height: 75vh; aspect-ratio: 4/5; border: 8px solid var(--poster-pink); border-radius: 30px; background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 50px var(--poster-pink); }
+
+    .winner-frame img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+    .winner-info-card { background: rgba(0,0,0,0.9); padding: 50px; border-radius: 30px; border-left: 15px solid var(--gold); min-width: 550px; }
+
+    .winner-event-tag { font-family: 'Orbitron'; font-size: 2.8rem; color: var(--poster-blue); margin-bottom: 5px; text-transform: uppercase; }
+
+    .winner-rank-tag { font-family: 'Orbitron'; font-size: 2rem; color: var(--gold); margin-bottom: 15px; }
+
+    .winner-name-hero { font-family: 'Orbitron'; font-size: 5.5rem; color: #fff; text-transform: uppercase; line-height: 1; margin-bottom: 10px; }
+
+    .winner-college-tag { font-family: 'Share Tech Mono'; font-size: 3.5rem; color: #aaa; }
+
+
+
+    /* --- TIMELINE SCHEDULE --- */
+
+    #timeline-scroll-container { height: calc(100vh - 350px); overflow-y: scroll; margin-top: 100px; padding-bottom: 500px; scrollbar-width: none; position: relative; }
+
+    #timeline-scroll-container::-webkit-scrollbar { display: none; }
+
+    .timeline { position: relative; max-width: 1200px; margin: 0 auto; padding: 50px 0; }
+
+    .timeline::after { content: ''; position: absolute; width: 6px; background: linear-gradient(to bottom, var(--poster-blue), var(--poster-pink), var(--poster-purple)); top: 0; bottom: 0; left: 50%; margin-left: -3px; border-radius: 10px; }
+
+    .timeline-item { padding: 40px 0; position: relative; width: 50%; opacity: 0; transition: 1s; display: flex; align-items: center; box-sizing: border-box; }
+
+    .timeline-item.left { left: 0; padding-right: 80px; justify-content: flex-end; transform: translateX(-50px); }
+
+    .timeline-item.right { left: 50%; padding-left: 80px; justify-content: flex-start; transform: translateX(50px); }
+
+    .slide.active .timeline-item { opacity: 1; transform: translateX(0); }
+
+    .timeline-dot { position: absolute; background: #07060f; border: 5px solid; top: 50%; transform: translateY(-50%); border-radius: 50%; z-index: 10; width: 22px; height: 22px; }
+
+    .timeline-item.left .timeline-dot { right: -74px; border-color: var(--poster-blue); }
+
+    .timeline-item.right .timeline-dot { left: -74px; border-color: var(--poster-pink); }
+
+    .schedule-card { background: var(--glass); border: 2px solid rgba(255, 255, 255, 0.2); border-radius: 20px; padding: 25px; width: 450px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+
+    .schedule-time { color: var(--gold); font-family: 'Orbitron'; font-size: 1.3rem; font-weight: 900; display: block; margin-bottom: 10px; letter-spacing: 1px; }
+
+    .schedule-title { font-family: 'Orbitron'; font-size: 2.2rem; color: #fff; margin: 0; line-height: 1.2; }
+
+
+
+    /* --- AIRPORT BOARD (50% SIZE INCREASE + GLOW) --- */
+
+   .airport-board {
+    margin-top: 60px;
+    padding: 0 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 35px; /* Increased gap to fill vertical space better */
+}
+
+
+
+.event-row {
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid #333;
+    border-radius: 15px;
+    display: grid;
+    /* Adjusted columns: 550px for name, 280px for badge, remaining for activity */
+    grid-template-columns: 550px 280px 1fr; 
+    align-items: center;
+    padding: 40px 45px; /* Increased padding to make rows chunkier */
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+
+
+    .event-row::before {
+
+        content: "";
+
+        position: absolute;
+
+        left: 0; top: 0; bottom: 0;
+
+        width: 8px;
+
+        background: var(--poster-blue);
+
+    }
+
+
+
+   .event-name-cell {
+    font-family: 'Orbitron';
+    font-size: 2.2rem; /* Balanced size for 3 rows */
+    color: #fff;
+    font-weight: 900;
+    text-transform: uppercase;
+    /* Neon Glow */
+    text-shadow: 0 0 10px var(--poster-blue), 0 0 20px var(--poster-blue);
+    animation: textGlowPulse 3s ease-in-out infinite alternate;
+}
+
+@keyframes textGlowPulse {
+    from {
+        text-shadow: 
+            0 0 5px #fff,
+            0 0 10px var(--poster-blue),
+            0 0 20px var(--poster-blue);
+        opacity: 0.9;
+    }
+    to {
+        text-shadow: 
+            0 0 10px #fff,
+            0 0 20px var(--poster-blue),
+            0 0 30px var(--poster-blue),
+            0 0 50px var(--poster-blue),
+            0 0 80px var(--poster-blue);
+        opacity: 1;
+    }
+}
+
+
+
+    .status-badge {
+
+        font-family: 'Orbitron';
+
+        padding: 8px 22px;
+
+        border-radius: 6px;
+
+        font-size: 1.35rem;
+
+        text-align: center;
+
+        font-weight: bold;
+
+        width: 210px;
+
+    }
+
+
+
+    .status-not-started { color: #555; border: 1px solid #333; }
+
+
+
+    .status-entry {
+
+        color: var(--poster-blue);
+
+        border: 1.5px solid var(--poster-blue);
+
+        animation: blink 2s infinite;
+
+    }
+
+
+
+    .status-ongoing {
+
+        color: var(--poster-pink);
+
+        border: 1.5px solid var(--poster-pink);
+
+        animation: blink 1s infinite;
+
+        text-shadow: 0 0 8px var(--poster-pink);
+
+        box-shadow: 0 0 15px rgba(209, 31, 183, 0.3);
+
+    }
+
+
+
+    .status-completed {
+
+        color: var(--gold);
+
+        border: 1.5px solid var(--gold);
+
+        background: rgba(255, 234, 0, 0.1);
+
+    }
+
+
+
+    .activity-scroller {
+
+        font-family: 'Share Tech Mono';
+
+        font-size: 1.8rem;
+
+        color: #aaa;
+
+        white-space: nowrap;
+
+        overflow: hidden;
+
+        position: relative;
+
+    }
+
+
+
+    .scroll-text {
+
+        display: inline-block;
+
+        animation: airportTicker 15s linear infinite;
+
+        padding-left: 100%;
+
+    }
+
+
+
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    @keyframes airportTicker { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+
+
+
+    /* --- FOOTER SCROLLER --- */
+
+    .footer { background: #000; border-top: 3px solid var(--poster-blue); height: 100px; z-index: 20; overflow: hidden; }
+
+    .scroller { display: flex; align-items: center; width: max-content; animation: scrollTicker 30s linear infinite; height: 100%; }
+
+    @keyframes scrollTicker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    .sponsor-pod { height: 70px; margin: 0 60px; flex-shrink: 0; }
+
+    .sponsor-pod img { height: 60px; }
+
+
+
+    /* --- MAXIMIZED PHOTO SIZE LOGIC --- */
+
+    .media-container-hero { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; width: 100%; position: relative; }
+
+    .winner-frame.max-view {
+
+        height: 85vh;
+
+        width: 95vw;
+
+        border: 4px solid var(--poster-blue);
+
+        border-radius: 20px;
+
+        box-shadow: 0 0 30px rgba(31, 193, 209, 0.5);
+
+    }
+
+    .caption-mini {
+
+        position: absolute; bottom: 40px; right: 60px;
+
+        background: rgba(0, 0, 0, 0.85); padding: 15px 25px;
+
+        border-radius: 12px; border-right: 8px solid var(--poster-blue);
+
+        z-index: 100; backdrop-filter: blur(5px);
+
+    }
+
+    .mini-event-tag { font-family: 'Orbitron'; font-size: 1.4rem; color: var(--poster-blue); margin: 0; text-transform: uppercase; letter-spacing: 1px; }
+
+    .mini-name-hero { font-family: 'Orbitron'; font-size: 2.2rem; color: #fff; margin: 5px 0 0 0; text-transform: uppercase; }
+
+
+
+    /* Individual Voter Ticker Animation */
+
+    .voter-ticker-text {
+
+        display: inline-block;
+
+        font-family: 'Share Tech Mono', monospace;
+
+        font-size: 0.85rem;
+
+        color: var(--poster-blue);
+
+        text-transform: uppercase;
+
+        white-space: nowrap;
+
+        padding-left: 100%;
+
+        animation: tickerMove 25s linear infinite;
+
+    }
+
+
+
+    @keyframes tickerMove {
+
+        0%   { transform: translate(0, 0); }
+
+        100% { transform: translate(-100%, 0); }
+
+    }
+
+
+
+    /* --- GROUP LAYOUT --- */
+
+    .winner-marathon.group-layout {
+
+        flex-direction: column;
+
+        padding: 0;
+
+        justify-content: flex-start;
+
+    }
+
+
+
+    .group-frame {
+
+        width: 100vw !important;
+
+        height: 85vh !important;
+
+        max-width: none !important;
+
+        position: relative;
+
+        background: #000;
+
+        overflow: hidden;
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+    }
+
+
+
+    .group-frame img {
+
+        width: 100%;
+
+        height: 100%;
+
+        object-fit: cover;
+
+        transform: scale(1.0);  /* ✅ FIXED: was scale(1.0; — missing closing parenthesis */
+
+        object-position: center 30%;
+
+        animation: slowPan 10s ease-in-out infinite alternate;
+
+    }
+
+
+
+    @keyframes slowPan {
+
+        0%   { transform: scale(1.0) translateX(-5%); }
+
+        100% { transform: scale(1.0) translateX(5%); }
+
+    }
+
+
+
+    .group-overlay-card {
+
+        position: absolute;
+
+        bottom: 0; left: 0; right: 0;
+
+        background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 50%, transparent 100%);
+
+        padding: 40px 60px;
+
+        z-index: 10;
+
+    }
+
+
+
+    .group-overlay-card .winner-name-hero {
+
+        font-size: 4rem;
+
+        margin: 0;
+
+    }
+
+
+
+    /* --- REFINED VENUE STYLING --- */
+
+    .venue-icon {
+
+        width: 14px !important;
+
+        height: 14px !important;
+
+        display: inline-block !important;
+
+        vertical-align: middle;
+
+        fill: var(--poster-blue);
+
+        flex-shrink: 0;
+
+        margin-right: 4px;
+
+        line-height: 1;
+
+    }
+
+
+
+    .schedule-venue {
+
+        color: #a0a0a0;
+
+        font-size: 0.95rem;
+
+        display: flex;
+
+        align-items: center;
+
+        margin-top: 5px;
+
+        font-family: 'Share Tech Mono', monospace;
+
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+        padding-top: 5px;
+
+        line-height: 1.2;
+
+    }
+
+
+
+/* --- CINEMATIC MENTOR HUB (16:9 LANDSCAPE OPTIMIZED) --- */
+.mentor-hero-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    gap: 30px;
+    padding: 0 50px;
+    box-sizing: border-box;
+    perspective: 2000px;
+}
+
+.mentor-polaroid-frame {
+    /* Maximized Horizontal Size */
+    width: min(55vw, 900px); 
+    aspect-ratio: 16 / 9;
+    background: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    position: relative;
+    border: 5px solid #fff;
+    box-shadow: 0 0 50px rgba(31, 193, 209, 0.3), 0 20px 40px rgba(0,0,0,0.8);
+    animation: mentorEntrance 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Floating Title over Picture */
+.mentor-badge-floating {
+    position: absolute;
+    top: -20px;
+    left: 40px;
+    background: var(--poster-blue);
+    color: #fff;
+    padding: 8px 25px;
+    font-family: 'Orbitron';
+    font-weight: 900;
+    font-size: 1.1rem;
+    z-index: 110;
+    box-shadow: 0 0 15px var(--poster-blue);
+    border: 2px solid #fff;
+    border-radius: 4px;
+    letter-spacing: 2px;
+}
+
+.camera-pop {
+    position: absolute;
+    top: -45px;
+    right: 20px;
+    font-size: 3.5rem;
+    filter: drop-shadow(0 0 15px var(--poster-pink));
+    animation: camBounce 2s infinite ease-in-out;
+}
+
+.mentor-image-container {
+    width: 100%;
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+    border-radius: 4px;
+}
+
+.mentor-image-container img {
+    width: 100%; height: 100%; 
+    object-fit: cover; /* Fills the 16:9 frame perfectly */
+}
+
+/* RIGHT SIDE DATA PANEL - Compact & Glowing */
+.mentor-details-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px;
+    border-left: 10px solid var(--poster-pink);
+    background: linear-gradient(90deg, rgba(209, 31, 183, 0.1), transparent);
+    animation: slideInRight 0.8s ease-out;
+}
+
+.m-detail-label { 
+    font-family: 'Share Tech Mono'; 
+    color: var(--poster-blue); 
+    font-size: 1.2rem; 
+    letter-spacing: 3px; 
+    margin-bottom: 5px;
+}
+
+.m-detail-val { 
+    font-family: 'Orbitron'; 
+    color: #fff; 
+    font-size: 2.8rem; 
+    font-weight: 900; 
+    text-transform: uppercase; 
+    margin-bottom: 25px;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+    line-height: 1;
+}
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(50px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes mentorEntrance {
+    0% { transform: scale(0.8) rotateY(-20deg) translateY(100px); opacity: 0; }
+    100% { transform: scale(1) rotateY(0deg) translateY(0); opacity: 1; }
+}
+
+/* --- RECENT TAG STYLING --- */
+.recent-tag {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: var(--gold);
+    color: #000;
+    padding: 5px 15px;
+    font-family: 'Orbitron';
+    font-weight: 900;
+    font-size: 1rem;
+    border-radius: 4px;
+    z-index: 120;
+    box-shadow: 0 0 15px var(--gold);
+    animation: pulseRecent 2s infinite;
+}
+
+@keyframes pulseRecent {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Special glow for the very latest photo */
+.latest-border {
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 60px rgba(255, 234, 0, 0.4) !important;
+}
+
+/* --- CINEMATIC SIDE-TEXT QR LAYOUT --- */
+.qr-hero-slide {
+    display: flex;
+    flex-direction: row; /* Align side-by-side */
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    gap: 40px;
+    padding: 0 50px;
+}
+
+.qr-main-frame {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 20px;
+    border-radius: 20px;
+    border: 4px solid var(--poster-blue);
+    box-shadow: 0 0 50px rgba(31, 193, 209, 0.4);
+    backdrop-filter: blur(10px);
+    z-index: 10;
+}
+
+.qr-main-frame img {
+    width: 380px;
+    height: 380px;
+    border: 8px solid #fff;
+    border-radius: 10px;
+    display: block;
+}
+
+.qr-side-text {
+    font-family: 'Orbitron';
+    font-weight: 900;
+    text-transform: uppercase;
+    line-height: 1;
+}
+
+/* Left side "SCAN" */
+.qr-text-left {
+    font-size: 6rem;
+    color: #fff;
+    text-shadow: 0 0 20px var(--poster-blue);
+    writing-mode: vertical-lr; /* Makes it vertical */
+    transform: rotate(180deg);
+}
+
+/* Right side "GET FEATURED" */
+.qr-text-right {
+    font-size: 3.5rem;
+    color: var(--gold);
+    max-width: 300px;
+    text-align: left;
+    animation: pulseFeatured 1.5s infinite alternate;
+}
+
+@keyframes pulseFeatured {
+    from { opacity: 0.6; transform: scale(0.95); text-shadow: 0 0 10px var(--gold); }
+    to { opacity: 1; transform: scale(1.05); text-shadow: 0 0 30px var(--gold), 0 0 50px var(--gold); }
+}
+/* --- SPONSOR VIDEO SPOTLIGHT --- */
+/* --- RESPONSIVE SPONSOR GRID --- */
+.sponsor-spotlight-grid {
+    display: grid;
+    grid-template-columns: 400px 1fr; /* Fixed width for logo, flexible for video */
+    gap: 30px;
+    width: 95%;
+    height: 85vh; /* Occupy most of the vertical stage */
+    align-items: center;
+    margin: 0 auto;
+}
+
+.sponsor-branding-panel {
+    background: rgba(255, 255, 255, 0.03);
+    border-left: 10px solid var(--gold);
+    padding: 30px;
+    height: 60%; /* Compact branding box */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+}
+
+.sponsor-brand-img {
+    max-width: 100%;
+    max-height: 250px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 15px var(--gold));
+}
+
+.sponsor-video-panel {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    overflow: hidden;
+}
+
+.sponsor-main-video {
+    width: 100%;
+    max-height: 70vh;
+    object-fit: contain; /* CRITICAL: Handles vertical videos with black bars */
+    background: #000;
+    border: 3px solid var(--poster-blue);
+    border-radius: 15px;
+    box-shadow: 0 0 30px rgba(31, 193, 209, 0.3);
+}
+.sponsor-video-placeholder {
+    width: 100%;
+    height: 50vh; /* Matches average video height */
+    background: rgba(255, 255, 255, 0.03);
+    border: 2px dashed rgba(31, 193, 209, 0.4);
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.placeholder-icon {
+    font-size: 5rem;
+    color: var(--gold);
+    text-shadow: 0 0 20px var(--gold);
+    margin-bottom: 10px;
+    animation: pulseGold 2s infinite alternate;
+}
+
+.placeholder-text {
+    font-family: 'Orbitron';
+    font-size: 1.5rem;
+    color: var(--poster-blue);
+    letter-spacing: 5px;
+}
+
+.sponsor-brand-name {
+    font-family: 'Orbitron';
+    font-size: 2.2rem;
+    color: #fff;
+    text-align: center;
+}
+</style>
+
+
+
+</head>
+
+<body>
+
+
+
+<audio id="fanfareAudio" src="winner_theme.mp3" preload="auto"></audio>
+
+<audio id="clappingAudio" src="clapping.mp3" loop preload="auto"></audio>
+
+
+
+<div class="college-header">Govt. Residential Women's Polytechnic College Payyanur</div>
+
+<div id="particles-js"></div>
+
+<div class="scanline"></div>
+
+
+<div id="now-playing" class="now-playing">
+    <div class="np-info-content">
+        <div class="np-label">⚡ SYNAPSE LIVE TOP PICK</div>
+        <div id="np-song">LOADING...</div>
+        <div id="np-artist">ARTIST</div>
+        <div class="np-time">
+            <span style="font-family: 'Orbitron';">STATUS: PLAYING NOW</span>
+            <span id="np-votes" style="color: var(--gold); font-weight: bold;">🏆 0 VOTES</span>
+        </div>
+    </div>
+
+    <div class="np-qr-container">
+        <div style="color:#000; font-size:0.9rem; font-weight:bold; margin-bottom:5px;">VOTE FOR NEXT</div>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://synapse2026.github.io/vote_your_song.html" alt="Vote QR">
+        <div class="np-qr-label">SCAN ME</div>
+    </div>
+</div>
+
+
+
+<div class="dashboard">
+
+    <header class="header">
+
+        <div class="logo">SYNAPSE '26</div>
+
+        <div class="flip-clock">
+
+            <div class="flip-card" id="h1">0</div><div class="flip-card" id="h2">0</div>
+
+            <div class="clock-sep" style="font-size: 4rem; padding: 0 10px;">:</div>
+
+            <div class="flip-card" id="m1">0</div><div class="flip-card" id="m2">0</div>
+
+            <div class="am-pm" id="ampm">AM</div>
+
+        </div>
+
+    </header>
+
+
+
+    <main class="stage">
+
+        <div class="stats-overlay">
+
+            <div class="stat-card"><div class="stat-val" id="paidCount">0</div><div class="stat-label">Check-ins</div></div>
+
+            <div class="stat-card" style="border-color: var(--poster-blue);"><div class="stat-val" id="winCount">0</div><div class="stat-label">Winners</div></div>
+
+        </div>
+
+        <div class="slide active" id="slide-status">
+
+    <div class="stage-title">LIVE EVENT TRACKER</div>
+
+    <div class="airport-board" id="airport-board">
+
+        </div>
+
+</div>
+
+<div class="slide" id="slide-mentor">
+
+    <div class="stage-title">MENTOR MOMENTS</div>
+
+    <div id="mentor-content" style="height: 100%; width: 100%;"></div>
+
+</div>
+
+<div class="slide" id="slide-video">
+    <div class="stage-title">OUR PROUD SPONSORS</div>
+    <div id="sponsor-video-container" style="height: 100%; width: 100%; display: flex; align-items: center; justify-content: center;">
+        </div>
+</div>
+
+        <div class="slide" id="slide-music">
+
+    <div class="stage-title">VOTE FOR UR FAV MUSIC</div>
+
+    <div class="poll-layout">
+
+        <div class="poll-bars" id="poll-bars-container"></div>
+
+        
+
+        <div class="qr-card" style="margin-top: 50px;">
+
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://synapse2026.github.io/vote_your_song.html" alt="QR">
+
+            <div class="qr-text" style="color:#000; font-family:Orbitron; font-weight:900; margin-top:10px; text-align:center;">SCAN TO VOTE</div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+       <div class="slide" id="slide-photos">
+    <div class="stage-title">LIVE SNAP</div>
+    <div id="live-media-content" style="height: 100%; width: 100%;"></div>
+</div>
+
+        <div class="slide" id="slide-achievements">
+
+    <div class="stage-title">SPECIAL ACHIEVEMENTS</div>
+
+    <div id="achievement-content" style="height: 100%; width: 100%;"></div>
+
+</div>
+
+        <div class="slide" id="slide-winners">
+
+            <div class="stage-title">HALL OF FAME</div>
+
+            <div id="winner-marathon-area" style="height: 100%; width: 100%;"></div>
+
+        </div>
+
+
+
+        <div class="slide" id="slide-schedule">
+
+            <div class="stage-title">EVENT TIMELINE</div>
+
+            <div id="timeline-scroll-container">
+
+                <div class="timeline" id="hud-timeline">
+
+    <div class="timeline-item left"><div class="timeline-dot"></div><div class="schedule-card">
+
+        <span class="schedule-time">09:00 AM - 04:00 PM</span>
+
+        <h3 class="schedule-title">Project Expo</h3>
+
+        <div class="schedule-venue">
+
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+
+            S6 EC & CT Class Rooms
+
+        </div>
+
+    </div></div>
+
+
+
+    <div class="timeline-item right"><div class="timeline-dot"></div><div class="schedule-card">
+
+        <span class="schedule-time">10:00 AM - 11:00 AM</span>
+
+        <h3 class="schedule-title">Pixel Clash</h3>
+
+        <div class="schedule-venue">
+
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+
+            CABM Lab
+
+        </div>
+
+    </div></div>
+
+
+
+    <div class="timeline-item left"><div class="timeline-dot"></div><div class="schedule-card">
+
+        <span class="schedule-time">10:00 AM - 12:00 PM</span>
+
+        <h3 class="schedule-title">Glow Craft</h3>
+
+        <div class="schedule-venue">
+
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+
+            Embedded System Lab
+
+        </div>
+
+    </div></div>
+
+
+
+    <div class="timeline-item right"><div class="timeline-dot"></div><div class="schedule-card">
+
+        <span class="schedule-time">10:00 AM - 12:00 PM</span>
+
+        <h3 class="schedule-title">TrailBlaze</h3>
+
+        <div class="schedule-venue">
+
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+
+            Software Lab 2
+
+        </div>
+
+    </div></div>
+
+
+
+    <div class="timeline-item left"><div class="timeline-dot"></div><div class="schedule-card">
+
+        <span class="schedule-time">10:00 AM - 01:00 PM</span>
+
+        <h3 class="schedule-title">Play Villa</h3>
+
+        <div class="schedule-venue">
+
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+
+            S6 IE Class Room
+
+        </div>
+
+    </div></div>
+
+
+
+    <div class="timeline-item right"><div class="timeline-dot"></div><div class="schedule-card">
+
+        <span class="schedule-time">11:00 AM - 04:00 PM</span>
+
+        <h3 class="schedule-title">Titan Trials</h3>
+
+        <div class="schedule-venue">
+
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+
+            Resource Centre
+
+        </div>
+
+    </div></div>
+
+
+
+    <div class="timeline-item left"><div class="timeline-dot"></div><div class="schedule-card">
+
+        <span class="schedule-time">11:30 AM</span>
+
+        <h3 class="schedule-title">Idea Forum</h3>
+
+        <div class="schedule-venue">
+
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+
+            Mini Auditorium
+
+        </div>
+
+    </div></div>
+
+
+
+    <div class="timeline-item right"><div class="timeline-dot"></div><div class="schedule-card">
+
+        <span class="schedule-time">01:00 PM - 02:00 PM</span>
+
+        <h3 class="schedule-title">Brain2Bot</h3>
+
+        <div class="schedule-venue">
+
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+
+            Software Lab 1
+
+        </div>
+
+    </div></div>
+
+
+
+    <div class="timeline-item left"><div class="timeline-dot"></div><div class="schedule-card">
+
+        <span class="schedule-time">01:00 PM - 03:00 PM</span>
+
+        <h3 class="schedule-title">ReverseX</h3>
+
+        <div class="schedule-venue">
+
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+
+            Basic Electronics Lab
+
+        </div>
+
+    </div></div>
+
+
+
+    <div class="timeline-item right"><div class="timeline-dot"></div><div class="schedule-card">
+
+        <span class="schedule-time">02:00 PM - 04:00 PM</span>
+
+        <h3 class="schedule-title">InnoSense</h3>
+
+        <div class="schedule-venue">
+
+            <svg class="venue-icon" width="14" height="14" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+
+            Software Lab
+
+        </div>
+
+    </div></div>
+
+</div>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="slide" id="slide-attendees"><div class="stage-title">ACTIVITY FEED</div><div id="attendee-list" style="margin-top:50px;"></div></div>
+
+    </main>
+
+    <footer class="footer"><div class="scroller" id="sponsorScroller"></div></footer>
+
+</div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+
+
+
+<script>
+
+// 1. Define your sponsor list here
+const sponsorVideos = [
+
+    { 
+        name: "LAMI BOTIQUE", 
+        type: "MAIN SPONSOR", 
+        img: "sponsors/Lami.png", 
+        vid: "sponsor_videos/LAMI.mp4" // Matching your new naming format
+    },
+    { 
+        name: "TECHCAKE", 
+        type: "CO SPONSOR", 
+        img: "sponsors/techcake.jpeg", 
+        vid: "sponsor_videos/techcake.mp4" // Matching your new naming format
+    },
+    { 
+        name: "Kerala Bank", 
+        type: "SPONSOR", 
+        img: "sponsors/keralabank.jpeg", 
+        vid: "sponsor_videos/keralabank.mp4" 
+    },
+     { 
+        name: "Payyannur Rural Cperatinge Bank", 
+        type: "SPONSOR", 
+        img: "sponsors/1.jpeg", 
+        vid: "" 
+    },
+	{ 
+        name: "Janatha Charitable Society", 
+        type: "SPONSOR", 
+        img: "sponsors/2.jpeg", 
+        vid: "" 
+    },
+	 { 
+        name: "Payyannur Service CO-op Bank", 
+        type: "SPONSOR", 
+        img: "sponsors/3.jpeg", 
+        vid: "" 
+    },
+	 { 
+        name: "Data Power Technologies Pvt ltd", 
+        type: "SPONSOR", 
+        img: "sponsors/4.jpeg", 
+        vid: "" 
+    },
+	 { 
+        name: "Payyannur Co op HOsptial", 
+        type: "SPONSOR", 
+        img: "sponsors/5.jpeg", 
+        vid: "" 
+    },
+	 { 
+        name: "Korom Bank", 
+        type: "SPONSOR", 
+        img: "sponsors/6.jpeg", 
+        vid: "" 
+    },
+	 { 
+        name: "Denesto  Furnitures", 
+        type: "SPONSOR", 
+        img: "sponsors/7.jpeg", 
+        vid: "" 
+    }
+	
+	
+];
+
+// 2. The Video Marathon Function
+async function startSponsorMarathon() {
+    const container = document.getElementById('sponsor-video-container');
+    isCyclingWinners = true;
+
+    for (let sponsor of sponsorVideos) {
+        if (slides[currentSlide] !== 'slide-video') break;
+
+        // Check if video exists
+        const hasVideo = sponsor.vid && sponsor.vid.trim() !== "";
+        
+        // Define what goes in the right column
+        const rightColumnContent = hasVideo 
+            ? `<video id="activeSponsorVid" class="sponsor-main-video" autoplay>
+                    <source src="${sponsor.vid}" type="video/mp4">
+               </video>`
+            : `<div class="sponsor-video-placeholder">
+                    <div class="placeholder-icon">★</div>
+                    <div class="placeholder-text">OFFICIAL PARTNER</div>
+               </div>`;
+
+        container.innerHTML = `
+            <div class="sponsor-spotlight-grid">
+                <div class="sponsor-branding-panel">
+                    <img src="${sponsor.img}" class="sponsor-brand-img" onerror="this.src='logo.png'">
+                    <div class="sponsor-brand-name">${sponsor.name}</div>
+                    <div class="sponsor-desc-tag">${sponsor.type}</div>
+                </div>
+
+                <div class="sponsor-video-panel">
+                    ${rightColumnContent}
+                </div>
+            </div>`;
+
+        if (hasVideo) {
+            const vidElement = document.getElementById('activeSponsorVid');
+            vidElement.volume = 0.8;
+            await new Promise((resolve) => {
+                vidElement.onended = resolve;
+                vidElement.onerror = resolve; 
+                setTimeout(resolve, 30000); // 30s safety
+            });
+        } else {
+            // Stay for 8 seconds if no video is present
+            await new Promise(r => setTimeout(r, 8000));
+        }
+    }
+
+    isCyclingWinners = false;
+    rotateSlides(); 
+}
+
+const allEvents = ["Glow Craft", "Reverse X", "Trail Blaze", "Brain 2 Bot", "Titan Trials", "Pixel Clash", "Innosense", "Seminar Presentation", "Play villa"];
+
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzb97bG3GTT1wMH7M9j8RDXkoqoFD_MWXFkUZS0przdUO51s-7Zyutn0FbRSRnjjH8X5A/exec';
+
+    let cachedData = null, isCyclingWinners = false, lastWinnerUri = "", lastSignalReceived = 0, scrollPos = 0;
+
+
+
+    particlesJS("particles-js", { "particles": { "number": { "value": 60 }, "color": { "value": ["#d11fb7", "#1fc1d1"] }, "opacity": { "value": 0.5 }, "size": { "value": 4 }, "line_linked": { "enable": true, "distance": 180, "color": "#741fd1", "opacity": 0.4, "width": 2 }, "move": { "enable": true, "speed": 1.5 } } });
+
+
+
+    function stopAllCeremonyAudio() {
+
+    const fan = document.getElementById('fanfareAudio');
+
+    const clap = document.getElementById('clappingAudio');
+
+    // Only stop if we are NOT on the winners slide
+
+    if (slides[currentSlide] !== 'slide-winners') {
+
+        if (fan) { fan.pause(); fan.currentTime = 0; }
+
+        if (clap) { clap.pause(); clap.currentTime = 0; }
+
+    }
+
+}
+
+function syncVolumeWithSpotify() {
+
+    fetch(`${scriptURL}?action=getMusicState`)
+
+        .then(res => res.text())
+
+        .then(state => {
+
+            const fan = document.getElementById('fanfareAudio');
+
+            const clap = document.getElementById('clappingAudio');
+
+            
+
+            if (state.trim() === "playing") {
+
+                // Reduce volume to 20% if Spotify is active
+
+                if (fan) fan.volume = 0.2;
+
+                if (clap) clap.volume = 0.2;
+
+            } else {
+
+                // Restore full volume
+
+                if (fan) fan.volume = 1.0;
+
+                if (clap) clap.volume = 1.0;
+
+            }
+
+        });
+
+}
+
+
+
+// Check every 5 seconds
+
+setInterval(syncVolumeWithSpotify, 5000);
+
+
+
+   function updateMusicPoll() {
+
+    fetch(`${scriptURL}?action=getAllSongs`)
+
+    .then(res => res.json())
+
+    .then(response => {
+
+        const container = document.getElementById('poll-bars-container');
+
+        container.innerHTML = '';
+
+        
+
+        // Extract the songs array from the response object
+
+        const songs = response.songs || []; 
+
+        const sorted = songs.sort((a,b) => b.votes - a.votes).slice(0, 4);
+
+        const maxVotes = Math.max(...sorted.map(s => s.votes), 1);
+
+
+
+        sorted.forEach((song, i) => {
+
+            const width = (song.votes / maxVotes) * 100;
+
+            // Use lastVoter info we added to the Apps Script
+
+            const voterDisplay = song.lastVoter ? `LATEST VOTE: ${song.lastVoter}` : "WAITING FOR VOTES...";
+
+
+
+            container.innerHTML += `
+
+                <div class="poll-item" style="animation-delay:${i*0.1}s; height: auto; padding-bottom: 10px;">
+
+                    <div class="poll-label">
+
+                        <span>${song.name}</span>
+
+                        <span style="color:var(--gold)">${song.votes} VOTES</span>
+
+                    </div>
+
+                    <div class="progress-track">
+
+                        <div class="progress-fill" style="width:${width}%"></div>
+
+                    </div>
+
+                    <div style="overflow: hidden; white-space: nowrap; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 4px;">
+
+                        <div class="voter-ticker-text">
+
+                            ${voterDisplay}
+
+                        </div>
+
+                    </div>
+
+                </div>`;
+
+        });
+
+    });
+
+}
+
+
+
+    function checkMusicSignal() {
+
+        fetch(`${scriptURL}?action=checkMusicSignal`).then(res => res.json()).then(data => {
+
+            if (data.signalTime && data.signalTime > lastSignalReceived) {
+
+                if (lastSignalReceived !== 0) forceShowNowPlaying();
+
+                lastSignalReceived = data.signalTime;
+
+            }
+
+        });
+
+    }
+
+
+
+    function forceShowNowPlaying() {
+    fetch(`${scriptURL}?action=getTopSong`).then(res => res.json()).then(data => {
+        if (data.uri !== "none" && data.votes > 0) {
+            document.getElementById('np-song').innerText = data.name;
+            document.getElementById('np-artist').innerText = data.artist || "Music Juke Box Pick";
+            document.getElementById('np-votes').innerText = `🏆 ${data.votes} VOTES`;
+            
+            const card = document.getElementById('now-playing');
+            card.classList.add('active');
+            triggerFullConfetti();
+            
+            // Stay for 20 seconds instead of 15 to give people more time to scan
+            setTimeout(() => card.classList.remove('active'), 20000); 
+        }
+    });
+}
+
+
+
+    function triggerFullConfetti() {
+
+        const end = Date.now() + (3 * 1000);
+
+        const colors = ['#d11fb7', '#1fc1d1', '#ffea00'];
+
+        (function frame() {
+
+            confetti({ particleCount: 7, angle: 60, spread: 55, origin: { x: 0 }, colors });
+
+            confetti({ particleCount: 7, angle: 120, spread: 55, origin: { x: 1 }, colors });
+
+            if (Date.now() < end) requestAnimationFrame(frame);
+
+        }());
+
+    }
+
+
+
+    function smoothScroll() {
+
+        const container = document.getElementById('timeline-scroll-container');
+
+        if (slides[currentSlide] === 'slide-schedule' && container) {
+
+            scrollPos += 1.5;
+
+            container.scrollTop = scrollPos;
+
+            const maxScroll = container.scrollHeight - container.offsetHeight;
+
+            if (scrollPos >= maxScroll + 50) { 
+
+                scrollPos = -50; 
+
+            }
+
+        }
+
+        requestAnimationFrame(smoothScroll);
+
+    }
+
+
+
+  async function startWinnerMarathon() {
+
+    if (!cachedData || !cachedData.photos) return;
+
+    const marathonArea = document.getElementById('winner-marathon-area');
+
+    const winners = cachedData.photos.filter(p => p.event && p.event !== "General" && p.type === "PHOTO").reverse();
+
+    
+
+    if (winners.length === 0) {
+
+        marathonArea.innerHTML = "<h1 style='text-align:center; margin-top:150px;'>AWAITING RESULTS...</h1>";
+
+        await new Promise(r => setTimeout(r, 4000));
+
+    } else {
+
+        isCyclingWinners = true;
+
+        document.getElementById('clappingAudio').play().catch(()=>{});
+
+        
+
+        let counter = 0;
+
+        for (let winner of winners) {
+
+            if (slides[currentSlide] !== 'slide-winners') { 
+
+                stopAllCeremonyAudio(); 
+
+                isCyclingWinners = false;
+
+                return; 
+
+            }
+
+
+
+            document.getElementById('fanfareAudio').currentTime = 0;
+
+            document.getElementById('fanfareAudio').play().catch(()=>{});
+
+
+
+            const details = cachedData.winnerDetails.find(d => d.includes(winner.event)) || winner.event;
+
+            const parts = details.split('|');
+
+            const nameCollege = parts[0].trim();
+
+            const rankInfo = parts[1] ? parts[1].split(':')[1] || "WINNER" : "WINNER";
+
+            const nameOnly = nameCollege.split('(')[0].trim();
+
+            const collegeOnly = nameCollege.includes('(') ? nameCollege.split('(')[1].replace(')', '') : "";
+
+            
+
+            // --- NEW: Detect Group/Landscape Layout ---
+
+            // We create a temporary image object to check dimensions
+
+            const tempImg = new Image();
+
+            tempImg.src = winner.url;
+
+            await tempImg.decode(); // Wait for image to load to get dimensions
+
+            const isLandscape = tempImg.width > tempImg.height;
+
+
+
+            if (isLandscape) {
+
+                // LARGE GROUP LAYOUT
+
+                // Inside the isLandscape block
+
+marathonArea.innerHTML = `
+
+    <div class="winner-marathon group-layout">
+
+        <div class="winner-frame group-frame">
+
+            <img src="${winner.url}">
+
+            <div class="group-overlay-card">
+
+                <div class="winner-event-tag" style="color:var(--gold)">${winner.event}</div>
+
+                <div class="winner-rank-tag">${rankInfo.trim()}</div>
+
+                <div class="winner-name-hero">${nameOnly}</div>
+
+                <div class="winner-college-tag">${collegeOnly}</div>
+
+            </div>
+
+        </div>
+
+    </div>`;
+
+            } else {
+
+                // STANDARD SINGLE LAYOUT
+
+                const reverseClass = (counter % 2 === 1) ? "reverse" : "";
+
+                marathonArea.innerHTML = `
+
+                    <div class="winner-marathon ${reverseClass}">
+
+                        <div class="winner-info-card">
+
+                            <div class="winner-event-tag">${winner.event}</div>
+
+                            <div class="winner-rank-tag">${rankInfo.trim()}</div>
+
+                            <div class="winner-name-hero">${nameOnly}</div>
+
+                            <div class="winner-college-tag">${collegeOnly}</div>
+
+                        </div>
+
+                        <div class="winner-frame">
+
+                            <img src="${winner.url}">
+
+                        </div>
+
+                    </div>`;
+
+            }
+
+            
+
+            triggerFullConfetti();
+
+            counter++;
+
+            await new Promise(r => setTimeout(r, 10000));
+
+        }
+
+        stopAllCeremonyAudio();
+
+        isCyclingWinners = false;
+
+    }
+
+    rotateSlides();
+
+}
+
+
+
+  async function startMediaMarathon(type, title, containerId) {
+    if (!cachedData || !cachedData.photos) return;
+    const container = document.getElementById(containerId);
+
+    // If it's an ACHIEVEMENT, show everything. Otherwise, keep the top 5 for Snaps/Mentors.
+const allAssets = cachedData.photos.filter(p => p.type === type).reverse();
+const assets = (type === "ACHIEVEMENT") ? allAssets : allAssets.slice(0, 5);
+
+    // --- TEMPLATE FOR THE FULL SCREEN QR ---
+    const qrSlideHTML = `
+        <div class="qr-hero-slide">
+            <div class="qr-side-text qr-text-left">SCAN</div>
+            <div class="qr-main-frame">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=https://synapse2026.github.io/mentor_cam.html" alt="Mentor QR">
+            </div>
+            <div class="qr-side-text qr-text-right">GET<br>FEATURED<br>HERE</div>
+        </div>`;
+
+    // IF NO MEDIA EXISTS: Show the QR Slide for Mentor Cam, or a Status message for Snaps
+    if (assets.length === 0) {
+        if (type === "MENTOR_SELFIE") {
+            container.innerHTML = qrSlideHTML;
+        } else {
+            container.innerHTML = `<h2 style="text-align: center; margin-top: 20%; color: var(--poster-blue); font-size: 4rem; font-family:'Orbitron';">AWAITING ${title}...</h2>`;
+        }
+        await new Promise(r => setTimeout(r, 10000));
+        isCyclingWinners = false;
+        return;
+    }
+
+    isCyclingWinners = true;
+    let counter = 1;
+
+    for (let item of assets) {
+        // Break if the slide has changed during the loop
+        if (slides[currentSlide] !== 'slide-mentor' && 
+            slides[currentSlide] !== 'slide-photos' && 
+            slides[currentSlide] !== 'slide-achievements') break;
+
+        const isFirst = (counter === 1);
+        const tagText = isFirst ? "MOST RECENT" : `RECENT #${counter}`;
+        const latestClass = isFirst ? "latest-border" : "";
+
+        if (type === "MENTOR_SELFIE") {
+            // --- MENTOR SELFIE LAYOUT ---
+            let rawMeta = item.event || "";
+            let sName = "STUDENT", sSem = "N/A", sDept = "GENERAL";
+
+            if (rawMeta.includes('|')) {
+                const parts = rawMeta.split('|');
+                sName = parts[0]?.trim() || sName;
+                sSem = parts[1]?.trim() || sSem;
+                sDept = parts[2]?.trim() || sDept;
+            } else if (rawMeta.includes('(')) {
+                sName = rawMeta.split('(')[0].trim();
+                let insideBrackets = rawMeta.match(/\(([^)]+)\)/);
+                if (insideBrackets) {
+                    let details = insideBrackets[1].split(' ');
+                    sDept = details[0] || "IE";
+                    sSem = details[1] || "S4";
+                }
+            }
+            
+            container.innerHTML = `
+            <div class="mentor-hero-container">
+                <div class="mentor-polaroid-frame ${latestClass}">
+                    <div class="recent-tag">${tagText}</div>
+                    <div class="camera-pop">📸</div>
+                    <div class="mentor-badge-floating">MENTOR CAM</div>
+                    <div class="mentor-image-container">
+                        <img src="${item.url}" style="width:100%; height:100%; object-fit:cover;">
+                    </div>
+                </div>
+                <div class="mentor-details-panel">
+                    <div class="m-detail-label">STUDENT NAME</div>
+                    <div class="m-detail-val">${sName}</div>
+                    <div class="m-detail-label">SEMESTER</div>
+                    <div class="m-detail-val">${sSem}</div>
+                    <div class="m-detail-label">DEPARTMENT</div>
+                    <div class="m-detail-val" style="color:var(--poster-pink);">${sDept}</div>
+                </div>
+            </div>`;
+        } else {
+            // --- STANDARD LAYOUT FOR LIVE SNAPS & ACHIEVEMENTS ---
+            container.innerHTML = `
+                <div class="media-container-hero">
+                    <div class="winner-frame max-view ${latestClass}">
+                        <div class="recent-tag">${tagText}</div>
+                        <img src="${item.url}" style="width:100%; height:100%; object-fit:contain;">
+                    </div>
+                    <div class="caption-mini">
+                        <div class="mini-event-tag">${title}</div>
+                        <div class="mini-name-hero">${item.event || "SYNAPSE '26"}</div>
+                    </div>
+                </div>`;
+        }
+
+        counter++;
+        await new Promise(r => setTimeout(r, 8000));
+    }
+
+    // Show QR only for Mentor Cam at the end of the loop
+    if (type === "MENTOR_SELFIE" && slides[currentSlide] === 'slide-mentor') {
+        container.innerHTML = qrSlideHTML;
+        await new Promise(r => setTimeout(r, 12000));
+    }
+
+    isCyclingWinners = false;
+}
+
+let currentEventPage = 0;
+
+const eventsPerPage = 3;
+
+
+
+function fetchLiveData() {
+    // 1. Fetch Global Stats & Recent Attendees
+    fetch(`${scriptURL}?action=getLiveTVData`).then(res => res.json()).then(data => {
+        cachedData = data;
+        document.getElementById('paidCount').innerText = data.stats.paid || 0;
+        document.getElementById('winCount').innerText = data.stats.winners || 0;
+        
+        const attendeeContainer = document.getElementById('attendee-list');
+        if (attendeeContainer && data.recentAttendees && data.recentAttendees.length > 0) {
+            attendeeContainer.innerHTML = data.recentAttendees
+                .reverse()
+                .slice(0, 5)
+                .map(attendee => `
+                    <div class="list-item" style="
+                        font-family: 'Orbitron';
+                        font-size: 2.2rem; 
+                        padding: 30px; 
+                        margin-bottom: 20px;
+                        background: rgba(31, 193, 209, 0.1); 
+                        border-left: 15px solid var(--poster-blue);
+                        border-radius: 0 15px 15px 0;
+                        animation: slideIn 0.5s ease-out;
+                    ">
+                        <span style="color: var(--gold);">⚡ ADMITTED:</span> ${attendee.toUpperCase()}
+                    </div>
+                `).join('');
+        }
+        
+        if(data.sponsors?.length > 0) {
+            const pods = data.sponsors.map(url => `<div class="sponsor-pod"><img src="${url.trim()}"></div>`).join('');
+            document.getElementById('sponsorScroller').innerHTML = pods + pods;
+        }
+    });
+
+    // 2. Fetch Event Progress for the Airport Board (with Smooth Transition)
+    fetch(`${scriptURL}?action=getEventStatusBoard`).then(res => res.json()).then(statusData => {
+        const board = document.getElementById('airport-board');
+        if (!board) return;
+        
+        // Merge with master event list
+        const mergedEvents = allEvents.map(evtName => {
+            const found = statusData.find(s => s.name === evtName);
+            return found || { name: evtName, entry: false, started: false, completed: false, attendees: [] };
+        });
+
+        // Pagination Logic (Now set to 3 events per page)
+        const startIndex = currentEventPage * eventsPerPage;
+        const pageEvents = mergedEvents.slice(startIndex, startIndex + eventsPerPage);
+
+        if (startIndex + eventsPerPage >= mergedEvents.length) {
+            currentEventPage = 0;
+        } else {
+            currentEventPage++;
+        }
+
+        // --- START SMOOTH TRANSITION ---
+        board.style.opacity = '0';
+        board.style.transition = 'opacity 0.3s ease-in-out';
+
+        setTimeout(() => {
+            board.innerHTML = ''; 
+
+            pageEvents.forEach(event => {
+                let statusHtml = '';
+                let activityHtml = '';
+
+                if (event.completed) {
+                    statusHtml = '<div class="status-badge status-completed">COMPLETED</div>';
+                    const winners = cachedData?.winnerDetails?.filter(w => w.includes(event.name)) || [];
+                    activityHtml = winners.length > 0 ? `🏆 WINNERS: ${winners.join(" • ")}` : "RESULTS FINALIZED";
+                } 
+                else if (event.started || event.entry) {
+                    statusHtml = event.started ? 
+                        '<div class="status-badge status-ongoing">ONGOING</div>' : 
+                        '<div class="status-badge status-entry">ENTRY OPEN</div>';
+                    
+                    activityHtml = event.attendees && event.attendees.length > 0 ? 
+                        `LATEST CHECK-INS: ${event.attendees.join(" • ")}` : 
+                        "AWAITING PARTICIPANTS TO REPORT...";
+                } 
+                else {
+                    statusHtml = '<div class="status-badge status-not-started">NOT STARTED</div>';
+                    activityHtml = "WAITING FOR THE EVENT TO START...";
+                }
+
+                board.innerHTML += `
+                    <div class="event-row">
+                        <div class="event-name-cell">${event.name.toUpperCase()}</div>
+                        <div>${statusHtml}</div>
+                        <div class="activity-scroller">
+                            <div class="scroll-text">${activityHtml}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Fade back in
+            board.style.opacity = '1';
+        }, 300);
+    });
+}
+
+
+
+    let currentSlide = 0;
+
+const slides = [
+
+    'slide-status',
+	
+
+    
+
+    'slide-schedule',
+	'slide-photos',
+
+    'slide-attendees'
+	'slide-mentor',
+
+    
+
+     // New dedicated slide
+
+    'slide-music',
+	'slide-winners',
+	'slide-achievements',
+
+    
+
+    
+
+];
+
+    
+
+    async function rotateSlides() {
+
+    if (isCyclingWinners) return;
+
+    
+
+    // 1. Stop any active audio from previous slides
+
+    stopAllCeremonyAudio();
+
+    
+
+    // 2. Switch classes
+
+    document.getElementById(slides[currentSlide]).classList.remove('active');
+
+    currentSlide = (currentSlide + 1) % slides.length;
+
+    const activeSlideId = slides[currentSlide];
+
+    document.getElementById(activeSlideId).classList.add('active');
+
+
+
+    // 3. Logic based on which slide just became active
+
+    if (!cachedData) return;
+
+
+
+    switch (activeSlideId) {
+
+        case 'slide-mentor':
+
+            // The first argument "MENTOR_SELFIE" must match the 'Type' column in your Assets sheet
+
+            await startMediaMarathon("MENTOR_SELFIE", "MENTOR MOMENT", "mentor-content");
+
+            break;
+
+        case 'slide-music':
+
+            updateMusicPoll();
+
+            break;
+
+
+
+        case 'slide-schedule':
+
+            scrollPos = -50; // Reset scroll position for the timeline
+
+            break;
+
+
+
+        case 'slide-winners':
+
+            await startWinnerMarathon();
+
+            break;
+
+        case 'slide-status':
+            currentEventPage = 0; // Reset to first page
+            fetchLiveData();      // Load first 3 immediately
+            break;
+
+        case 'slide-achievements':
+
+            await startMediaMarathon("ACHIEVEMENT", "ACHIEVEMENTS", "achievement-content");
+
+            break;
+
+
+
+        case 'slide-photos':
+
+            await startMediaMarathon("LIVE_MOMENT", "LIVE SNAP", "live-media-content");
+
+            break;
+		case 'slide-video':
+    await startSponsorMarathon();
+    break;
+
+    }
+
+}
+
+    fetchLiveData();
+
+    setInterval(fetchLiveData, 10000);
+
+    setInterval(checkMusicSignal, 3000);
+
+   // Remove the old setInterval(rotateSlides, 25000);
+
+// Use this custom function to handle variable slide times:
+
+
+
+function startCustomRotation() {
+    // Look at the slide that is currently visible (active)
+    const activeSlideName = slides[currentSlide]; 
+    let slideTime = 25000; // Default 25 seconds
+
+    if (activeSlideName === 'slide-status') {
+        // Calculate total pages based on your 3-per-page setting
+        const totalPages = Math.ceil(allEvents.length / eventsPerPage);
+        // Stay for 10 seconds per page + a 2 second buffer
+        slideTime = (totalPages * 10000) + 2000; 
+    } 
+    else if (activeSlideName === 'slide-music') {
+        slideTime = 60000; // 60 seconds for Music
+    } 
+    else if (activeSlideName === 'slide-winners') {
+        slideTime = 15000; // startWinnerMarathon handles its own internal timing
+    }
+	else if (activeSlideName === 'slide-video') {
+    slideTime = 999999; // Effectively infinite, marathon will call rotateSlides() manually
+}
+
+    setTimeout(() => {
+        rotateSlides();
+        startCustomRotation(); // Recurse
+    }, slideTime);
+}
+
+
+
+// Start the sequence
+
+startCustomRotation();
+
+    requestAnimationFrame(smoothScroll);
+
+
+
+    setInterval(() => {
+
+        const d = new Date(), h = d.getHours() % 12 || 12;
+
+        document.getElementById('h1').innerText = Math.floor(h/10);
+
+        document.getElementById('h2').innerText = h%10;
+
+        document.getElementById('m1').innerText = Math.floor(d.getMinutes()/10);
+
+        document.getElementById('m2').innerText = d.getMinutes()%10;
+
+        document.getElementById('ampm').innerText = d.getHours() >= 12 ? 'PM' : 'AM';
+
+    }, 1000);
+
+
+
+    document.body.addEventListener('click', () => {
+
+        document.getElementById('fanfareAudio').play().then(() => document.getElementById('fanfareAudio').pause());
+
+        document.getElementById('clappingAudio').play().then(() => document.getElementById('clappingAudio').pause());
+
+    }, {once: true});
+
+</script>
+
+</body>
+
+</html>
