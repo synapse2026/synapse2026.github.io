@@ -71,7 +71,6 @@
         .label { color: var(--neon-blue); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-top: 12px; }
         .val { font-size: 1.1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 5px;}
         
-        /* Checkbox List Styling */
         #event-checkbox-container {
             background: rgba(255,255,255,0.05);
             border-radius: 10px;
@@ -151,8 +150,7 @@
                         <span class="label" style="color: var(--warning-gold);">Add New Events</span>
                         <span id="selected-count" class="badge bg-info text-dark">0 Selected</span>
                     </div>
-                    <div id="event-checkbox-container">
-                        </div>
+                    <div id="event-checkbox-container"></div>
                 </div>
             </div>
             
@@ -171,7 +169,7 @@
         const html5QrCode = new Html5Qrcode("reader");
         let currentMob = "";
 
-        // MUST MATCH SPREADSHEET EXACTLY
+        // IMPORTANT: Update this list to match your actual sheet event names
         const MASTER_EVENT_LIST = ["Event 1", "Event 2", "Event 3", "Workshop", "Paper Presentation", "Coding Battle"];
 
         document.getElementById('manual-mobile').addEventListener('input', e => {
@@ -215,26 +213,27 @@
                     document.getElementById('d-mobile').innerText = data.mobile;
                     document.getElementById('d-events').innerText = data.events;
                     
-                    // Build Checkboxes
                     const container = document.getElementById('event-checkbox-container');
                     container.innerHTML = "";
-                   // Replace the checkbox loop inside handleData in your HTML
-const registered = data.events.split(',').map(e => e.trim().toLowerCase()); // Cleaned array
+                    const registered = data.events.split(',').map(e => e.trim().toLowerCase());
 
-let count = 0;
-MASTER_EVENT_LIST.forEach((evt, i) => {
-    // Case-insensitive check to see if they are already registered
-    if (!registered.includes(evt.trim().toLowerCase())) {
-        const item = document.createElement('div');
-        item.className = "event-item";
-        item.innerHTML = `
-            <input type="checkbox" class="event-chk-input" value="${evt}" id="chk_${i}" onchange="updateCount()">
-            <label for="chk_${i}" style="width:100%; cursor:pointer; margin-bottom:0; padding-left:10px;">${evt}</label>
-        `;
-        container.appendChild(item);
-        count++;
-    }
-});
+                    let availableCount = 0;
+                    MASTER_EVENT_LIST.forEach((evt, i) => {
+                        if (!registered.includes(evt.trim().toLowerCase())) {
+                            const item = document.createElement('div');
+                            item.className = "event-item";
+                            item.innerHTML = `
+                                <input type="checkbox" class="event-chk-input" value="${evt}" id="chk_${i}" onchange="updateCount()">
+                                <label for="chk_${i}" style="width:100%; cursor:pointer; margin-bottom:0; padding-left:10px;">${evt}</label>
+                            `;
+                            container.appendChild(item);
+                            availableCount++;
+                        }
+                    });
+
+                    if(availableCount === 0) {
+                        container.innerHTML = '<div class="p-2 small text-white-50">Already registered for all events.</div>';
+                    }
 
                     const qrArea = document.getElementById("qr-preview-area");
                     qrArea.innerHTML = "";
@@ -250,7 +249,12 @@ MASTER_EVENT_LIST.forEach((evt, i) => {
                         badge.innerText = "PAYMENT PENDING";
                         badge.className = "badge-status bg-red";
                         document.getElementById('confirmBtn').classList.remove('d-none');
+                        document.getElementById('add-event-wrapper').style.display = 'block';
                     }
+                })
+                .catch(() => {
+                    badge.innerText = "NETWORK ERROR";
+                    badge.className = "badge-status bg-red";
                 });
         };
 
