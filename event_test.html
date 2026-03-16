@@ -69,15 +69,15 @@
         }
 
         .label { color: var(--neon-blue); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-top: 12px; }
-        .val { font-size: 1.1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
+        .val { font-size: 1.1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; margin-bottom: 5px;}
         
-        /* New Event Selection Styling */
+        /* Checkbox List Styling */
         #event-checkbox-container {
-            background: rgba(0,0,0,0.4);
+            background: rgba(255,255,255,0.05);
             border-radius: 10px;
             padding: 10px;
-            margin-top: 5px;
-            border: 1px solid #333;
+            margin-top: 10px;
+            border: 1px solid rgba(31, 193, 209, 0.3);
             max-height: 200px;
             overflow-y: auto;
         }
@@ -85,17 +85,18 @@
         .event-item {
             display: flex;
             align-items: center;
-            padding: 8px;
-            border-bottom: 1px solid #222;
+            padding: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            cursor: pointer;
         }
 
-        .event-item:last-child { border-bottom: none; }
+        .event-item:hover { background: rgba(31, 193, 209, 0.1); }
 
         .event-item input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            margin-right: 12px;
-            accent-color: var(--neon-blue);
+            width: 22px;
+            height: 22px;
+            margin-right: 15px;
+            cursor: pointer;
         }
 
         .badge-status { 
@@ -108,13 +109,7 @@
         .bg-green { background: rgba(46, 213, 115, 0.2); color: #2ed573; border: 1px solid #2ed573; }
         .bg-process { background: rgba(255, 193, 7, 0.1); color: var(--warning-gold); border: 1px solid var(--warning-gold); }
         
-        #qr-preview-area {
-            background: #fff; 
-            padding: 15px; 
-            border-radius: 10px;
-            display: inline-block; 
-            margin: 10px 0;
-        }
+        #qr-preview-area { background: #fff; padding: 15px; border-radius: 10px; display: inline-block; margin: 10px 0; }
     </style>
 </head>
 <body>
@@ -151,8 +146,11 @@
                 <div class="label">Mobile Number</div><div id="d-mobile" class="val">-</div>
                 <div class="label">Registered Events</div><div id="d-events" class="val">-</div>
                 
-                <div id="add-event-wrapper">
-                    <div class="label" style="color: var(--warning-gold);">Add Extra Events (Spot Reg)</div>
+                <div id="add-event-wrapper" class="mt-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="label" style="color: var(--warning-gold);">Add New Events</span>
+                        <span id="selected-count" class="badge bg-info text-dark">0 Selected</span>
+                    </div>
                     <div id="event-checkbox-container">
                         </div>
                 </div>
@@ -173,7 +171,7 @@
         const html5QrCode = new Html5Qrcode("reader");
         let currentMob = "";
 
-        // UPDATE THESE TO MATCH YOUR EXACT SPREADSHEET NAMES
+        // MUST MATCH SPREADSHEET EXACTLY
         const MASTER_EVENT_LIST = ["Event 1", "Event 2", "Event 3", "Workshop", "Paper Presentation", "Coding Battle"];
 
         document.getElementById('manual-mobile').addEventListener('input', e => {
@@ -209,8 +207,6 @@
                     if (responseText === "NotFound") {
                         badge.innerText = "NOT REGISTERED";
                         badge.className = "badge-status bg-red";
-                        document.getElementById('d-name').innerText = "NEW USER";
-                        document.getElementById('d-mobile').innerText = currentMob;
                         return;
                     }
 
@@ -219,51 +215,47 @@
                     document.getElementById('d-mobile').innerText = data.mobile;
                     document.getElementById('d-events').innerText = data.events;
                     
-                    // --- Build Checkbox List for Unregistered Events ---
+                    // Build Checkboxes
                     const container = document.getElementById('event-checkbox-container');
                     container.innerHTML = "";
                     const registered = data.events.split(',').map(e => e.trim());
                     
-                    let availableCount = 0;
-                    MASTER_EVENT_LIST.forEach((evt, index) => {
+                    let count = 0;
+                    MASTER_EVENT_LIST.forEach((evt, i) => {
                         if (!registered.includes(evt)) {
                             const item = document.createElement('div');
                             item.className = "event-item";
                             item.innerHTML = `
-                                <input type="checkbox" class="event-chk" value="${evt}" id="evt_${index}">
-                                <label for="evt_${index}">${evt}</label>
+                                <input type="checkbox" class="event-chk-input" value="${evt}" id="chk_${i}" onchange="updateCount()">
+                                <label for="chk_${i}" style="width:100%; cursor:pointer;">${evt}</label>
                             `;
                             container.appendChild(item);
-                            availableCount++;
+                            count++;
                         }
                     });
 
-                    if(availableCount === 0) {
-                        container.innerHTML = `<div class="p-2 small text-white-50">Already registered for everything.</div>`;
-                    }
-
-                    // Show QR
                     const qrArea = document.getElementById("qr-preview-area");
                     qrArea.innerHTML = "";
                     new QRCode(qrArea, { text: data.mobile, width: 160, height: 160 });
                     document.getElementById('qr-display-section').classList.remove('d-none');
 
                     if (data.payment === "COMPLETED") {
-                        badge.innerText = "STATUS: PAID & VERIFIED";
+                        badge.innerText = "PAID & VERIFIED";
                         badge.className = "badge-status bg-green";
                         document.getElementById('alreadyVerifiedMsg').classList.remove('d-none');
-                        document.getElementById('add-event-wrapper').style.display = "none";
+                        document.getElementById('add-event-wrapper').style.display = 'none';
                     } else {
-                        badge.innerText = "STATUS: PAYMENT PENDING";
+                        badge.innerText = "PAYMENT PENDING";
                         badge.className = "badge-status bg-red";
                         document.getElementById('confirmBtn').classList.remove('d-none');
                     }
-                })
-                .catch(() => {
-                    badge.innerText = "NETWORK ERROR";
-                    badge.className = "badge-status bg-red";
                 });
         };
+
+        function updateCount() {
+            const selected = document.querySelectorAll('.event-chk-input:checked').length;
+            document.getElementById('selected-count').innerText = `${selected} Selected`;
+        }
 
         const onScanSuccess = (t) => { 
             if(html5QrCode.isScanning) html5QrCode.stop(); 
@@ -271,27 +263,25 @@
         };
 
         document.getElementById('confirmBtn').addEventListener('click', function() {
-            // Collect all checked events
-            const checks = document.querySelectorAll('.event-chk:checked');
-            const selected = Array.from(checks).map(c => c.value);
+            const checkedBoxes = document.querySelectorAll('.event-chk-input:checked');
+            const selectedEvents = Array.from(checkedBoxes).map(cb => cb.value);
             
             this.disabled = true; 
-            this.innerText = "PROCESSING...";
+            this.innerText = "UPDATING...";
 
-            // Construct URL with newEvents parameter
-            let url = `${scriptURL}?action=updatePayment&mobile=${currentMob}`;
-            if (selected.length > 0) {
-                url += `&newEvents=${encodeURIComponent(selected.join(','))}`;
+            let finalUrl = `${scriptURL}?action=updatePayment&mobile=${currentMob}`;
+            if (selectedEvents.length > 0) {
+                finalUrl += `&newEvents=${encodeURIComponent(selectedEvents.join(','))}`;
             }
 
-            fetch(url)
+            fetch(finalUrl)
                 .then(r => r.text())
-                .then(resp => { 
-                    alert("Entry Confirmed" + (selected.length > 0 ? " and " + selected.length + " events added!" : "!")); 
+                .then(() => { 
+                    alert("Success! Payment recorded and events updated."); 
                     location.reload(); 
                 })
-                .catch(err => {
-                    alert("Error: " + err);
+                .catch(() => {
+                    alert("Error updating record.");
                     this.disabled = false;
                     this.innerText = "MARK ENTRY & PAYMENT";
                 });
