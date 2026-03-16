@@ -57,13 +57,68 @@
     .np-time { font-family: 'Share Tech Mono'; color: #888; font-size: 1.1rem; border-top: 1px solid #333; padding-top: 8px; margin-top: 5px; display: flex; justify-content: space-between; }
 
     /* --- DJ POLL --- */
-    .poll-layout { display: grid; grid-template-columns: 1fr 380px; gap: 40px; height: 80%; margin-top: 100px; }
-    .poll-bars { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-content: center; }
-    .poll-item { background: var(--glass); border-left: 8px solid var(--poster-pink); padding: 15px; border-radius: 0 15px 15px 0; animation: slideIn 0.5s ease-out forwards; opacity: 0; }
+    /* --- DJ POLL (SCALED 50% & QR 100%) --- */
+    .poll-layout { 
+        display: grid; 
+        grid-template-columns: 1fr 480px; /* Increased from 380px to fit double-size QR */
+        gap: 60px; 
+        height: 80%; 
+        margin-top: 100px; 
+    }
+
+    .poll-bars { 
+        display: grid; 
+        grid-template-columns: 1fr 1fr; 
+        gap: 30px; /* Increased gap by 50% */
+        align-content: center; 
+    }
+
+    .poll-item { 
+        background: var(--glass); 
+        border-left: 12px solid var(--poster-pink); /* 8px * 1.5 */
+        padding: 22px; /* 15px * 1.5 */
+        border-radius: 0 20px 20px 0; 
+        margin-bottom: 22px; 
+        animation: slideIn 0.5s ease-out forwards; 
+        opacity: 0; 
+    }
+
     @keyframes slideIn { from { transform: translateX(-30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-    .poll-label { display: flex; justify-content: space-between; font-family: 'Orbitron'; margin-bottom: 8px; font-size: 1.1rem;}
-    .progress-track { background: rgba(255,255,255,0.1); height: 20px; border-radius: 5px; overflow: hidden;}
-    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--poster-blue), var(--poster-pink)); transition: width 1s; }
+
+    .poll-label { 
+        display: flex; 
+        justify-content: space-between; 
+        font-family: 'Orbitron'; 
+        margin-bottom: 12px; 
+        font-size: 1.65rem; /* 1.1rem * 1.5 */
+        text-shadow: 0 0 10px rgba(209, 31, 183, 0.5); /* Added subtle glow */
+    }
+
+    .progress-track { 
+        background: rgba(255,255,255,0.1); 
+        height: 30px; /* 20px * 1.5 */
+        border-radius: 8px; 
+        overflow: hidden;
+    }
+
+    .progress-fill { 
+        height: 100%; 
+        background: linear-gradient(90deg, var(--poster-blue), var(--poster-pink)); 
+        transition: width 1s; 
+    }
+
+    /* Target the QR card for Double Size */
+    .qr-card img {
+        width: 450px !important; /* Approximately double size */
+        height: 450px !important;
+        border-radius: 15px;
+        box-shadow: 0 0 30px rgba(31, 193, 209, 0.4);
+    }
+
+    .qr-text {
+        font-size: 2rem !important; /* Scaled up for readability */
+        margin-top: 15px;
+    }
 
     /* --- WINNER PAGE (HALL OF FAME) --- */
     .winner-marathon { display: flex; align-items: center; justify-content: center; gap: 50px; height: 100%; width: 100%; }
@@ -227,13 +282,7 @@
 }
 
 /* Adjust the poll item to handle the extra text height */
-.poll-item {
-    background: var(--glass);
-    border-left: 8px solid var(--poster-pink);
-    padding: 15px;
-    border-radius: 0 15px 15px 0;
-    margin-bottom: 15px; /* Added spacing between bars */
-}
+
 /* Container for the Large Group Layout */
 .winner-marathon.group-layout {
     flex-direction: column;
@@ -877,7 +926,7 @@ function startCustomRotation() {
     const nextSlideName = slides[currentSlide]; 
     
     if (nextSlideName === 'slide-music') {
-        slideTime = 60000; // Stay for 60 seconds on the Music Voting slide
+        slideTime = 120000; // Stay for 60 seconds on the Music Voting slide
     } else if (nextSlideName === 'slide-winners') {
         // Winners slide timing is handled by the startWinnerMarathon function
         // so we don't need a high number here, but let's keep it safe
