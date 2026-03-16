@@ -93,65 +93,95 @@
     .schedule-title { font-family: 'Orbitron'; font-size: 2.2rem; color: #fff; margin: 0; line-height: 1.2; }
 
     /* --- AIRPORT BOARD --- */
-    /* --- AIRPORT BOARD (DOUBLED SIZE) --- */
+    /* --- AIRPORT BOARD (50% SIZE INCREASE + GLOW) --- */
     .airport-board { 
-        margin-top: 60px; 
+        margin-top: 70px; 
         padding: 0 40px; 
         display: flex; 
         flex-direction: column; 
-        gap: 25px; /* Increased gap for larger rows */
+        gap: 22px; /* Scaled from 15px */
     }
 
     .event-row { 
         background: rgba(0, 0, 0, 0.8); 
-        border: 2px solid #333; /* Slightly thicker border */
-        border-radius: 15px; 
-        /* Widened columns to prevent text overlap */
+        border: 1px solid #333; 
+        border-radius: 12px; 
+        /* Widened columns to 480px and 280px to fit larger text */
         display: grid; 
-        grid-template-columns: 600px 350px 1fr; 
+        grid-template-columns: 480px 280px 1fr; 
         align-items: center; 
-        padding: 30px 40px; 
+        padding: 22px 35px; /* Scaled from 15px/25px */
         position: relative; 
         overflow: hidden;
-        min-height: 120px;
     }
 
-    .event-row::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 10px; background: var(--poster-blue); }
-    
+    .event-row::before { 
+        content: ""; 
+        position: absolute; 
+        left: 0; top: 0; bottom: 0; 
+        width: 8px; /* Scaled from 5px */
+        background: var(--poster-blue); 
+    }
+
     .event-name-cell { 
         font-family: 'Orbitron'; 
-        font-size: 3.6rem; /* Doubled from 1.8rem */
+        font-size: 2.7rem; /* 1.8rem * 1.5 */
         color: #fff; 
-        letter-spacing: 2px; 
-        font-weight: 900;
+        letter-spacing: 2px;
+        font-weight: 700;
+        /* BLUE GLOW EFFECT */
+        text-shadow: 0 0 10px rgba(31, 193, 209, 0.8), 
+                     0 0 20px rgba(31, 193, 209, 0.4);
     }
 
     .status-badge { 
         font-family: 'Orbitron'; 
-        padding: 15px 30px; 
-        border-radius: 8px; 
-        font-size: 1.8rem; /* Doubled from 0.9rem */
+        padding: 8px 22px; 
+        border-radius: 6px; 
+        font-size: 1.35rem; /* 0.9rem * 1.5 */
         text-align: center; 
         font-weight: bold; 
-        width: 280px; /* Increased width for larger font */
+        width: 210px; /* Scaled from 140px */
     }
 
-    .status-not-started { color: #555; border: 2px solid #333; }
-    .status-entry { color: var(--poster-blue); border: 2px solid var(--poster-blue); animation: blink 2s infinite; }
-    .status-ongoing { color: var(--poster-pink); border: 2px solid var(--poster-pink); animation: blink 1s infinite; }
-    .status-completed { color: var(--gold); border: 2px solid var(--gold); background: rgba(255, 234, 0, 0.1); }
+    .status-not-started { color: #555; border: 1px solid #333; }
+    
+    .status-entry { 
+        color: var(--poster-blue); 
+        border: 1.5px solid var(--poster-blue); 
+        animation: blink 2s infinite; 
+    }
+
+    .status-ongoing { 
+        color: var(--poster-pink); 
+        border: 1.5px solid var(--poster-pink); 
+        animation: blink 1s infinite; 
+        /* PINK GLOW FOR ONGOING */
+        text-shadow: 0 0 8px var(--poster-pink);
+        box-shadow: 0 0 15px rgba(209, 31, 183, 0.3);
+    }
+
+    .status-completed { 
+        color: var(--gold); 
+        border: 1.5px solid var(--gold); 
+        background: rgba(255, 234, 0, 0.1); 
+    }
 
     .activity-scroller { 
         font-family: 'Share Tech Mono'; 
-        font-size: 2.4rem; /* Doubled from 1.2rem */
+        font-size: 1.8rem; /* 1.2rem * 1.5 */
         color: #aaa; 
         white-space: nowrap; 
         overflow: hidden; 
         position: relative; 
     }
 
-    .scroll-text { display: inline-block; animation: airportTicker 15s linear infinite; padding-left: 100%; }
-    
+    .scroll-text { 
+        display: inline-block; 
+        animation: airportTicker 15s linear infinite; 
+        padding-left: 100%; 
+    }
+
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     @keyframes airportTicker { from { transform: translateX(0); } to { transform: translateX(-100%); } }
     /* --- FOOTER SCROLLER --- */
