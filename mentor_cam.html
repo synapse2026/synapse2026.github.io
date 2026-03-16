@@ -11,47 +11,47 @@
         body { background: var(--dark-bg); color: #fff; font-family: 'Rajdhani', sans-serif; min-height: 100vh; overflow-x: hidden; }
         .hero-title { font-family: 'Orbitron'; color: var(--neon-blue); text-align: center; margin-top: 20px; letter-spacing: 2px; text-shadow: 0 0 10px var(--neon-blue); }
         
-        /* Camera Container */
+        /* Camera Container - 3:4 Vertical */
         #camera-container { 
             width: 90%; 
-            max-width: 400px; 
+            max-width: 450px; 
             margin: 20px auto; 
-            border: 2px solid rgba(255,255,255,0.2); 
+            border: 2px solid rgba(255,255,255,0.1); 
             border-radius: 20px; 
             overflow: hidden; 
             position: relative; 
             aspect-ratio: 3/4; 
             background: #000; 
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
         }
 
         video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-        #preview-img { width: 100%; height: 100%; object-fit: contain; display: none; position: relative; z-index: 5; }
+        #preview-img { width: 100%; height: 100%; object-fit: contain; display: none; position: relative; z-index: 50; }
 
-        /* --- VIEWFINDER OVERLAY --- */
-        .viewfinder {
+        /* --- PROFESSIONAL VIEWFINDER --- */
+        .viewfinder-overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none;
             z-index: 10;
-            border: 40px solid rgba(0, 0, 0, 0.5); /* Dims the crop area */
+            /* Creates the darkened crop area */
+            border: 35px solid rgba(0, 0, 0, 0.6); 
         }
 
-        .viewfinder-corners {
+        .viewfinder-frame {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             border: 2px solid var(--neon-pink);
-            box-shadow: inset 0 0 20px rgba(209, 31, 183, 0.3);
+            box-shadow: inset 0 0 20px rgba(209, 31, 183, 0.2);
         }
 
-        /* Scanning Line Animation */
         .scan-line {
             position: absolute;
-            width: 100%;
-            height: 2px;
+            width: 100%; height: 2px;
             background: var(--neon-blue);
             box-shadow: 0 0 15px var(--neon-blue);
             top: 0;
-            animation: scanMove 3s linear infinite;
+            animation: scanMove 4s linear infinite;
         }
 
         @keyframes scanMove {
@@ -61,11 +61,16 @@
             100% { top: 100%; opacity: 0; }
         }
 
-        .btn-capture { background: linear-gradient(135deg, var(--neon-pink), #741fd1); color: white; font-family: 'Orbitron'; font-weight: 700; border: none; padding: 15px; border-radius: 50px; box-shadow: 0 0 20px rgba(209, 31, 183, 0.5); transition: 0.3s; margin-top: 10px; }
-        .form-control, .form-select { background: rgba(255,255,255,0.05) !important; border: 1px solid var(--neon-blue) !important; color: #fff !important; margin-bottom: 15px; }
+        /* Capture UI */
+        .btn-capture { background: linear-gradient(135deg, var(--neon-pink), #741fd1); color: white; font-family: 'Orbitron'; font-weight: 700; border: none; padding: 18px; border-radius: 50px; box-shadow: 0 0 25px rgba(209, 31, 183, 0.4); transition: 0.3s; margin-top: 15px; }
+        .btn-capture:active { transform: scale(0.92); }
+        .form-control, .form-select { background: rgba(255,255,255,0.05) !important; border: 1px solid var(--neon-blue) !important; color: #fff !important; margin-bottom: 12px; padding: 12px; }
         
+        /* Flash Effect */
         .flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; pointer-events: none; z-index: 9999; }
         @keyframes cameraFlash { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
+        
+        .retake-link { color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.9rem; margin-top: 15px; display: inline-block; }
     </style>
 </head>
 <body>
@@ -73,34 +78,41 @@
 
     <div class="container py-4">
         <h2 class="hero-title">MENTOR CAM</h2>
-        <p class="text-center text-white-50 small">PLEASE FIT FACE INSIDE THE PINK FRAME</p>
+        <p class="text-center text-white-50 small mb-4">ULTRA-HD SELFIE PORTAL</p>
         
-        <div id="setup-form">
+        <div id="setup-form" class="px-3">
             <input type="text" id="stuName" class="form-control" placeholder="STUDENT NAME">
-            <select id="stuDept" class="form-select border-info">
+            <select id="stuDept" class="form-select">
                 <option value="" disabled selected>DEPARTMENT</option>
-                <option value="CT">CT</option><option value="EC">EC</option><option value="IE">IE</option>
+                <option value="CT">CT</option>
+                <option value="EC">EC</option>
+                <option value="IE">IE</option>
+                <option value="CABM">CABM</option>
             </select>
-            <input type="text" id="stuSem" class="form-control" placeholder="SEMESTER (e.g. S6)">
-            <button onclick="startCam()" class="btn btn-info w-100 py-3 fw-bold">START CAPTURE</button>
+            <input type="text" id="stuSem" class="form-control" placeholder="SEMESTER (e.g., S6)">
+            <button onclick="startCam()" class="btn btn-info w-100 py-3 fw-bold mt-2">INITIALIZE CAMERA</button>
         </div>
 
         <div id="cam-ui" style="display:none;">
             <div id="camera-container">
                 <video id="video" autoplay playsinline></video>
                 
-                <div id="viewfinder-ui" class="viewfinder">
-                    <div class="viewfinder-corners">
+                <div id="viewfinder-ui" class="viewfinder-overlay">
+                    <div class="viewfinder-frame">
                         <div class="scan-line"></div>
                     </div>
                 </div>
                 
                 <img id="preview-img">
             </div>
-            <div class="text-center">
-                <button id="captureBtn" onclick="takePhoto()" class="btn btn-capture w-75 py-3">📸 TAKE SELFIE</button>
-                <button id="uploadBtn" onclick="uploadPhoto()" class="btn btn-success w-75 mt-2 py-3 fw-bold" style="display:none;">📤 UPLINK PHOTO</button>
-                <button onclick="location.reload()" class="btn btn-link text-white-50 mt-2 text-decoration-none">← Retake</button>
+            
+            <div class="text-center px-4">
+                <button id="captureBtn" onclick="takePhoto()" class="btn btn-capture w-100">📸 CAPTURE MOMENT</button>
+                
+                <div id="upload-controls" style="display:none;">
+                    <button id="uploadBtn" onclick="uploadPhoto()" class="btn btn-success w-100 py-3 fw-bold mt-3">📤 UPLINK TO LIVE HUD</button>
+                    <a href="javascript:location.reload()" class="retake-link">← Not happy? Retake photo</a>
+                </div>
             </div>
         </div>
     </div>
@@ -110,22 +122,32 @@
         let stream;
 
         async function startCam() {
-            if(!document.getElementById('stuName').value) return alert("Enter Name");
+            const name = document.getElementById('stuName').value;
+            if(!name) return alert("Please enter your name");
+
             document.getElementById('setup-form').style.display = 'none';
             document.getElementById('cam-ui').style.display = 'block';
 
             try {
-                stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: "user", width: { ideal: 1920 }, height: { ideal: 1080 } } 
-                });
+                // Request maximum raw hardware resolution
+                const constraints = { 
+                    video: { 
+                        facingMode: "user", 
+                        width: { ideal: 4096 }, 
+                        height: { ideal: 2160 } 
+                    } 
+                };
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
                 document.getElementById('video').srcObject = stream;
             } catch (err) {
-                alert("Camera error: " + err.message);
+                // Fallback to standard HD if 4K fails
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                document.getElementById('video').srcObject = stream;
             }
         }
 
         function takePhoto() {
-            // Flash Effect
+            // Screen Flash
             const flash = document.getElementById('flash-effect');
             flash.style.animation = 'cameraFlash 0.3s';
             setTimeout(() => { flash.style.animation = ''; }, 300);
@@ -133,12 +155,12 @@
             const video = document.getElementById('video');
             const canvas = document.createElement('canvas');
             
-            // Set capture to high-res 3:4 ratio
-            canvas.width = 1200;
-            canvas.height = 1600;
+            // ULTRA RESOLUTION: 2160 x 2880 (6.2 Megapixels)
+            canvas.width = 2160;
+            canvas.height = 2880;
             const ctx = canvas.getContext('2d');
 
-            // Smart Crop logic
+            // Exact center-crop math for 3:4 ratio
             const vW = video.videoWidth;
             const vH = video.videoHeight;
             const targetAspect = 3/4;
@@ -156,25 +178,33 @@
                 sY = (vH - sH) / 2;
             }
 
+            // Mirror image and draw at High Quality
             ctx.translate(canvas.width, 0);
             ctx.scale(-1, 1);
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            
             ctx.drawImage(video, sX, sY, sW, sH, 0, 0, canvas.width, canvas.height);
             
+            // Switch UI to preview mode
             video.style.display = 'none';
             document.getElementById('viewfinder-ui').style.display = 'none';
             const preview = document.getElementById('preview-img');
-            preview.src = canvas.toDataURL('image/jpeg', 0.9);
+            preview.src = canvas.toDataURL('image/jpeg', 0.95);
             preview.style.display = 'block';
             
             document.getElementById('captureBtn').style.display = 'none';
-            document.getElementById('uploadBtn').style.display = 'inline-block';
+            document.getElementById('upload-controls').style.display = 'block';
         }
 
         async function uploadPhoto() {
             const btn = document.getElementById('uploadBtn');
-            btn.disabled = true; btn.innerText = "UPLINKING...";
+            btn.disabled = true; 
+            btn.innerText = "UPLINKING ULTRA-HD DATA...";
             
-            const blob = document.getElementById('preview-img').src.split(',')[1];
+            const rawImg = document.getElementById('preview-img').src;
+            const blob = rawImg.split(',')[1];
+            
             const meta = {
                 name: document.getElementById('stuName').value,
                 dept: document.getElementById('stuDept').value,
@@ -186,8 +216,12 @@
                 mode: "no-cors",
                 body: JSON.stringify({ action: "mentorSelfie", img: blob, ...meta })
             }).then(() => {
-                alert("Selfie Uplinked! Check the HUD.");
+                alert("Selfie Uplinked! It will appear on the HUD shortly.");
                 location.reload();
+            }).catch(err => {
+                alert("Network error. Please try again.");
+                btn.disabled = false;
+                btn.innerText = "RETRY UPLINK";
             });
         }
     </script>
