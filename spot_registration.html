@@ -379,10 +379,11 @@
                 const spin = document.getElementById('checkSpinner');
                 spin.style.display = 'block';
                 fetch(`${scriptURL}?action=search&mobile=${this.value}`)
-                    .then(res => res.json())
-                    .then(data => {
+                    .then(res => res.text())
+                    .then(responseText => {
                         spin.style.display = 'none';
-                        if (data !== "NotFound") {
+                        const text = responseText.trim();
+                        if (text && text !== "NotFound") {
                             isDuplicate = true;
                             this.classList.add('is-invalid-custom');
                             document.getElementById('mobileError').style.display = 'block';

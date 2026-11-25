@@ -1951,7 +1951,10 @@ async function startSponsorMarathon() {
     isCyclingWinners = true;
 
     for (let sponsor of sponsorVideos) {
-        if (slides[currentSlide] !== 'slide-video') break;
+        if (slides[currentSlide] !== 'slide-video') {
+            isCyclingWinners = false;
+            return;
+        }
 
         // Check if video exists
         const hasVideo = sponsor.vid && sponsor.vid.trim() !== "";
@@ -2255,39 +2258,54 @@ setInterval(syncVolumeWithSpotify, 5000);
 
         
 
+        const usedWinnerDetailIndices = new Set();
         let counter = 0;
 
         for (let winner of winners) {
-
             if (slides[currentSlide] !== 'slide-winners') { 
-
                 stopAllCeremonyAudio(); 
-
                 isCyclingWinners = false;
-
                 return; 
-
             }
 
-
-
             document.getElementById('fanfareAudio').currentTime = 0;
-
             document.getElementById('fanfareAudio').play().catch(()=>{});
 
+            // Smart Winner Mapping: match unused winner detail for this specific event to avoid repeating 1st place
+            let matchedDetail = null;
+            if (cachedData.winnerDetails && cachedData.winnerDetails.length > 0) {
+                for (let i = 0; i < cachedData.winnerDetails.length; i++) {
+                    if (!usedWinnerDetailIndices.has(i) && cachedData.winnerDetails[i].includes(winner.event)) {
+                        matchedDetail = cachedData.winnerDetails[i];
+                        usedWinnerDetailIndices.add(i);
+                        break;
+                    }
+                }
+                if (!matchedDetail) {
+                    matchedDetail = cachedData.winnerDetails.find(d => d.includes(winner.event)) || winner.event;
+                }
+            } else {
+                matchedDetail = winner.event;
+            }
 
-
-            const details = cachedData.winnerDetails.find(d => d.includes(winner.event)) || winner.event;
-
-            const parts = details.split('|');
-
+            const parts = matchedDetail.split('|');
             const nameCollege = parts[0].trim();
-
-            const rankInfo = parts[1] ? parts[1].split(':')[1] || "WINNER" : "WINNER";
-
             const nameOnly = nameCollege.split('(')[0].trim();
+            const collegeOnly = nameCollege.includes('(') ? nameCollege.split('(')[1].replace(')', '').trim() : "";
 
-            const collegeOnly = nameCollege.includes('(') ? nameCollege.split('(')[1].replace(')', '') : "";
+            // Find event-specific rank info
+            let rankInfo = "WINNER";
+            for (let i = 1; i < parts.length; i++) {
+                if (parts[i].includes(winner.event)) {
+                    const colonParts = parts[i].split(':');
+                    rankInfo = (colonParts[1] || colonParts[0] || "WINNER").trim();
+                    break;
+                }
+            }
+            if (rankInfo === "WINNER" && parts[1]) {
+                const colonParts = parts[1].split(':');
+                rankInfo = (colonParts[1] || colonParts[0] || "WINNER").trim();
+            }
 
             
 
@@ -2416,8 +2434,9 @@ const assets = (type === "ACHIEVEMENT") ? allAssets : allAssets.slice(0, 5);
         } else {
             container.innerHTML = `<h2 style="text-align: center; margin-top: 20%; color: var(--poster-blue); font-size: 4rem; font-family:'Orbitron';">AWAITING ${title}...</h2>`;
         }
-        await new Promise(r => setTimeout(r, 10000));
+        await new Promise(r => setTimeout(r, 6000));
         isCyclingWinners = false;
+        rotateSlides();
         return;
     }
 
@@ -2495,10 +2514,11 @@ const assets = (type === "ACHIEVEMENT") ? allAssets : allAssets.slice(0, 5);
     // Show QR only for Mentor Cam at the end of the loop
     if (type === "MENTOR_SELFIE" && slides[currentSlide] === 'slide-mentor') {
         container.innerHTML = qrSlideHTML;
-        await new Promise(r => setTimeout(r, 12000));
+        await new Promise(r => setTimeout(r, 10000));
     }
 
     isCyclingWinners = false;
+    rotateSlides();
 }
 
 let currentEventPage = 0;
@@ -2644,138 +2664,109 @@ const slides = [
 
     
 
-    async function rotateSlides() {
+let rotationTimer = null;
 
+function scheduleNextSlide(delayMs) {
+    if (rotationTimer) {
+        clearTimeout(rotationTimer);
+        rotationTimer = null;
+    }
+    rotationTimer = setTimeout(() => {
+        rotateSlides();
+    }, delayMs);
+}
+
+async function rotateSlides() {
     if (isCyclingWinners) return;
-
-    
+    if (rotationTimer) {
+        clearTimeout(rotationTimer);
+        rotationTimer = null;
+    }
 
     // 1. Stop any active audio from previous slides
-
     stopAllCeremonyAudio();
 
-    
-
     // 2. Switch classes
-
     document.getElementById(slides[currentSlide]).classList.remove('active');
-
     currentSlide = (currentSlide + 1) % slides.length;
-
     const activeSlideId = slides[currentSlide];
-
     document.getElementById(activeSlideId).classList.add('active');
 
-
-
     // 3. Logic based on which slide just became active
-
-    if (!cachedData) return;
-
-
+    if (!cachedData) {
+        scheduleNextSlide(5000);
+        return;
+    }
 
     switch (activeSlideId) {
-
-        case 'slide-mentor':
-
-            // The first argument "MENTOR_SELFIE" must match the 'Type' column in your Assets sheet
-
-            await startMediaMarathon("MENTOR_SELFIE", "MENTOR MOMENT", "mentor-content");
-
-            break;
-
-        case 'slide-music':
-
-            updateMusicPoll();
-
-            break;
-
-
-
-        case 'slide-schedule':
-
-            scrollPos = -50; // Reset scroll position for the timeline
-
-            break;
-
-
-
-        case 'slide-winners':
-
-            await startWinnerMarathon();
-
-            break;
-
-        case 'slide-status':
+        case 'slide-status': {
             currentEventPage = 0; // Reset to first page
             fetchLiveData();      // Load first 3 immediately
+            const totalPages = Math.max(1, Math.ceil(allEvents.length / eventsPerPage));
+            scheduleNextSlide((totalPages * 8000) + 2000);
             break;
+        }
 
-        case 'slide-achievements':
-
-            await startMediaMarathon("ACHIEVEMENT", "ACHIEVEMENTS", "achievement-content");
-
+        case 'slide-schedule': {
+            scrollPos = -50; // Reset scroll position for timeline
+            scheduleNextSlide(20000);
             break;
+        }
 
-
-
-        case 'slide-photos':
-
-            await startMediaMarathon("LIVE_MOMENT", "LIVE SNAP", "live-media-content");
-
+        case 'slide-mentor': {
+            scheduleNextSlide(75000); // Safety fallback timeout
+            startMediaMarathon("MENTOR_SELFIE", "MENTOR MOMENT", "mentor-content");
             break;
-		case 'slide-video':
-    await startSponsorMarathon();
-    break;
+        }
 
+        case 'slide-winners': {
+            scheduleNextSlide(120000); // Safety fallback timeout
+            startWinnerMarathon();
+            break;
+        }
+
+        case 'slide-achievements': {
+            scheduleNextSlide(60000); // Safety fallback timeout
+            startMediaMarathon("ACHIEVEMENT", "ACHIEVEMENTS", "achievement-content");
+            break;
+        }
+
+        case 'slide-music': {
+            updateMusicPoll();
+            scheduleNextSlide(15000); // Snappy 15s music poll (eliminated 60s freeze)
+            break;
+        }
+
+        case 'slide-photos': {
+            scheduleNextSlide(60000); // Safety fallback timeout
+            startMediaMarathon("LIVE_MOMENT", "LIVE SNAP", "live-media-content");
+            break;
+        }
+
+        case 'slide-attendees': {
+            scheduleNextSlide(16000);
+            break;
+        }
+
+        case 'slide-video': {
+            scheduleNextSlide(90000); // Safety fallback timeout (eliminated infinite 999999ms freeze)
+            startSponsorMarathon();
+            break;
+        }
+
+        default: {
+            scheduleNextSlide(20000);
+            break;
+        }
     }
-
 }
 
-    fetchLiveData();
+fetchLiveData();
+setInterval(fetchLiveData, 10000);
+setInterval(checkMusicSignal, 3000);
 
-    setInterval(fetchLiveData, 10000);
-
-    setInterval(checkMusicSignal, 3000);
-
-   // Remove the old setInterval(rotateSlides, 25000);
-
-// Use this custom function to handle variable slide times:
-
-
-
-function startCustomRotation() {
-    // Look at the slide that is currently visible (active)
-    const activeSlideName = slides[currentSlide]; 
-    let slideTime = 25000; // Default 25 seconds
-
-    if (activeSlideName === 'slide-status') {
-        // Calculate total pages based on your 3-per-page setting
-        const totalPages = Math.ceil(allEvents.length / eventsPerPage);
-        // Stay for 10 seconds per page + a 2 second buffer
-        slideTime = (totalPages * 10000) + 2000; 
-    } 
-    else if (activeSlideName === 'slide-music') {
-        slideTime = 60000; // 60 seconds for Music
-    } 
-    else if (activeSlideName === 'slide-winners') {
-        slideTime = 15000; // startWinnerMarathon handles its own internal timing
-    }
-	else if (activeSlideName === 'slide-video') {
-    slideTime = 999999; // Effectively infinite, marathon will call rotateSlides() manually
-}
-
-    setTimeout(() => {
-        rotateSlides();
-        startCustomRotation(); // Recurse
-    }, slideTime);
-}
-
-
-
-// Start the sequence
-
-startCustomRotation();
+// Kick off slide sequence
+scheduleNextSlide(25000);
 
     requestAnimationFrame(smoothScroll);
 

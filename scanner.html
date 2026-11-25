@@ -132,6 +132,8 @@
             <div id="infoFields">
                 <div class="label">Attendee Name</div><div id="d-name" class="val">-</div>
                 <div class="label">Mobile Number</div><div id="d-mobile" class="val">-</div>
+                <div class="label">College</div><div id="d-college" class="val">-</div>
+                <div class="label">Department</div><div id="d-dept" class="val">-</div>
                 <div class="label">Events</div><div id="d-events" class="val">-</div>
             </div>
             
@@ -139,16 +141,61 @@
                 <div id="p-badge" class="badge-status">INITIALIZING...</div>
                 <button id="confirmBtn" class="btn btn-primary w-100 mt-3 py-3 fw-bold d-none">MARK ENTRY & PAYMENT</button>
                 <div id="alreadyVerifiedMsg" class="mt-3 text-success fw-bold d-none">✓ ENTRY GRANTED</div>
+                <button id="editBtn" class="btn btn-outline-info w-100 mt-3 py-2 fw-bold" onclick="openEditModal()">✏️ EDIT PARTICIPANT DETAILS</button>
             </div>
             
             <button class="btn btn-link text-white-50 w-100 mt-3 text-decoration-none" onclick="location.reload()">← BACK TO HOME</button>
+        </div>
+
+        <!-- MODAL: EDIT PARTICIPANT DETAILS -->
+        <div id="editModal" class="detail-card text-start" style="display:none; border-color: var(--neon-blue); box-shadow: 0 0 30px rgba(31, 193, 209, 0.25);">
+            <h5 class="text-center mb-3" style="color: var(--neon-blue); font-family: 'Orbitron';">EDIT PARTICIPANT</h5>
+            
+            <div class="mb-2">
+                <label class="label mt-0">Full Name</label>
+                <input type="text" id="edit-name" class="form-control form-control-sm mt-1">
+            </div>
+            <div class="mb-2">
+                <label class="label mt-0">College</label>
+                <input type="text" id="edit-college" class="form-control form-control-sm mt-1">
+            </div>
+            <div class="mb-2">
+                <label class="label mt-0">Department</label>
+                <input type="text" id="edit-dept" class="form-control form-control-sm mt-1">
+            </div>
+            
+            <div class="mb-3">
+                <label class="label mt-0">Registered Events</label>
+                <div id="edit-events-container" class="mt-1 p-2 rounded" style="background: rgba(0,0,0,0.4); border: 1px solid #333; max-height: 180px; overflow-y: auto;">
+                    <!-- Event checkboxes populated by JS -->
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="label mt-0">Payment Status</label>
+                <select id="edit-payment" class="form-select mt-1" style="background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #444;">
+                    <option value="COMPLETED">PAID & VERIFIED (COMPLETED)</option>
+                    <option value="PENDING">PAYMENT PENDING (PENDING)</option>
+                </select>
+            </div>
+
+            <div class="row g-2 mt-2">
+                <div class="col-6">
+                    <button id="saveEditBtn" onclick="saveParticipantDetails()" class="btn btn-success w-100 py-2 fw-bold">💾 SAVE</button>
+                </div>
+                <div class="col-6">
+                    <button onclick="closeEditModal()" class="btn btn-outline-secondary w-100 py-2 fw-bold">CANCEL</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         const scriptURL = 'https://script.google.com/macros/s/AKfycbwKjrjjrV5hJUrqaP5nWjYAW2HW50y6EI3_k9bfzriS8ktMuAHpYe1i8K6IyPFV-jsndA/exec';
+        const ALL_EVENTS = ["Glow Craft", "Reverse X", "Trail Blaze", "Brain 2 Bot", "Titan Trials", "Pixel Clash", "Innosense", "Seminar Presentation", "Play villa"];
         const html5QrCode = new Html5Qrcode("reader");
         let currentMob = "";
+        let currentParticipant = null;
 
         // UI Digit Counter
         document.getElementById('manual-mobile').addEventListener('input', e => {
@@ -186,13 +233,21 @@
                         badge.className = "badge-status bg-red";
                         document.getElementById('d-name').innerText = "NOT FOUND";
                         document.getElementById('d-mobile').innerText = currentMob;
+                        document.getElementById('d-college').innerText = "-";
+                        document.getElementById('d-dept').innerText = "-";
+                        document.getElementById('d-events').innerText = "-";
+                        document.getElementById('editBtn').style.display = 'none';
                         return;
                     }
 
                     const data = JSON.parse(responseText);
-                    document.getElementById('d-name').innerText = data.name;
-                    document.getElementById('d-mobile').innerText = data.mobile;
-                    document.getElementById('d-events').innerText = data.events;
+                    currentParticipant = data;
+                    document.getElementById('d-name').innerText = data.name || "-";
+                    document.getElementById('d-mobile').innerText = data.mobile || currentMob;
+                    document.getElementById('d-college').innerText = data.college || "-";
+                    document.getElementById('d-dept').innerText = data.dept || "-";
+                    document.getElementById('d-events').innerText = data.events || "-";
+                    document.getElementById('editBtn').style.display = 'block';
                     
                     // Show Large QR for Student
                     const qrArea = document.getElementById("qr-preview-area");
@@ -204,10 +259,12 @@
                         badge.innerText = "STATUS: PAID & VERIFIED";
                         badge.className = "badge-status bg-green";
                         document.getElementById('alreadyVerifiedMsg').classList.remove('d-none');
+                        document.getElementById('confirmBtn').classList.add('d-none');
                     } else {
                         badge.innerText = "STATUS: PAYMENT PENDING";
                         badge.className = "badge-status bg-red";
                         document.getElementById('confirmBtn').classList.remove('d-none');
+                        document.getElementById('alreadyVerifiedMsg').classList.add('d-none');
                     }
                 })
                 .catch(() => {
@@ -227,6 +284,105 @@
                 .then(r => r.text())
                 .then(() => { alert("Entry Confirmed!"); location.reload(); });
         });
+
+        function openEditModal() {
+            if (!currentParticipant) return;
+            document.getElementById('edit-name').value = currentParticipant.name || "";
+            document.getElementById('edit-college').value = currentParticipant.college || "";
+            document.getElementById('edit-dept').value = currentParticipant.dept || "";
+            document.getElementById('edit-payment').value = (currentParticipant.payment === "COMPLETED") ? "COMPLETED" : "PENDING";
+
+            const container = document.getElementById('edit-events-container');
+            container.innerHTML = "";
+            const selectedEvents = (currentParticipant.events || "").split(',').map(e => e.trim());
+            ALL_EVENTS.forEach(ev => {
+                const isChecked = selectedEvents.includes(ev);
+                const itemDiv = document.createElement('div');
+                itemDiv.className = "form-check my-1";
+                itemDiv.innerHTML = `
+                    <input class="form-check-input event-edit-check" type="checkbox" id="chk-${ev.replace(/\s+/g, '')}" value="${ev}" ${isChecked ? 'checked' : ''}>
+                    <label class="form-check-label text-light small ms-1" for="chk-${ev.replace(/\s+/g, '')}">${ev}</label>
+                `;
+                container.appendChild(itemDiv);
+            });
+
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+            document.getElementById('result').style.display = 'block';
+        }
+
+        function saveParticipantDetails() {
+            const saveBtn = document.getElementById('saveEditBtn');
+            saveBtn.disabled = true;
+            saveBtn.innerText = "SAVING...";
+
+            const updatedName = document.getElementById('edit-name').value.trim();
+            const updatedCollege = document.getElementById('edit-college').value.trim();
+            const updatedDept = document.getElementById('edit-dept').value.trim();
+            const updatedPayment = document.getElementById('edit-payment').value;
+            const checkedBoxes = Array.from(document.querySelectorAll('.event-edit-check:checked'));
+            const updatedEvents = checkedBoxes.map(cb => cb.value).join(', ');
+
+            const payload = {
+                action: "register",
+                name: updatedName,
+                mobile: currentMob,
+                college: updatedCollege,
+                dept: updatedDept,
+                events: updatedEvents,
+                payment: updatedPayment
+            };
+
+            // 1. Submit POST update to backend
+            fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            // 2. If payment marked COMPLETED, trigger GET updatePayment as well
+            if (updatedPayment === "COMPLETED") {
+                fetch(`${scriptURL}?action=updatePayment&mobile=${currentMob}`);
+            }
+
+            // 3. Immediately reflect changes in the local UI
+            currentParticipant.name = updatedName;
+            currentParticipant.college = updatedCollege;
+            currentParticipant.dept = updatedDept;
+            currentParticipant.events = updatedEvents;
+            currentParticipant.payment = updatedPayment;
+
+            document.getElementById('d-name').innerText = updatedName;
+            document.getElementById('d-college').innerText = updatedCollege;
+            document.getElementById('d-dept').innerText = updatedDept;
+            document.getElementById('d-events').innerText = updatedEvents;
+
+            const badge = document.getElementById('p-badge');
+            const confirmBtn = document.getElementById('confirmBtn');
+            const alreadyVerifiedMsg = document.getElementById('alreadyVerifiedMsg');
+
+            if (updatedPayment === "COMPLETED") {
+                badge.innerText = "STATUS: PAID & VERIFIED";
+                badge.className = "badge-status bg-green";
+                confirmBtn.classList.add('d-none');
+                alreadyVerifiedMsg.classList.remove('d-none');
+            } else {
+                badge.innerText = "STATUS: PAYMENT PENDING";
+                badge.className = "badge-status bg-red";
+                confirmBtn.classList.remove('d-none');
+                alreadyVerifiedMsg.classList.add('d-none');
+            }
+
+            saveBtn.disabled = false;
+            saveBtn.innerText = "💾 SAVE";
+            closeEditModal();
+            alert("✅ Participant details updated successfully!");
+        }
     </script>
 </body>
 </html>
