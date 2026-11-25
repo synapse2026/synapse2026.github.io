@@ -1511,6 +1511,506 @@
         }
     }
 
+
+    /* ==========================================================================
+       SYNAPSE 2026 NEXT-GEN STAGE DISPLAY ENHANCEMENTS
+       ========================================================================== */
+    
+    /* 1. ROTATING SMART QR CORNER HUB */
+    .smart-qr-hub {
+        position: fixed;
+        top: 80px;
+        right: 25px;
+        z-index: 120;
+        background: rgba(8, 8, 18, 0.94);
+        border: 2px solid var(--poster-blue);
+        border-radius: 16px;
+        padding: 12px 14px;
+        box-shadow: 0 0 30px rgba(31, 193, 209, 0.45), inset 0 0 15px rgba(31, 193, 209, 0.15);
+        backdrop-filter: blur(15px);
+        width: 170px;
+        text-align: center;
+        transition: border-color 0.6s ease, box-shadow 0.6s ease, transform 0.3s ease;
+        user-select: none;
+    }
+    .smart-qr-hub:hover {
+        transform: scale(1.04);
+    }
+    .qr-badge-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+    }
+    .qr-tag-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.72rem;
+        letter-spacing: 1.5px;
+        font-weight: 700;
+        color: var(--poster-blue);
+        text-transform: uppercase;
+    }
+    .qr-pulse-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--poster-blue);
+        box-shadow: 0 0 10px var(--poster-blue);
+        animation: pulseGlow 1.2s infinite alternate;
+    }
+    .qr-canvas-box {
+        position: relative;
+        background: #ffffff;
+        padding: 6px;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+    }
+    #qrDynamicImg {
+        width: 120px;
+        height: 120px;
+        display: block;
+        image-rendering: pixelated;
+        border-radius: 4px;
+    }
+    .qr-corner-bracket {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border-color: var(--poster-blue);
+        border-style: solid;
+        pointer-events: none;
+    }
+    .qr-corner-bracket.tl { top: -2px; left: -2px; border-width: 3px 0 0 3px; }
+    .qr-corner-bracket.tr { top: -2px; right: -2px; border-width: 3px 3px 0 0; }
+    .qr-corner-bracket.bl { bottom: -2px; left: -2px; border-width: 0 0 3px 3px; }
+    .qr-corner-bracket.br { bottom: -2px; right: -2px; border-width: 0 3px 3px 0; }
+    .qr-action-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.82rem;
+        font-weight: 900;
+        color: #fff;
+        letter-spacing: 1px;
+        margin-top: 4px;
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+    }
+    .qr-action-sub {
+        font-size: 0.72rem;
+        color: rgba(255, 255, 255, 0.75);
+        line-height: 1.15;
+    }
+    .qr-progress-bar-container {
+        width: 100%;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 2px;
+        margin-top: 6px;
+        overflow: hidden;
+    }
+    .qr-progress-bar {
+        width: 100%;
+        height: 100%;
+        background: var(--poster-blue);
+        transition: width 0.1s linear;
+    }
+
+    /* 2. LIVE GATE ENTRY TOAST NOTIFICATIONS */
+    .gate-toast-container {
+        position: fixed;
+        bottom: 135px;
+        right: 25px;
+        z-index: 9998;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        pointer-events: none;
+    }
+    .gate-toast {
+        background: rgba(5, 5, 15, 0.96);
+        border: 2px solid var(--poster-blue);
+        border-left: 8px solid var(--poster-blue);
+        border-radius: 14px;
+        padding: 16px 22px;
+        box-shadow: 0 0 35px rgba(31, 193, 209, 0.55);
+        backdrop-filter: blur(20px);
+        min-width: 320px;
+        max-width: 440px;
+        color: #fff;
+        animation: toastSlideIn 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        position: relative;
+        overflow: hidden;
+    }
+    .gate-toast.hiding {
+        animation: toastSlideOut 0.45s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+    }
+    @keyframes toastSlideIn {
+        from { transform: translateX(120%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes toastSlideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(120%); opacity: 0; }
+    }
+    .toast-header-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 6px;
+    }
+    .toast-badge {
+        font-family: 'Orbitron';
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--poster-blue);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .toast-time {
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.5);
+    }
+    .toast-name {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.35rem;
+        font-weight: 900;
+        color: #fff;
+        letter-spacing: 1px;
+        text-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .toast-college {
+        font-size: 0.95rem;
+        color: var(--gold);
+        margin-top: 3px;
+        letter-spacing: 1px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* 3. NEXT EVENT COUNTDOWN STAT CARD */
+    .countdown-stat-card {
+        border-color: var(--gold) !important;
+        position: relative;
+        overflow: hidden;
+    }
+    .countdown-timer-val {
+        color: var(--gold) !important;
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 900;
+        letter-spacing: 2px;
+        text-shadow: 0 0 15px rgba(255, 234, 0, 0.6);
+    }
+    .countdown-urgent {
+        animation: pulseRed 1s infinite alternate !important;
+        color: #ff0055 !important;
+        text-shadow: 0 0 20px #ff0055 !important;
+    }
+    @keyframes pulseRed {
+        from { transform: scale(1); }
+        to { transform: scale(1.06); }
+    }
+
+    /* 4. NOW PLAYING AUDIO VISUALIZER BARS */
+    .np-visualizer {
+        display: flex;
+        align-items: flex-end;
+        gap: 5px;
+        height: 36px;
+        margin: 12px 0;
+        padding: 4px 8px;
+        background: rgba(255, 255, 255, 0.04);
+        border-radius: 8px;
+        border: 1px solid rgba(31, 193, 209, 0.2);
+    }
+    .viz-bar {
+        flex: 1;
+        width: 6px;
+        background: linear-gradient(to top, var(--poster-blue), var(--poster-pink), var(--gold));
+        border-radius: 3px;
+        height: 20%;
+        animation: vizBounce 0.9s ease-in-out infinite alternate;
+        box-shadow: 0 0 8px rgba(31, 193, 209, 0.5);
+    }
+    .viz-bar:nth-child(2) { animation-delay: 0.12s; }
+    .viz-bar:nth-child(3) { animation-delay: 0.24s; }
+    .viz-bar:nth-child(4) { animation-delay: 0.36s; }
+    .viz-bar:nth-child(5) { animation-delay: 0.48s; }
+    .viz-bar:nth-child(6) { animation-delay: 0.18s; }
+    .viz-bar:nth-child(7) { animation-delay: 0.32s; }
+    .viz-bar:nth-child(8) { animation-delay: 0.45s; }
+    .viz-bar:nth-child(9) { animation-delay: 0.1s; }
+    .viz-bar:nth-child(10) { animation-delay: 0.28s; }
+    .viz-bar:nth-child(11) { animation-delay: 0.4s; }
+    .viz-bar:nth-child(12) { animation-delay: 0.15s; }
+    .viz-bar:nth-child(13) { animation-delay: 0.35s; }
+    .viz-bar:nth-child(14) { animation-delay: 0.22s; }
+    .viz-bar:nth-child(15) { animation-delay: 0.5s; }
+    .viz-bar:nth-child(16) { animation-delay: 0.08s; }
+    @keyframes vizBounce {
+        0% { height: 15%; opacity: 0.6; }
+        50% { height: 95%; opacity: 1; }
+        100% { height: 35%; opacity: 0.8; }
+    }
+
+    /* 5. MUSIC POLL TOP SONG FLAME BADGE */
+    .top-vote-flame {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: linear-gradient(135deg, #ff0055, #ffea00);
+        color: #000;
+        font-family: 'Orbitron';
+        font-weight: 900;
+        font-size: 0.95rem;
+        padding: 4px 12px;
+        border-radius: 20px;
+        margin-left: 15px;
+        box-shadow: 0 0 15px rgba(255, 0, 85, 0.7);
+        animation: flamePulse 1.2s infinite alternate;
+    }
+    @keyframes flamePulse {
+        from { transform: scale(0.97); box-shadow: 0 0 10px rgba(255, 234, 0, 0.6); }
+        to { transform: scale(1.05); box-shadow: 0 0 25px rgba(255, 0, 85, 0.9); }
+    }
+
+    /* 6. STAGE LASER BEAMS FOR WINNER CELEBRATION */
+    .stage-lasers-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        z-index: 100;
+        display: none;
+        overflow: hidden;
+    }
+    .stage-laser {
+        position: absolute;
+        height: 4px;
+        width: 150vw;
+        filter: blur(1px);
+        box-shadow: 0 0 20px 4px var(--poster-blue);
+        opacity: 0.85;
+    }
+    .laser-1 {
+        top: 0;
+        left: -20vw;
+        background: linear-gradient(90deg, transparent, var(--poster-blue), #fff, var(--poster-blue), transparent);
+        transform-origin: left center;
+        animation: laserSweep1 3.5s infinite ease-in-out alternate;
+    }
+    .laser-2 {
+        bottom: 0;
+        right: -20vw;
+        background: linear-gradient(90deg, transparent, var(--poster-pink), #fff, var(--poster-pink), transparent);
+        transform-origin: right center;
+        animation: laserSweep2 4s infinite ease-in-out alternate;
+    }
+    .laser-3 {
+        top: 20vh;
+        left: -30vw;
+        background: linear-gradient(90deg, transparent, var(--gold), #fff, var(--gold), transparent);
+        transform-origin: left center;
+        animation: laserSweep3 3s infinite ease-in-out alternate;
+    }
+    .laser-4 {
+        bottom: 20vh;
+        right: -30vw;
+        background: linear-gradient(90deg, transparent, var(--poster-blue), #fff, var(--poster-blue), transparent);
+        transform-origin: right center;
+        animation: laserSweep4 4.5s infinite ease-in-out alternate;
+    }
+    @keyframes laserSweep1 {
+        0% { transform: rotate(15deg); }
+        100% { transform: rotate(55deg); }
+    }
+    @keyframes laserSweep2 {
+        0% { transform: rotate(-25deg); }
+        100% { transform: rotate(-65deg); }
+    }
+    @keyframes laserSweep3 {
+        0% { transform: rotate(-10deg); }
+        100% { transform: rotate(40deg); }
+    }
+    @keyframes laserSweep4 {
+        0% { transform: rotate(35deg); }
+        100% { transform: rotate(-20deg); }
+    }
+
+    /* 7. PAUSE BADGE INDICATOR */
+    .pause-badge {
+        position: fixed;
+        top: 85px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255, 0, 85, 0.94);
+        border: 2px solid #fff;
+        color: #fff;
+        padding: 10px 28px;
+        border-radius: 40px;
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 900;
+        font-size: 1.05rem;
+        letter-spacing: 2.5px;
+        box-shadow: 0 0 35px rgba(255, 0, 85, 0.8);
+        z-index: 10002;
+        display: none;
+        align-items: center;
+        gap: 12px;
+        animation: pulseGlow 1.2s infinite alternate;
+        backdrop-filter: blur(10px);
+    }
+
+    /* 8. BREAKING STAGE FLASH ANNOUNCEMENT OVERLAY */
+    .stage-flash-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.88);
+        backdrop-filter: blur(18px);
+        z-index: 99999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s ease;
+    }
+    .flash-modal-card {
+        max-width: 950px;
+        width: 92%;
+        background: #090914;
+        border: 4px solid var(--gold);
+        border-radius: 24px;
+        padding: 45px 35px;
+        text-align: center;
+        box-shadow: 0 0 90px rgba(255, 234, 0, 0.7);
+        position: relative;
+        overflow: hidden;
+    }
+    .flash-hazard-bar {
+        background: repeating-linear-gradient(45deg, #ffea00, #ffea00 25px, #000 25px, #000 50px);
+        color: #000;
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 900;
+        font-size: 1.45rem;
+        padding: 14px;
+        letter-spacing: 4px;
+        margin: -45px -35px 30px -35px;
+        text-shadow: 0 0 5px rgba(255, 255, 255, 0.6);
+    }
+    .flash-content-text {
+        font-family: 'Orbitron', sans-serif;
+        font-size: clamp(2rem, 3.8vw, 3.6rem);
+        font-weight: 900;
+        color: #fff;
+        line-height: 1.35;
+        margin: 25px 0;
+        text-shadow: 0 0 25px rgba(255, 255, 255, 0.6);
+        word-break: break-word;
+    }
+    .flash-sub-text {
+        font-size: 1.25rem;
+        color: var(--poster-blue);
+        letter-spacing: 3px;
+        font-family: 'Share Tech Mono', monospace;
+        margin-bottom: 30px;
+    }
+    .flash-dismiss-btn {
+        background: transparent;
+        border: 2px solid var(--gold);
+        color: var(--gold);
+        padding: 12px 30px;
+        border-radius: 10px;
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 700;
+        font-size: 1rem;
+        letter-spacing: 2px;
+        cursor: pointer;
+        transition: 0.25s;
+    }
+    .flash-dismiss-btn:hover {
+        background: var(--gold);
+        color: #000;
+        box-shadow: 0 0 25px var(--gold);
+    }
+
+    /* 9. STAGE OPERATOR HOTKEYS HELP MODAL */
+    .hotkey-help-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.88);
+        backdrop-filter: blur(15px);
+        z-index: 99999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+    .hotkey-card {
+        max-width: 780px;
+        width: 90%;
+        background: #090a16;
+        border: 2px solid var(--poster-blue);
+        border-radius: 20px;
+        padding: 35px;
+        box-shadow: 0 0 60px rgba(31, 193, 209, 0.5);
+    }
+    .hotkey-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.6rem;
+        color: var(--poster-blue);
+        text-align: center;
+        letter-spacing: 3px;
+        margin-bottom: 25px;
+        border-bottom: 1px solid rgba(31, 193, 209, 0.3);
+        padding-bottom: 15px;
+    }
+    .hotkey-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+    .hotkey-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 12px 16px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .hotkey-k {
+        background: var(--poster-blue);
+        color: #000;
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 900;
+        padding: 6px 12px;
+        border-radius: 6px;
+        min-width: 32px;
+        text-align: center;
+        font-size: 0.95rem;
+        box-shadow: 0 0 10px var(--poster-blue);
+    }
+    .hotkey-desc {
+        font-family: 'Share Tech Mono', monospace;
+        font-size: 0.95rem;
+        color: #fff;
+    }
+
 </style>
 
 
@@ -1537,6 +2037,7 @@
     <button class="hud-action-btn" id="btnAudioToggle" title="Click to enable live audio">
         <span id="audioIcon">🔊</span> <span id="audioText">ENABLE SOUND</span>
     </button>
+    <button class="hud-action-btn" id="btnHelpToggle" onclick="toggleHotkeyHelp()" title="Keyboard Shortcuts (H)">⌨️ HOTKEYS</button>
     <button class="hud-action-btn" id="btnFullscreenToggle" title="Toggle Fullscreen (F11)">
         ⛶ FULLSCREEN
     </button>
@@ -1548,6 +2049,12 @@
         <div class="np-label">⚡ SYNAPSE LIVE TOP PICK</div>
         <div id="np-song">LOADING...</div>
         <div id="np-artist">ARTIST</div>
+        <div class="np-visualizer" id="npVisualizer">
+            <span class="viz-bar"></span><span class="viz-bar"></span><span class="viz-bar"></span><span class="viz-bar"></span>
+            <span class="viz-bar"></span><span class="viz-bar"></span><span class="viz-bar"></span><span class="viz-bar"></span>
+            <span class="viz-bar"></span><span class="viz-bar"></span><span class="viz-bar"></span><span class="viz-bar"></span>
+            <span class="viz-bar"></span><span class="viz-bar"></span><span class="viz-bar"></span><span class="viz-bar"></span>
+        </div>
         <div class="np-time">
             <span style="font-family: 'Orbitron';">STATUS: PLAYING NOW</span>
             <span id="np-votes" style="color: var(--gold); font-weight: bold;">🏆 0 VOTES</span>
@@ -1592,6 +2099,10 @@
             <div class="stat-card"><div class="stat-val" id="paidCount">0</div><div class="stat-label">Check-ins</div></div>
 
             <div class="stat-card" style="border-color: var(--poster-blue);"><div class="stat-val" id="winCount">0</div><div class="stat-label">Winners</div></div>
+            <div class="stat-card countdown-stat-card" id="nextEventStatCard">
+                <div class="stat-val countdown-timer-val" id="nextEventTimer">--:--</div>
+                <div class="stat-label" id="nextEventNameLabel">Next Event</div>
+            </div>
 
         </div>
 
@@ -2110,8 +2621,7 @@ setInterval(syncVolumeWithSpotify, 5000);
             // Use lastVoter info we added to the Apps Script
 
             const voterDisplay = song.lastVoter ? `LATEST VOTE: ${song.lastVoter}` : "WAITING FOR VOTES...";
-
-
+            const flameBadge = (i === 0 && song.votes > 0) ? `<span class="top-vote-flame">🔥 #1 HYPED</span>` : '';
 
             container.innerHTML += `
 
@@ -2119,7 +2629,7 @@ setInterval(syncVolumeWithSpotify, 5000);
 
                     <div class="poll-label">
 
-                        <span>${song.name}</span>
+                        <span>${song.name} ${flameBadge}</span>
 
                         <span style="color:var(--gold)">${song.votes} VOTES</span>
 
@@ -2189,21 +2699,23 @@ setInterval(syncVolumeWithSpotify, 5000);
 
 
     function triggerFullConfetti() {
+        const laserContainer = document.getElementById('stageLasers');
+        if (laserContainer) {
+            laserContainer.classList.add('active');
+            setTimeout(() => {
+                laserContainer.classList.remove('active');
+            }, 4500);
+        }
 
-        const end = Date.now() + (3 * 1000);
-
-        const colors = ['#d11fb7', '#1fc1d1', '#ffea00'];
+        const end = Date.now() + (3.5 * 1000);
+        const colors = ['#d11fb7', '#1fc1d1', '#ffea00', '#00ffcc', '#ff3366', '#ffffff'];
 
         (function frame() {
-
-            confetti({ particleCount: 7, angle: 60, spread: 55, origin: { x: 0 }, colors });
-
-            confetti({ particleCount: 7, angle: 120, spread: 55, origin: { x: 1 }, colors });
-
+            confetti({ particleCount: 7, angle: 60, spread: 60, origin: { x: 0, y: 0.8 }, colors });
+            confetti({ particleCount: 7, angle: 120, spread: 60, origin: { x: 1, y: 0.8 }, colors });
+            confetti({ particleCount: 9, angle: 90, spread: 80, origin: { x: 0.5, y: 0.95 }, colors });
             if (Date.now() < end) requestAnimationFrame(frame);
-
         }());
-
     }
 
 
@@ -2527,6 +3039,9 @@ const eventsPerPage = 3;
 
 
 
+let seenAttendees = new Set();
+let isInitialAttendeeFetch = true;
+
 function fetchLiveData() {
     // 1. Fetch Global Stats & Recent Attendees
     fetch(`${scriptURL}?action=getLiveTVData`).then(res => res.json()).then(data => {
@@ -2534,6 +3049,21 @@ function fetchLiveData() {
         document.getElementById('paidCount').innerText = data.stats.paid || 0;
         document.getElementById('winCount').innerText = data.stats.winners || 0;
         
+        if (data.recentAttendees && data.recentAttendees.length > 0) {
+            if (isInitialAttendeeFetch) {
+                data.recentAttendees.forEach(name => seenAttendees.add(name.trim().toUpperCase()));
+                isInitialAttendeeFetch = false;
+            } else {
+                data.recentAttendees.forEach(name => {
+                    const cleanName = name.trim().toUpperCase();
+                    if (cleanName && !seenAttendees.has(cleanName)) {
+                        seenAttendees.add(cleanName);
+                        showGateWelcomeToast(cleanName, "WELCOME TO SYNAPSE 2026");
+                    }
+                });
+            }
+        }
+
         const attendeeContainer = document.getElementById('attendee-list');
         if (attendeeContainer && data.recentAttendees && data.recentAttendees.length > 0) {
             attendeeContainer.innerHTML = data.recentAttendees
@@ -2665,12 +3195,15 @@ const slides = [
     
 
 let rotationTimer = null;
+let isCarouselPaused = false;
 
 function scheduleNextSlide(delayMs) {
     if (rotationTimer) {
         clearTimeout(rotationTimer);
         rotationTimer = null;
     }
+    if (isCarouselPaused) return;
+
     rotationTimer = setTimeout(() => {
         rotateSlides();
     }, delayMs);
@@ -2833,7 +3366,405 @@ scheduleNextSlide(25000);
         });
     }
 
+    // =========================================================
+    // --- STAGE VISUAL ENHANCEMENT & OPERATOR HOTKEY ENGINE ---
+    // =========================================================
+
+    // 1. Toast Notification for Live Gate Check-ins
+    function showGateWelcomeToast(name, subtext = "WELCOME TO SYNAPSE 2026") {
+        const container = document.getElementById('gateToastContainer');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = 'gate-toast';
+        toast.innerHTML = `
+            <div class="toast-avatar">⚡</div>
+            <div class="toast-body">
+                <div class="toast-title">GATE ENTRY CONFIRMED</div>
+                <div class="toast-name">${name}</div>
+                <div class="toast-sub">${subtext}</div>
+            </div>
+        `;
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.animation = 'toastOut 0.4s forwards';
+            setTimeout(() => toast.remove(), 400);
+        }, 5500);
+
+        while (container.children.length > 3) {
+            container.removeChild(container.firstChild);
+        }
+    }
+
+    // 2. Dynamic Rotating Smart QR Corner Hub
+    const smartQrStages = [
+        {
+            cat: "CROWD DJ",
+            title: "VOTE NEXT TRACK",
+            sub: "Scan to queue live music 🎵",
+            url: "https://synapse2026.github.io/vote_your_song.html",
+            borderColor: "#d11fb7"
+        },
+        {
+            cat: "AUDIENCE CAM",
+            title: "SNAP & PROJECT",
+            sub: "Upload selfie to stage screen 📸",
+            url: "https://synapse2026.github.io/camera.html",
+            borderColor: "#ffea00"
+        },
+        {
+            cat: "SPOT REGISTRATION",
+            title: "SPOT ENTRY OPEN",
+            sub: "Register for active competitions ⚡",
+            url: "https://synapse2026.github.io/registration.html",
+            borderColor: "#1fc1d1"
+        }
+    ];
+
+    let currentQrIndex = 0;
+    const QR_INTERVAL_MS = 20000;
+
+    function initSmartQrRotator() {
+        const qrImg = document.getElementById('qrDynamicImg');
+        const qrCat = document.getElementById('qrActionCategory');
+        const qrTitle = document.getElementById('qrActionTitle');
+        const qrSub = document.getElementById('qrActionSubtitle');
+        const qrBar = document.getElementById('qrTimerBar');
+        const qrWrapper = document.getElementById('qrBoxWrapper');
+
+        if (!qrImg || !qrCat || !qrTitle || !qrSub || !qrBar) return;
+
+        function applyQr(index) {
+            const item = smartQrStages[index];
+            if (qrWrapper) qrWrapper.style.opacity = '0.3';
+            qrCat.style.opacity = '0.3';
+
+            setTimeout(() => {
+                qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(item.url)}`;
+                qrCat.innerText = item.cat;
+                qrCat.style.borderColor = item.borderColor;
+                qrCat.style.color = item.borderColor;
+                qrTitle.innerText = item.title;
+                qrSub.innerText = item.sub;
+
+                if (qrWrapper) qrWrapper.style.opacity = '1';
+                qrCat.style.opacity = '1';
+
+                qrBar.style.transition = 'none';
+                qrBar.style.width = '0%';
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        qrBar.style.transition = `width ${QR_INTERVAL_MS}ms linear`;
+                        qrBar.style.width = '100%';
+                    });
+                });
+            }, 300);
+        }
+
+        applyQr(0);
+
+        setInterval(() => {
+            currentQrIndex = (currentQrIndex + 1) % smartQrStages.length;
+            applyQr(currentQrIndex);
+        }, QR_INTERVAL_MS);
+    }
+
+    // 3. Next Event Live Countdown Ticker
+    function initNextEventCountdown() {
+        const timerEl = document.getElementById('nextEventTimer');
+        const labelEl = document.getElementById('nextEventNameLabel');
+        if (!timerEl || !labelEl) return;
+
+        function parseTimeStringToToday(timeStr) {
+            const match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+            if (!match) return null;
+            let hours = parseInt(match[1], 10);
+            const minutes = parseInt(match[2], 10);
+            const meridian = match[3].toUpperCase();
+            if (meridian === 'PM' && hours < 12) hours += 12;
+            if (meridian === 'AM' && hours === 12) hours = 0;
+            const d = new Date();
+            d.setHours(hours, minutes, 0, 0);
+            return d;
+        }
+
+        function updateCountdown() {
+            const items = document.querySelectorAll('#hud-timeline .timeline-item');
+            const now = new Date();
+            let closestEvent = null;
+            let smallestDiff = Infinity;
+            let ongoingEvent = null;
+
+            items.forEach(el => {
+                const timeEl = el.querySelector('.schedule-time');
+                const titleEl = el.querySelector('.schedule-title');
+                if (!timeEl || !titleEl) return;
+
+                const title = titleEl.innerText.trim();
+                const rawTime = timeEl.innerText.trim();
+                const parts = rawTime.split('-').map(s => s.trim());
+                if (parts.length >= 1) {
+                    const startD = parseTimeStringToToday(parts[0]);
+                    const endD = parts.length > 1 ? parseTimeStringToToday(parts[1]) : null;
+
+                    if (startD) {
+                        const diffMs = startD.getTime() - now.getTime();
+                        if (diffMs > 0 && diffMs < smallestDiff) {
+                            smallestDiff = diffMs;
+                            closestEvent = { title, startD, diffMs };
+                        }
+                        if (startD <= now && endD && now <= endD) {
+                            ongoingEvent = { title };
+                        }
+                    }
+                }
+            });
+
+            if (closestEvent) {
+                const totalSecs = Math.floor(closestEvent.diffMs / 1000);
+                const hrs = Math.floor(totalSecs / 3600);
+                const mins = Math.floor((totalSecs % 3600) / 60);
+                const secs = totalSecs % 60;
+                const pad = n => String(n).padStart(2, '0');
+
+                if (hrs > 0) {
+                    timerEl.innerText = `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
+                } else {
+                    timerEl.innerText = `${pad(mins)}:${pad(secs)}`;
+                }
+                labelEl.innerText = `NEXT: ${closestEvent.title.toUpperCase()}`;
+                timerEl.style.color = "var(--gold)";
+            } else if (ongoingEvent) {
+                timerEl.innerText = "LIVE NOW";
+                labelEl.innerText = ongoingEvent.title.toUpperCase();
+                timerEl.style.color = "var(--cyan)";
+            } else {
+                timerEl.innerText = "SYNAPSE";
+                labelEl.innerText = "NEXT EVENT";
+                timerEl.style.color = "var(--gold)";
+            }
+        }
+
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+    }
+
+    // 4. Carousel Pause & Direct Slide Navigation
+    function toggleCarouselPause() {
+        isCarouselPaused = !isCarouselPaused;
+        const badge = document.getElementById('pauseBadge');
+        if (badge) {
+            if (isCarouselPaused) {
+                badge.classList.add('active');
+                if (rotationTimer) {
+                    clearTimeout(rotationTimer);
+                    rotationTimer = null;
+                }
+            } else {
+                badge.classList.remove('active');
+                scheduleNextSlide(12000);
+            }
+        }
+    }
+
+    function jumpToSlide(slideId) {
+        const targetIdx = slides.indexOf(slideId);
+        if (targetIdx === -1) return;
+
+        if (rotationTimer) {
+            clearTimeout(rotationTimer);
+            rotationTimer = null;
+        }
+
+        stopAllCeremonyAudio();
+        const currentEl = document.getElementById(slides[currentSlide]);
+        if (currentEl) currentEl.classList.remove('active');
+
+        currentSlide = targetIdx;
+        const activeSlideEl = document.getElementById(slideId);
+        if (activeSlideEl) activeSlideEl.classList.add('active');
+
+        switch (slideId) {
+            case 'slide-status':
+                currentEventPage = 0;
+                fetchLiveData();
+                break;
+            case 'slide-schedule':
+                scrollPos = -50;
+                break;
+            case 'slide-mentor':
+                startMediaMarathon("MENTOR_SELFIE", "MENTOR MOMENT", "mentor-content");
+                break;
+            case 'slide-winners':
+                startWinnerMarathon();
+                break;
+            case 'slide-achievements':
+                startMediaMarathon("ACHIEVEMENT", "ACHIEVEMENTS", "achievement-content");
+                break;
+            case 'slide-music':
+                updateMusicPoll();
+                break;
+            case 'slide-photos':
+                startMediaMarathon("LIVE_MOMENT", "LIVE SNAP", "live-media-content");
+                break;
+            case 'slide-video':
+                startSponsorMarathon();
+                break;
+        }
+
+        if (!isCarouselPaused) {
+            scheduleNextSlide(25000);
+        }
+    }
+
+    // 5. Stage Emergency / Flash Announcements Overlay
+    function showFlashAnnouncement(text) {
+        const overlay = document.getElementById('stageFlashOverlay');
+        const textEl = document.getElementById('flashAnnouncementText');
+        if (!overlay) return;
+        if (textEl && text) {
+            textEl.innerText = text.toUpperCase();
+        }
+        overlay.classList.add('active');
+
+        const fan = document.getElementById('fanfareAudio');
+        if (fan) {
+            fan.currentTime = 0;
+            fan.play().catch(() => {});
+            setTimeout(() => fan.pause(), 1500);
+        }
+    }
+
+    function dismissFlashAnnouncement() {
+        const overlay = document.getElementById('stageFlashOverlay');
+        if (overlay) overlay.classList.remove('active');
+    }
+
+    // 6. Stage Operator Hotkeys Cheat Sheet
+    function toggleHotkeyHelp() {
+        const modal = document.getElementById('hotkeyHelpModal');
+        if (modal) {
+            modal.classList.toggle('active');
+        }
+    }
+
+    // 7. Global Keyboard Event Listener
+    document.addEventListener('keydown', (e) => {
+        if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+
+        const key = e.key.toUpperCase();
+        if (e.code === 'Space') {
+            e.preventDefault();
+            toggleCarouselPause();
+        } else if (key === 'W') {
+            jumpToSlide('slide-winners');
+            triggerFullConfetti();
+        } else if (key === 'S') {
+            jumpToSlide('slide-mentor');
+        } else if (key === 'M') {
+            jumpToSlide('slide-music');
+        } else if (key === 'E') {
+            jumpToSlide('slide-status');
+        } else if (key === 'A') {
+            const msg = prompt("Enter stage broadcast announcement:");
+            if (msg) showFlashAnnouncement(msg);
+        } else if (key === 'T') {
+            const randId = Math.floor(Math.random() * 899 + 100);
+            showGateWelcomeToast(`DELEGATE #${randId} (GEC KANNUR)`, "VIP DELEGATE CHECK-IN");
+        } else if (key === 'F') {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                document.exitFullscreen().catch(() => {});
+            }
+        } else if (key === 'H') {
+            toggleHotkeyHelp();
+        } else if (e.key === 'Escape') {
+            dismissFlashAnnouncement();
+            const modal = document.getElementById('hotkeyHelpModal');
+            if (modal) modal.classList.remove('active');
+        }
+    });
+
+    // Boot up the Stage Enhancements
+    initSmartQrRotator();
+    initNextEventCountdown();
+
 </script>
+
+
+<!-- STAGE LASER BEAMS FOR WINNER SHOWCASE -->
+<div id="stageLasers" class="stage-lasers-container">
+    <div class="stage-laser laser-1"></div>
+    <div class="stage-laser laser-2"></div>
+    <div class="stage-laser laser-3"></div>
+    <div class="stage-laser laser-4"></div>
+</div>
+
+<!-- SLIDESHOW PAUSE INDICATOR -->
+<div id="pauseBadge" class="pause-badge">
+    <span>⏸️</span> ROTATION PAUSED <small style="opacity:0.8; font-size:0.75rem;">(PRESS SPACE TO RESUME)</small>
+</div>
+
+<!-- DYNAMIC ROTATING SMART QR CORNER HUB -->
+<div id="smartQrHub" class="smart-qr-hub" title="Scan with your smartphone!">
+    <div class="qr-badge-inner">
+        <div class="qr-tag-row">
+            <span class="qr-pulse-dot" id="qrPulseDot"></span>
+            <span id="qrActionCategory" class="qr-action-cat">CROWD DJ</span>
+        </div>
+        <div class="qr-canvas-box" id="qrBoxWrapper">
+            <img id="qrDynamicImg" src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://synapse2026.github.io/vote_your_song.html" alt="Smart Stage QR">
+            <div class="qr-corner-bracket tl"></div>
+            <div class="qr-corner-bracket tr"></div>
+            <div class="qr-corner-bracket bl"></div>
+            <div class="qr-corner-bracket br"></div>
+        </div>
+        <div class="qr-text-block">
+            <div id="qrActionTitle" class="qr-action-title">VOTE NEXT TRACK</div>
+            <div id="qrActionSubtitle" class="qr-action-sub">Scan to queue live music 🎵</div>
+        </div>
+        <div class="qr-progress-bar-container">
+            <div id="qrTimerBar" class="qr-progress-bar"></div>
+        </div>
+    </div>
+</div>
+
+<!-- LIVE GATE ENTRY TOAST NOTIFICATIONS -->
+<div id="gateToastContainer" class="gate-toast-container"></div>
+
+<!-- STAGE EMERGENCY / FLASH ANNOUNCEMENT OVERLAY -->
+<div id="stageFlashOverlay" class="stage-flash-overlay">
+    <div class="flash-modal-card">
+        <div class="flash-hazard-bar">⚠️ STAGE ANNOUNCEMENT ⚠️</div>
+        <div class="flash-content-text" id="flashAnnouncementText">LUNCH IS NOW SERVED IN AUDITORIUM LOBBY</div>
+        <div class="flash-sub-text">SYNAPSE 2026 CENTRAL COORDINATION</div>
+        <button class="flash-dismiss-btn" onclick="dismissFlashAnnouncement()">DISMISS [ESC]</button>
+    </div>
+</div>
+
+<!-- STAGE OPERATOR HOTKEYS CHEAT SHEET MODAL -->
+<div id="hotkeyHelpModal" class="hotkey-help-modal" onclick="if(event.target === this) toggleHotkeyHelp()">
+    <div class="hotkey-card">
+        <div class="hotkey-title">⚡ STAGE OPERATOR HOTKEYS</div>
+        <div class="hotkey-grid">
+            <div class="hotkey-item"><div class="hotkey-k">SPACE</div><div class="hotkey-desc">Pause / Resume Carousel</div></div>
+            <div class="hotkey-item"><div class="hotkey-k">W</div><div class="hotkey-desc">Winners Slide + Confetti</div></div>
+            <div class="hotkey-item"><div class="hotkey-k">S</div><div class="hotkey-desc">Audience Selfie Cam Slide</div></div>
+            <div class="hotkey-item"><div class="hotkey-k">M</div><div class="hotkey-desc">Crowd DJ / Music Poll Slide</div></div>
+            <div class="hotkey-item"><div class="hotkey-k">E</div><div class="hotkey-desc">Live Event Tracker Slide</div></div>
+            <div class="hotkey-item"><div class="hotkey-k">A</div><div class="hotkey-desc">Trigger Flash Announcement</div></div>
+            <div class="hotkey-item"><div class="hotkey-k">T</div><div class="hotkey-desc">Test Gate Welcome Toast</div></div>
+            <div class="hotkey-item"><div class="hotkey-k">F</div><div class="hotkey-desc">Toggle True Fullscreen</div></div>
+            <div class="hotkey-item"><div class="hotkey-k">H</div><div class="hotkey-desc">Toggle Hotkeys HUD</div></div>
+            <div class="hotkey-item"><div class="hotkey-k">ESC</div><div class="hotkey-desc">Close Modals / Overlays</div></div>
+        </div>
+        <div style="text-align: center;">
+            <button class="flash-dismiss-btn" onclick="toggleHotkeyHelp()">CLOSE [ESC]</button>
+        </div>
+    </div>
+</div>
 
 </body>
 
