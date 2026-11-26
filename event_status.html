@@ -1104,6 +1104,25 @@
             letter-spacing: 0.5px;
             flex-shrink: 0;
             box-shadow: 0 0 12px rgba(255, 204, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .cert-hero-banner.locked {
+            background: linear-gradient(135deg, rgba(255, 71, 87, 0.12), rgba(255, 170, 0, 0.08));
+            border-color: rgba(255, 71, 87, 0.4);
+        }
+        .cert-hero-banner.locked .cert-hero-badge-icon {
+            background: rgba(255, 71, 87, 0.15);
+            border-color: rgba(255, 71, 87, 0.3);
+        }
+        .cert-hero-banner.locked .cert-hero-title {
+            color: #ff6b81;
+        }
+        .cert-hero-action.locked {
+            background: rgba(255, 71, 87, 0.15);
+            color: #ff6b81;
+            border: 1px solid rgba(255, 71, 87, 0.4);
+            box-shadow: none;
         }
 
         /* Certificate Modal */
@@ -1478,13 +1497,13 @@
     </div>
 
     <!-- CERTIFICATE HERO BANNER -->
-    <div class="cert-hero-banner" onclick="openCertModal()">
-        <div class="cert-hero-badge-icon">🎓</div>
+    <div class="cert-hero-banner" id="certHeroBanner" onclick="openCertModal()">
+        <div class="cert-hero-badge-icon" id="certHeroIcon">🎓</div>
         <div class="cert-hero-content">
-            <div class="cert-hero-title">DOWNLOAD YOUR CERTIFICATE</div>
-            <div class="cert-hero-desc">Instant verified Merit & Participation PDFs for all events</div>
+            <div class="cert-hero-title" id="certHeroTitle">DOWNLOAD YOUR CERTIFICATE</div>
+            <div class="cert-hero-desc" id="certHeroDesc">Instant verified Merit & Participation PDFs for all events</div>
         </div>
-        <button class="cert-hero-action" type="button">GET PDF ➔</button>
+        <button class="cert-hero-action" id="certHeroBtn" type="button">GET PDF ➔</button>
     </div>
 
     <!-- EVENT CARDS LIST -->
@@ -1517,22 +1536,39 @@
             </div>
             
             <div class="cert-modal-body">
-                <label class="cert-input-label">ENTER REGISTERED 10-DIGIT MOBILE NUMBER</label>
-                <div class="cert-input-group">
-                    <span class="cert-input-prefix">+91</span>
-                    <input type="tel" id="certMobileInput" maxlength="10" placeholder="e.g. 9876543210" oninput="this.value = this.value.replace(/[^0-9]/g, '')" onkeyup="if(event.key==='Enter') lookupStudentCertificates()">
-                    <button class="cert-search-btn" id="btnLookupCert" onclick="lookupStudentCertificates()">FIND</button>
-                </div>
-                <div class="cert-input-hint">Enter your mobile number registered during SYNAPSE 2026.</div>
+                <!-- ACTIVE LOOKUP SECTION (SHOWN WHEN PORTAL IS ENABLED) -->
+                <div id="certInputSection">
+                    <label class="cert-input-label">ENTER REGISTERED 10-DIGIT MOBILE NUMBER</label>
+                    <div class="cert-input-group">
+                        <span class="cert-input-prefix">+91</span>
+                        <input type="tel" id="certMobileInput" maxlength="10" placeholder="e.g. 9876543210" oninput="this.value = this.value.replace(/[^0-9]/g, '')" onkeyup="if(event.key==='Enter') lookupStudentCertificates()">
+                        <button class="cert-search-btn" id="btnLookupCert" onclick="lookupStudentCertificates()">FIND</button>
+                    </div>
+                    <div class="cert-input-hint">Enter your mobile number registered during SYNAPSE 2026.</div>
 
-                <!-- Spinner -->
-                <div id="certLoadingSpinner" style="display: none;" class="cert-spinner-wrap">
-                    <div class="cert-spinner"></div>
-                    <span>Checking SYNAPSE Database...</span>
+                    <!-- Spinner -->
+                    <div id="certLoadingSpinner" style="display: none;" class="cert-spinner-wrap">
+                        <div class="cert-spinner"></div>
+                        <span>Checking SYNAPSE Database...</span>
+                    </div>
+
+                    <!-- Results container -->
+                    <div id="certResultsArea" style="display: none;"></div>
                 </div>
 
-                <!-- Results container -->
-                <div id="certResultsArea" style="display: none;"></div>
+                <!-- PORTAL LOCKED NOTICE SECTION (SHOWN WHEN PORTAL IS DISABLED) -->
+                <div id="certLockedSection" style="display: none; text-align: center; padding: 24px 10px;">
+                    <div style="font-size: 2.8rem; margin-bottom: 12px; filter: drop-shadow(0 0 10px rgba(255,71,87,0.4));">🔒</div>
+                    <div style="font-family:'Orbitron',sans-serif; color: #ff6b81; font-weight:800; font-size:1.02rem; letter-spacing:0.8px; margin-bottom: 10px;">
+                        PORTAL TEMPORARILY CLOSED
+                    </div>
+                    <p id="certLockedNoticeText" style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.55; margin-bottom: 16px; background: rgba(255,255,255,0.04); padding: 14px 12px; border-radius: 10px; border: 1px dashed rgba(255,71,87,0.35);">
+                        Certificates are currently under final evaluation by coordinators and judges. Opening shortly!
+                    </p>
+                    <div style="font-size: 0.75rem; color: #888; line-height: 1.45;">
+                        📢 Stay tuned to stage announcements. Once released, you will be able to search and download your official PDF directly from here.
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -2205,10 +2241,12 @@
         window.addEventListener('DOMContentLoaded', () => {
             renderEvents();
             refreshLiveData();
+            checkCertPortalStatus();
 
             // Auto-refresh every 12 seconds
             setInterval(() => {
                 refreshLiveData();
+                checkCertPortalStatus();
             }, 12000);
 
             // Auto-open certificate modal if linked with ?mobile= or #certificate
@@ -2224,12 +2262,70 @@
         // ==========================================
         let cachedMasterData = null;
         let currentStudentCertsList = [];
+        let certPortalConfig = {
+            enabled: true,
+            updatedAt: new Date().toISOString(),
+            message: "Official certificate portal is active."
+        };
+
+        async function checkCertPortalStatus() {
+            try {
+                const res = await fetch('cert_config.json?v=' + Date.now());
+                if (res.ok) {
+                    certPortalConfig = await res.json();
+                    updateCertPortalUI();
+                }
+            } catch (e) {
+                console.warn('Could not read cert_config.json, using default', e);
+            }
+        }
+
+        function updateCertPortalUI() {
+            const banner = document.getElementById('certHeroBanner');
+            const title = document.getElementById('certHeroTitle');
+            const desc = document.getElementById('certHeroDesc');
+            const btn = document.getElementById('certHeroBtn');
+
+            if (!certPortalConfig.enabled) {
+                if (banner) banner.classList.add('locked');
+                if (title) title.innerHTML = '🔒 CERTIFICATE PORTAL CLOSED';
+                if (desc) desc.innerText = certPortalConfig.message || 'Certificates are being processed by coordinators. Opening shortly!';
+                if (btn) {
+                    btn.classList.add('locked');
+                    btn.innerText = 'LOCKED 🔒';
+                }
+            } else {
+                if (banner) banner.classList.remove('locked');
+                if (title) title.innerHTML = 'DOWNLOAD YOUR CERTIFICATE';
+                if (desc) desc.innerText = 'Instant verified Merit & Participation PDFs for all events';
+                if (btn) {
+                    btn.classList.remove('locked');
+                    btn.innerText = 'GET PDF ➔';
+                }
+            }
+        }
 
         function openCertModal(presetMobile) {
             const overlay = document.getElementById('certModalOverlay');
             if (!overlay) return;
             overlay.classList.add('open');
             document.body.style.overflow = 'hidden';
+
+            const inputSec = document.getElementById('certInputSection');
+            const lockSec = document.getElementById('certLockedSection');
+            const lockMsg = document.getElementById('certLockedNoticeText');
+
+            if (!certPortalConfig.enabled) {
+                if (inputSec) inputSec.style.display = 'none';
+                if (lockSec) {
+                    lockSec.style.display = 'block';
+                    if (lockMsg) lockMsg.innerText = certPortalConfig.message || "Certificates are currently under final evaluation by judges and coordinators. Opening shortly!";
+                }
+                return;
+            } else {
+                if (inputSec) inputSec.style.display = 'block';
+                if (lockSec) lockSec.style.display = 'none';
+            }
 
             const input = document.getElementById('certMobileInput');
             if (presetMobile && input) {
@@ -2252,6 +2348,11 @@
         }
 
         async function lookupStudentCertificates() {
+            if (!certPortalConfig.enabled) {
+                alert("The certificate portal is currently closed.\n\nNotice: " + (certPortalConfig.message || "Opening soon!"));
+                return;
+            }
+
             const input = document.getElementById('certMobileInput');
             const rawVal = input ? input.value.trim().replace(/\D/g, '') : '';
 

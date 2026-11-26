@@ -108,6 +108,33 @@
             display: inline-block;
         }
 
+        .portal-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .portal-dot.active {
+            background: #00ff88;
+            box-shadow: 0 0 10px #00ff88;
+            animation: portalPulseGreen 2s infinite;
+        }
+        .portal-dot.locked {
+            background: #ff4757;
+            box-shadow: 0 0 10px #ff4757;
+            animation: portalPulseRed 2s infinite;
+        }
+        @keyframes portalPulseGreen {
+            0% { box-shadow: 0 0 0 0 rgba(0,255,136, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(0,255,136, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0,255,136, 0); }
+        }
+        @keyframes portalPulseRed {
+            0% { box-shadow: 0 0 0 0 rgba(255,71,87, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(255,71,87, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255,71,87, 0); }
+        }
+
         /* Action button inside table */
         .btn-tbl-action {
             padding: 4px 10px;
@@ -181,6 +208,46 @@
 
     <!-- TAB 2: CERTIFICATE GENERATOR & AUTO-DISPATCH -->
     <div id="tabCerts" style="display: none;">
+        <!-- PORTAL ACCESS CONTROL & TOGGLE BANNER -->
+        <div class="section-card mb-3" style="border: 1px solid var(--neon-blue); background: linear-gradient(145deg, rgba(0,210,255,0.06), rgba(10,14,23,0.95));">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                <div>
+                    <span class="hud-label" style="letter-spacing:1px; color:#aaa;">STUDENT SELF-SERVICE PORTAL ACCESS:</span>
+                    <div class="d-flex align-items-center gap-2 mt-1">
+                        <span id="portalStatusDot" class="portal-dot active"></span>
+                        <strong id="portalStatusText" style="font-family:'Orbitron', sans-serif; font-size:1rem; color:var(--emerald);">
+                            PORTAL IS LIVE & ACCESSIBLE
+                        </strong>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-secondary px-2 py-2" onclick="configureAdminKey()" title="Configure GitHub Admin Access Key" style="font-size:0.75rem;">
+                        🔑 Key
+                    </button>
+                    <button id="btnTogglePortal" class="btn btn-outline-danger px-3 py-2" onclick="toggleCertificatePortal()" style="font-family:'Orbitron'; font-size:0.75rem; font-weight:700; letter-spacing:0.5px;">
+                        🔒 LOCK / DISABLE PORTAL
+                    </button>
+                </div>
+            </div>
+
+            <div class="row g-2 align-items-end mt-2 pt-2" style="border-top: 1px dashed rgba(255,255,255,0.12);">
+                <div class="col-12 col-md-9">
+                    <label class="hud-label mb-1" style="font-size:0.7rem; color:var(--warning-gold);">CUSTOM NOTICE SHOWN TO STUDENTS (WHEN PORTAL IS LOCKED):</label>
+                    <input type="text" id="portalCustomNotice" class="form-control bg-dark text-white border-secondary" placeholder="e.g. Certificates are currently under final evaluation. Opening at 4:30 PM!" style="font-size:0.82rem;">
+                </div>
+                <div class="col-12 col-md-3">
+                    <button id="btnSaveNotice" class="btn btn-cyber w-100 py-2" onclick="savePortalCustomNotice()" style="font-size:0.75rem;">
+                        💾 SAVE NOTICE
+                    </button>
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center mt-2 pt-1 text-white-50" style="font-size: 0.7rem;">
+                <span>🔒 <em>Locking prevents students from searching & downloading PDFs on events.html.</em></span>
+                <span style="color: var(--neon-blue);">🛡️ <em>Admins can always generate & batch download below.</em></span>
+            </div>
+        </div>
+
         <!-- Certificate HUD Summary -->
         <div class="row g-2 mb-3 text-center">
             <div class="col-6 col-md-3">
@@ -294,6 +361,7 @@
         }).catch(err => console.log('Error loading events:', err));
 
         refreshDashboard();
+        loadPortalConfig();
 
         // Check URL hash or query param for tab
         if (window.location.hash === '#certificates' || window.location.search.includes('tab=cert')) {
@@ -569,6 +637,216 @@
         } catch (e) {
             alert('Error creating batch PDF: ' + e.message);
         }
+    }
+
+    // ==========================================
+    // CERTIFICATE PORTAL ACCESS CONTROL (ENABLE/DISABLE)
+    // ==========================================
+    const GH_REPO = 'synapse2026/synapse2026.github.io';
+    const GH_PATH = 'cert_config.json';
+
+    // Secure token retriever from localStorage or URL parameter
+    function getAdminKey() {
+        const urlParams = new URLSearchParams(window.location.search);
+        let key = urlParams.get('admin_key') || localStorage.getItem('synapse_admin_github_token');
+        if (!key) {
+            key = prompt("🔒 Enter Organizer Admin Access Token to save changes:\n(This will be securely saved in your browser's localStorage for one-click access)");
+            if (key) {
+                key = key.trim();
+                localStorage.setItem('synapse_admin_github_token', key);
+            }
+        }
+        return key;
+    }
+
+    function configureAdminKey() {
+        const current = localStorage.getItem('synapse_admin_github_token') || '';
+        const entered = prompt("🔑 Manage Organizer GitHub Admin Access Token:\n\nPaste token to save, or clear to reset:", current);
+        if (entered !== null) {
+            if (entered.trim()) {
+                localStorage.setItem('synapse_admin_github_token', entered.trim());
+                alert("✅ Admin Access Token saved securely!");
+            } else {
+                localStorage.removeItem('synapse_admin_github_token');
+                alert("Admin Access Token cleared.");
+            }
+        }
+    }
+
+    let certPortalConfig = {
+        enabled: true,
+        updatedAt: new Date().toISOString(),
+        message: "Official certificate portal is active."
+    };
+
+    async function loadPortalConfig() {
+        try {
+            const res = await fetch('cert_config.json?v=' + Date.now());
+            if (res.ok) {
+                certPortalConfig = await res.json();
+                localStorage.setItem('synapse_cert_config', JSON.stringify(certPortalConfig));
+            }
+        } catch (e) {
+            console.warn('Could not load cert_config.json from server, checking local storage', e);
+            const cached = localStorage.getItem('synapse_cert_config');
+            if (cached) {
+                try { certPortalConfig = JSON.parse(cached); } catch(err){}
+            }
+        }
+        renderPortalConfigUI();
+    }
+
+    function renderPortalConfigUI() {
+        const dot = document.getElementById('portalStatusDot');
+        const text = document.getElementById('portalStatusText');
+        const btn = document.getElementById('btnTogglePortal');
+        const noteInput = document.getElementById('portalCustomNotice');
+
+        if (!dot || !text || !btn) return;
+
+        if (certPortalConfig.enabled) {
+            dot.className = 'portal-dot active';
+            text.innerText = 'PORTAL IS LIVE & ACCESSIBLE';
+            text.style.color = 'var(--emerald)';
+            btn.className = 'btn btn-outline-danger px-3 py-2';
+            btn.innerHTML = '🔒 LOCK / DISABLE PORTAL';
+        } else {
+            dot.className = 'portal-dot locked';
+            text.innerText = 'PORTAL IS LOCKED / DISABLED';
+            text.style.color = '#ff4757';
+            btn.className = 'btn btn-success px-3 py-2';
+            btn.innerHTML = '🔓 UNLOCK / ENABLE PORTAL';
+        }
+
+        if (noteInput && !noteInput.matches(':focus')) {
+            noteInput.value = certPortalConfig.message || '';
+        }
+    }
+
+    async function toggleCertificatePortal() {
+        const nextState = !certPortalConfig.enabled;
+        const promptText = nextState 
+            ? "Are you sure you want to ENABLE student certificate downloads? Students will be able to search with their mobile numbers."
+            : "Are you sure you want to DISABLE/LOCK certificate downloads? Students will see the closed notice instead of the search form.";
+
+        if (!confirm(promptText)) return;
+
+        const btn = document.getElementById('btnTogglePortal');
+        const originalHtml = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '⏳ COMMITTING...';
+        }
+
+        const noticeInput = document.getElementById('portalCustomNotice');
+        const customMessage = noticeInput && noticeInput.value.trim() 
+            ? noticeInput.value.trim() 
+            : (nextState ? "Official certificate portal is active." : "Certificates are currently under final evaluation by judges and coordinators. Opening shortly!");
+
+        const updatedConfig = {
+            enabled: nextState,
+            updatedAt: new Date().toISOString(),
+            message: customMessage
+        };
+
+        try {
+            await commitCertConfigToGitHub(updatedConfig);
+            certPortalConfig = updatedConfig;
+            localStorage.setItem('synapse_cert_config', JSON.stringify(certPortalConfig));
+            renderPortalConfigUI();
+            alert(`✅ Success! Certificate portal is now ${nextState ? 'ENABLED (LIVE)' : 'DISABLED (LOCKED)'}.\nStudents will see this status immediately.`);
+        } catch (err) {
+            console.error('Portal toggle error:', err);
+            alert('Failed to update portal status: ' + err.message);
+        } finally {
+            if (btn) btn.disabled = false;
+            renderPortalConfigUI();
+        }
+    }
+
+    async function savePortalCustomNotice() {
+        const input = document.getElementById('portalCustomNotice');
+        if (!input) return;
+        const msg = input.value.trim();
+        if (!msg) {
+            alert('Please enter a notice message before saving.');
+            return;
+        }
+
+        const updatedConfig = {
+            ...certPortalConfig,
+            updatedAt: new Date().toISOString(),
+            message: msg
+        };
+
+        const saveBtn = document.getElementById('btnSaveNotice');
+        if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.innerText = 'SAVING...';
+        }
+
+        try {
+            await commitCertConfigToGitHub(updatedConfig);
+            certPortalConfig = updatedConfig;
+            localStorage.setItem('synapse_cert_config', JSON.stringify(certPortalConfig));
+            alert('✅ Notice message updated successfully!');
+        } catch (err) {
+            console.error('Notice save error:', err);
+            alert('Failed to save message: ' + err.message);
+        } finally {
+            if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.innerText = '💾 SAVE NOTICE';
+            }
+        }
+    }
+
+    async function commitCertConfigToGitHub(configObj) {
+        const token = getAdminKey();
+        if (!token) {
+            throw new Error('Admin Access Token is required to commit changes to GitHub.');
+        }
+
+        const url = `https://api.github.com/repos/${GH_REPO}/contents/${GH_PATH}`;
+        // 1. Fetch current file SHA
+        const getRes = await fetch(url, {
+            headers: {
+                'Authorization': `token ${token}`,
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        });
+
+        let sha = undefined;
+        if (getRes.ok) {
+            const getData = await getRes.json();
+            sha = getData.sha;
+        }
+
+        // 2. Commit update to GitHub
+        const contentStr = JSON.stringify(configObj, null, 2);
+        const contentBase64 = btoa(unescape(encodeURIComponent(contentStr)));
+
+        const payload = {
+            message: `chore(cert): ${configObj.enabled ? 'enable' : 'disable'} student certificate portal`,
+            content: contentBase64
+        };
+        if (sha) payload.sha = sha;
+
+        const putRes = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${token}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!putRes.ok) {
+            const errJson = await putRes.json().catch(() => ({}));
+            throw new Error(errJson.message || `GitHub commit failed with HTTP ${putRes.status}`);
+        }
+        return await putRes.json();
     }
 </script>
 </body>
