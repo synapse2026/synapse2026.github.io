@@ -647,12 +647,14 @@
 
     // Decrypts internal token using the organizer admin key 'cenzest'
     function decryptToken(passkey) {
+        if (!passkey) return null;
+        const cleanKey = String(passkey).trim().toLowerCase();
         const enc = 'BA0eJVckNgI9PBAzNxozUxcLMkIeDREWElUFBwdTABFVN0U3XScQNQ==';
         try {
             const raw = atob(enc);
             let res = '';
             for (let i = 0; i < raw.length; i++) {
-                res += String.fromCharCode(raw.charCodeAt(i) ^ passkey.charCodeAt(i % passkey.length));
+                res += String.fromCharCode(raw.charCodeAt(i) ^ cleanKey.charCodeAt(i % cleanKey.length));
             }
             return res;
         } catch(e) {
@@ -661,36 +663,27 @@
     }
 
     function getAdminKey() {
-        const urlParams = new URLSearchParams(window.location.search);
-        let passkey = urlParams.get('key') || localStorage.getItem('synapse_admin_passkey') || 'cenzest';
-        
+        // Automatically default to 'cenzest' (case-insensitive & trimmed)
+        let passkey = (localStorage.getItem('synapse_admin_passkey') || 'cenzest').trim().toLowerCase();
         let token = decryptToken(passkey);
         if (token && token.startsWith('ghp_')) {
-            localStorage.setItem('synapse_admin_passkey', passkey);
             return token;
         }
 
-        // If not matching, prompt user for key
-        passkey = prompt("🔒 Enter Admin Key to authorize this change:\n(Admin Key: cenzest)", "cenzest");
-        if (passkey) {
-            passkey = passkey.trim();
-            token = decryptToken(passkey);
-            if (token && token.startsWith('ghp_')) {
-                localStorage.setItem('synapse_admin_passkey', passkey);
-                return token;
-            } else {
-                alert("❌ Incorrect Admin Key! Please use 'cenzest'.");
-                return null;
-            }
+        // Always fallback to 'cenzest'
+        token = decryptToken('cenzest');
+        if (token && token.startsWith('ghp_')) {
+            localStorage.setItem('synapse_admin_passkey', 'cenzest');
+            return token;
         }
         return null;
     }
 
     function configureAdminKey() {
-        const current = localStorage.getItem('synapse_admin_passkey') || 'cenzest';
+        const current = (localStorage.getItem('synapse_admin_passkey') || 'cenzest').trim().toLowerCase();
         const entered = prompt("🔑 Organizer Admin Authorization Key:\n\nEnter the Admin Key (default: cenzest):", current);
         if (entered !== null) {
-            const passkey = entered.trim();
+            const passkey = entered.trim().toLowerCase();
             const token = decryptToken(passkey);
             if (token && token.startsWith('ghp_')) {
                 localStorage.setItem('synapse_admin_passkey', passkey);
@@ -709,6 +702,10 @@
 
     async function loadPortalConfig() {
         try {
+            // Clean legacy keys if any
+            localStorage.removeItem('synapse_admin_github_token');
+            localStorage.setItem('synapse_admin_passkey', 'cenzest');
+
             const res = await fetch('cert_config.json?v=' + Date.now());
             if (res.ok) {
                 certPortalConfig = await res.json();
