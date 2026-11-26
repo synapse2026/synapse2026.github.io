@@ -1225,25 +1225,41 @@
        SYNAPSE 2026 NEXT-GEN STAGE DISPLAY ENHANCEMENTS
        ========================================================================== */
     
-    /* 1. ROTATING SMART QR CORNER HUB */
+    /* 1. ROTATING SMART QR CORNER HUB (PLACED AT BOTTOM RIGHT WITH SMOOTH PULSE POPUP ANIMATIONS) */
     .smart-qr-hub {
-        position: fixed;
-        top: 80px;
+        position: absolute;
+        bottom: 135px;
         right: 25px;
         z-index: 120;
-        background: rgba(8, 8, 18, 0.94);
+        background: rgba(8, 8, 18, 0.95);
         border: 2px solid var(--poster-blue);
-        border-radius: 16px;
+        border-radius: 18px;
         padding: 12px 14px;
-        box-shadow: 0 0 30px rgba(31, 193, 209, 0.45), inset 0 0 15px rgba(31, 193, 209, 0.15);
+        box-shadow: 0 0 35px rgba(31, 193, 209, 0.5), inset 0 0 15px rgba(31, 193, 209, 0.15);
         backdrop-filter: blur(15px);
-        width: 170px;
+        width: 175px;
         text-align: center;
-        transition: border-color 0.6s ease, box-shadow 0.6s ease, transform 0.3s ease;
         user-select: none;
+        opacity: 0;
+        transform: translateY(40px) scale(0.85);
+        pointer-events: none;
+        transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.5s ease, box-shadow 0.5s ease;
     }
+
+    .smart-qr-hub.visible {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        pointer-events: auto;
+        animation: hubNeonFloat 4s ease-in-out infinite alternate;
+    }
+
+    @keyframes hubNeonFloat {
+        0% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 15px rgba(31, 193, 209, 0.4)); }
+        100% { transform: translateY(-8px) scale(1.02); filter: drop-shadow(0 0 25px rgba(209, 31, 183, 0.6)); }
+    }
+
     .smart-qr-hub:hover {
-        transform: scale(1.04);
+        transform: scale(1.05) translateY(-5px);
     }
     .qr-badge-inner {
         display: flex;
@@ -1328,9 +1344,9 @@
 
     /* 2. LIVE GATE ENTRY TOAST NOTIFICATIONS */
     .gate-toast-container {
-        position: fixed;
+        position: absolute;
         bottom: 135px;
-        right: 25px;
+        left: 25px;
         z-index: 9998;
         display: flex;
         flex-direction: column;
@@ -3141,9 +3157,11 @@ scheduleNextSlide(25000);
     ];
 
     let currentQrIndex = 0;
-    const QR_INTERVAL_MS = 20000;
+    const QR_VISIBLE_MS = 10000;  // Visible for 10 seconds
+    const QR_HIDDEN_MS = 10000;   // Hidden for 10 seconds
 
     function initSmartQrRotator() {
+        const hubEl = document.getElementById('smartQrHub');
         const qrImg = document.getElementById('qrDynamicImg');
         const qrCat = document.getElementById('qrActionCategory');
         const qrTitle = document.getElementById('qrActionTitle');
@@ -3151,41 +3169,52 @@ scheduleNextSlide(25000);
         const qrBar = document.getElementById('qrTimerBar');
         const qrWrapper = document.getElementById('qrBoxWrapper');
 
-        if (!qrImg || !qrCat || !qrTitle || !qrSub || !qrBar) return;
+        if (!hubEl || !qrImg || !qrCat || !qrTitle || !qrSub || !qrBar) return;
 
         function applyQr(index) {
             const item = smartQrStages[index];
-            if (qrWrapper) qrWrapper.style.opacity = '0.3';
-            qrCat.style.opacity = '0.3';
+            hubEl.style.borderColor = item.borderColor;
+            hubEl.style.boxShadow = `0 0 35px ${item.borderColor}88, inset 0 0 15px ${item.borderColor}33`;
 
-            setTimeout(() => {
-                qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(item.url)}`;
-                qrCat.innerText = item.cat;
-                qrCat.style.borderColor = item.borderColor;
-                qrCat.style.color = item.borderColor;
-                qrTitle.innerText = item.title;
-                qrSub.innerText = item.sub;
+            qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(item.url)}`;
+            qrCat.innerText = item.cat;
+            qrCat.style.borderColor = item.borderColor;
+            qrCat.style.color = item.borderColor;
+            qrTitle.innerText = item.title;
+            qrSub.innerText = item.sub;
 
-                if (qrWrapper) qrWrapper.style.opacity = '1';
-                qrCat.style.opacity = '1';
+            // Reset and arm progress bar
+            qrBar.style.backgroundColor = item.borderColor;
+            qrBar.style.transition = 'none';
+            qrBar.style.width = '100%';
 
-                qrBar.style.transition = 'none';
-                qrBar.style.width = '0%';
+            // Smooth entrance animation
+            hubEl.classList.add('visible');
+
+            requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                        qrBar.style.transition = `width ${QR_INTERVAL_MS}ms linear`;
-                        qrBar.style.width = '100%';
-                    });
+                    qrBar.style.transition = `width ${QR_VISIBLE_MS}ms linear`;
+                    qrBar.style.width = '0%';
                 });
-            }, 300);
+            });
+
+            // Schedule graceful disappearance after 10 seconds
+            setTimeout(() => {
+                hubEl.classList.remove('visible');
+
+                // Stay hidden for 10 seconds, then load next QR code
+                setTimeout(() => {
+                    currentQrIndex = (currentQrIndex + 1) % smartQrStages.length;
+                    applyQr(currentQrIndex);
+                }, QR_HIDDEN_MS);
+
+            }, QR_VISIBLE_MS);
         }
 
-        applyQr(0);
-
-        setInterval(() => {
-            currentQrIndex = (currentQrIndex + 1) % smartQrStages.length;
-            applyQr(currentQrIndex);
-        }, QR_INTERVAL_MS);
+        // Start initial appearance after 2.5 seconds
+        setTimeout(() => {
+            applyQr(0);
+        }, 2500);
     }
 
     // 3. Next Event Live Countdown Ticker
