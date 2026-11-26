@@ -3,110 +3,339 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Command Center | SYNAPSE 2026</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <title>Command Center & Certificates | SYNAPSE 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="certificate.js"></script>
 
     <style>
-        :root { --neon-blue: #1fc1d1; --neon-pink: #d11fb7; --dark-bg: #050508; --warning-gold: #ffc107; }
-        body { background-color: var(--dark-bg); background-image: linear-gradient(rgba(31, 193, 209, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(31, 193, 209, 0.05) 1px, transparent 1px); background-size: 40px 40px; animation: moveGrid 30s linear infinite; color: #fff; font-family: 'Rajdhani', sans-serif; overflow-x: hidden; }
+        :root { 
+            --neon-blue: #1fc1d1; 
+            --neon-pink: #d11fb7; 
+            --dark-bg: #050508; 
+            --warning-gold: #ffc107; 
+            --emerald: #2ed573;
+        }
+        body { 
+            background-color: var(--dark-bg); 
+            background-image: linear-gradient(rgba(31, 193, 209, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(31, 193, 209, 0.05) 1px, transparent 1px); 
+            background-size: 40px 40px; 
+            animation: moveGrid 30s linear infinite; 
+            color: #fff; 
+            font-family: 'Rajdhani', sans-serif; 
+            overflow-x: hidden; 
+        }
         @keyframes moveGrid { from { background-position: 0 0; } to { background-position: 0 1000px; } }
-        .container { max-width: 600px; padding: 15px; margin: auto; position: relative; }
-        h3, h5 { font-family: 'Orbitron', sans-serif; color: var(--neon-blue); text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px var(--neon-blue); }
-        .hud-card { background: rgba(0, 0, 0, 0.85); border: 1px solid var(--neon-blue); border-radius: 12px; padding: 15px; text-align: center; }
-        .hud-val { font-family: 'Orbitron'; font-size: 1.6rem; color: var(--neon-pink); }
-        .hud-label { font-size: 0.65rem; text-transform: uppercase; color: #888; letter-spacing: 1px; }
-        .section-card { background: rgba(15, 15, 25, 0.9); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 20px; margin-bottom: 20px; backdrop-filter: blur(10px); }
-        .report-preview { max-height: 320px; overflow-y: auto; border: 1px solid #333; border-radius: 8px; background: #000; }
+        .container { max-width: 920px; padding: 15px; margin: auto; position: relative; }
+        h3, h4, h5 { font-family: 'Orbitron', sans-serif; color: var(--neon-blue); text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px var(--neon-blue); }
+        .hud-card { background: rgba(0, 0, 0, 0.85); border: 1px solid var(--neon-blue); border-radius: 12px; padding: 12px; text-align: center; }
+        .hud-val { font-family: 'Orbitron'; font-size: 1.5rem; color: var(--neon-pink); }
+        .hud-label { font-size: 0.65rem; text-transform: uppercase; color: #888; letter-spacing: 1px; margin-top: 2px; }
+        .section-card { background: rgba(15, 15, 25, 0.92); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 20px; margin-bottom: 22px; backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .report-preview { max-height: 380px; overflow-y: auto; border: 1px solid #333; border-radius: 10px; background: #07070d; }
         .table { color: #fff; font-size: 0.8rem; margin-bottom: 0; }
-        .table thead th { position: sticky; top: 0; background: var(--neon-blue); color: #000; z-index: 5; font-family: 'Orbitron'; font-size: 0.6rem; }
+        .table thead th { position: sticky; top: 0; background: var(--neon-blue); color: #000; z-index: 5; font-family: 'Orbitron'; font-size: 0.65rem; letter-spacing: 0.5px; }
         .event-divider { background: rgba(31, 193, 209, 0.2); color: var(--neon-blue); font-weight: bold; text-transform: uppercase; font-family: 'Orbitron'; font-size: 0.7rem; }
-        .btn-cyber { font-family: 'Orbitron', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 0.75rem; border: 1px solid var(--neon-blue); color: var(--neon-blue); background: transparent; transition: 0.3s; }
+        
+        .btn-cyber { 
+            font-family: 'Orbitron', sans-serif; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            font-size: 0.75rem; 
+            border: 1px solid var(--neon-blue); 
+            color: var(--neon-blue); 
+            background: transparent; 
+            transition: 0.3s; 
+        }
         .btn-cyber:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px var(--neon-blue); }
+
+        .btn-gold {
+            font-family: 'Orbitron', sans-serif; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            font-size: 0.75rem; 
+            border: 1px solid var(--warning-gold); 
+            color: var(--warning-gold); 
+            background: rgba(255, 193, 7, 0.08); 
+            transition: 0.3s;
+        }
+        .btn-gold:hover { background: var(--warning-gold); color: #000; box-shadow: 0 0 20px var(--warning-gold); }
+
+        .nav-pill-btn {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            padding: 8px 16px;
+            border-radius: 30px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 1px;
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #aaa;
+            transition: 0.2s all;
+        }
+        .nav-pill-btn.active {
+            border-color: var(--neon-blue);
+            color: #fff;
+            background: rgba(31, 193, 209, 0.15);
+            box-shadow: 0 0 15px rgba(31, 193, 209, 0.3);
+        }
+
+        .badge-merit {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffd447;
+            border: 1px solid rgba(255, 193, 7, 0.5);
+            font-family: 'Orbitron';
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+        .badge-part {
+            background: rgba(31, 193, 209, 0.15);
+            color: #64e3f0;
+            border: 1px solid rgba(31, 193, 209, 0.4);
+            font-family: 'Orbitron';
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        /* Action button inside table */
+        .btn-tbl-action {
+            padding: 4px 10px;
+            font-size: 0.65rem;
+            font-family: 'Orbitron';
+            font-weight: 700;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <!-- Header -->
     <div class="text-center my-4">
         <h3>COMMAND CENTER</h3>
-        <p class="text-white-50 small" style="letter-spacing: 4px;">SYNAPSE 2026 ANALYTICS</p>
-    </div>
-
-    <div class="row g-2 mb-4 text-center">
-        <div class="col-6 col-md-3"><div class="hud-card"><div id="hud-total" class="hud-val">0</div><div class="hud-label">Total Reg</div></div></div>
-        <div class="col-6 col-md-3"><div class="hud-card"><div id="hud-paid" class="hud-val" style="color:#2ed573">0</div><div class="hud-label">Paid</div></div></div>
-        <div class="col-6 col-md-3"><div class="hud-card"><div id="hud-present" class="hud-val" style="color:var(--neon-blue)">0</div><div class="hud-label">Attended</div></div></div>
-        <div class="col-6 col-md-3"><div class="hud-card"><div id="hud-winners" class="hud-val" style="color:var(--warning-gold)">0</div><div class="hud-label">Winners</div></div></div>
-    </div>
-
-    <div class="section-card" style="height: 250px;">
-        <h5 style="font-size: 0.75rem; color: var(--neon-pink);">Live System Pulse</h5>
-        <canvas id="pulseChart"></canvas>
-    </div>
-
-    <div class="section-card">
-        <label class="hud-label">System Data Filter</label>
-        <div class="row g-2">
-            <div class="col-6">
-                <select id="reportCategory" class="form-select bg-dark text-white border-secondary" onchange="updateView()">
-                    <option value="reg">Registrations</option>
-                    <option value="paid">Payments Only</option>
-                    <option value="att">Attendance Log</option>
-                    <option value="win">Hall of Winners</option>
-                </select>
-            </div>
-            <div class="col-6">
-                <select id="reportScope" class="form-select bg-dark text-white border-secondary" onchange="updateView()">
-                    <option value="all">Global Master List</option>
-                </select>
-            </div>
+        <p class="text-white-50 small mb-3" style="letter-spacing: 4px;">SYNAPSE 2026 ANALYTICS & DISPATCH</p>
+        
+        <!-- Navigation Pills -->
+        <div class="d-flex justify-content-center gap-2 mb-2">
+            <a href="#stats" class="nav-pill-btn active" id="pillStats" onclick="switchTab('stats')">📊 SYSTEM ANALYTICS</a>
+            <a href="#certificates" class="nav-pill-btn" id="pillCerts" onclick="switchTab('certs')">🎓 CERTIFICATE CONSOLE</a>
         </div>
     </div>
 
-    <div class="section-card">
-        <h5 style="font-size: 0.8rem;">Data Stream Preview</h5>
-        <div class="report-preview">
-            <table class="table table-dark table-hover" id="reportTable">
-                <thead id="reportHead"></thead>
-                <tbody id="reportBody"></tbody>
-            </table>
+    <!-- TAB 1: SYSTEM ANALYTICS & MASTER REPORT -->
+    <div id="tabStats">
+        <div class="row g-2 mb-4 text-center">
+            <div class="col-6 col-md-3"><div class="hud-card"><div id="hud-total" class="hud-val">0</div><div class="hud-label">Total Reg</div></div></div>
+            <div class="col-6 col-md-3"><div class="hud-card"><div id="hud-paid" class="hud-val" style="color:#2ed573">0</div><div class="hud-label">Paid</div></div></div>
+            <div class="col-6 col-md-3"><div class="hud-card"><div id="hud-present" class="hud-val" style="color:var(--neon-blue)">0</div><div class="hud-label">Attended</div></div></div>
+            <div class="col-6 col-md-3"><div class="hud-card"><div id="hud-winners" class="hud-val" style="color:var(--warning-gold)">0</div><div class="hud-label">Winners</div></div></div>
         </div>
-        <button class="btn btn-cyber w-100 py-3 mt-3" onclick="downloadPDF()">📥 GENERATE ENCRYPTED PDF</button>
+
+        <div class="section-card" style="height: 250px;">
+            <h5 style="font-size: 0.75rem; color: var(--neon-pink);">Live System Pulse</h5>
+            <canvas id="pulseChart"></canvas>
+        </div>
+
+        <div class="section-card">
+            <label class="hud-label">System Data Filter</label>
+            <div class="row g-2">
+                <div class="col-6">
+                    <select id="reportCategory" class="form-select bg-dark text-white border-secondary" onchange="updateView()">
+                        <option value="reg">Registrations</option>
+                        <option value="paid">Payments Only</option>
+                        <option value="att">Attendance Log</option>
+                        <option value="win">Hall of Winners</option>
+                    </select>
+                </div>
+                <div class="col-6">
+                    <select id="reportScope" class="form-select bg-dark text-white border-secondary" onchange="updateView()">
+                        <option value="all">Global Master List</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h5 style="font-size: 0.8rem;">Data Stream Preview</h5>
+            <div class="report-preview">
+                <table class="table table-dark table-hover" id="reportTable">
+                    <thead id="reportHead"></thead>
+                    <tbody id="reportBody"></tbody>
+                </table>
+            </div>
+            <button class="btn btn-cyber w-100 py-3 mt-3" onclick="downloadPDF()">📥 GENERATE ENCRYPTED DATA REPORT (PDF)</button>
+        </div>
+    </div>
+
+    <!-- TAB 2: CERTIFICATE GENERATOR & AUTO-DISPATCH -->
+    <div id="tabCerts" style="display: none;">
+        <!-- Certificate HUD Summary -->
+        <div class="row g-2 mb-3 text-center">
+            <div class="col-6 col-md-3">
+                <div class="hud-card" style="border-color: var(--warning-gold);">
+                    <div id="cert-count-merit" class="hud-val" style="color: var(--warning-gold);">0</div>
+                    <div class="hud-label">Merit (Winners)</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="hud-card" style="border-color: var(--neon-blue);">
+                    <div id="cert-count-part" class="hud-val" style="color: var(--neon-blue);">0</div>
+                    <div class="hud-label">Participation</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="hud-card">
+                    <div id="cert-count-total" class="hud-val" style="color: #fff;">0</div>
+                    <div class="hud-label">Total Certificates</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="hud-card" style="border-color: var(--emerald);">
+                    <div id="cert-count-students" class="hud-val" style="color: var(--emerald);">0</div>
+                    <div class="hud-label">Eligible Students</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter & Search Controls -->
+        <div class="section-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 style="font-size: 0.85rem; color: var(--warning-gold); margin-bottom: 0;">🎓 CERTIFICATE DISPATCH CONSOLE</h5>
+                <span class="badge bg-dark border border-secondary text-white-50" style="font-size:0.65rem;">Govt. Residential Women's Polytechnic College</span>
+            </div>
+
+            <div class="row g-2 mb-3">
+                <div class="col-12 col-md-5">
+                    <label class="hud-label mb-1">Search Student / Mobile</label>
+                    <input type="text" id="certSearchInput" class="form-control bg-dark text-white border-secondary" placeholder="Type Name or 10-digit Mobile..." oninput="filterCertificates()" style="font-size: 0.85rem;">
+                </div>
+                <div class="col-6 col-md-3">
+                    <label class="hud-label mb-1">Award Type</label>
+                    <select id="certTypeFilter" class="form-select bg-dark text-white border-secondary" onchange="filterCertificates()" style="font-size: 0.85rem;">
+                        <option value="all">All Certificates</option>
+                        <option value="MERIT">🏆 Merit Only (Winners)</option>
+                        <option value="PARTICIPATION">📜 Participation Only</option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-4">
+                    <label class="hud-label mb-1">Filter by Event</label>
+                    <select id="certEventFilter" class="form-select bg-dark text-white border-secondary" onchange="filterCertificates()" style="font-size: 0.85rem;">
+                        <option value="all">All Events</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Batch Download Action Buttons -->
+            <div class="row g-2 mb-3">
+                <div class="col-12 col-md-7">
+                    <button class="btn btn-gold w-100 py-2" onclick="downloadBatchCertificates()">
+                        📥 DOWNLOAD FILTERED (<span id="batchCountBadge">0</span> CERTS) AS MULTI-PAGE PDF
+                    </button>
+                </div>
+                <div class="col-12 col-md-5">
+                    <button class="btn btn-cyber w-100 py-2" onclick="refreshDashboard()">
+                        🔄 RE-SYNC LIVE GOOGLE SHEET DATA
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table Preview -->
+            <div class="report-preview" style="max-height: 440px;">
+                <table class="table table-dark table-hover" id="certGridTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px;">#</th>
+                            <th>Student & College</th>
+                            <th>Event & Category</th>
+                            <th>Award Type / Rank</th>
+                            <th style="text-align: right; width: 110px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="certGridBody"></tbody>
+                </table>
+            </div>
+            <div class="text-white-50 text-end small mt-2" style="font-size: 0.7rem;">
+                * All certificates are dynamically drawn as high-resolution print-ready A4 vectors.
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbwKjrjjrV5hJUrqaP5nWjYAW2HW50y6EI3_k9bfzriS8ktMuAHpYe1i8K6IyPFV-jsndA/exec';
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzb97bG3GTT1wMH7M9j8RDXkoqoFD_MWXFkUZS0przdUO51s-7Zyutn0FbRSRnjjH8X5A/exec';
     let masterData = [];
     let myChart;
+
+    // Certificate state
+    let allCertificates = [];
+    let filteredCertificates = [];
 
     window.onload = () => {
         // Populating the event dropdown dynamically
         fetch(`${scriptURL}?action=getUniqueEvents`).then(res => res.json()).then(events => {
             const scope = document.getElementById('reportScope');
-            events.forEach(evt => { const opt = document.createElement('option'); opt.value = evt; opt.innerText = evt; scope.appendChild(opt); });
-        });
+            const certEvtScope = document.getElementById('certEventFilter');
+            events.forEach(evt => { 
+                const opt1 = document.createElement('option'); opt1.value = evt; opt1.innerText = evt; scope.appendChild(opt1); 
+                const opt2 = document.createElement('option'); opt2.value = evt; opt2.innerText = evt; certEvtScope.appendChild(opt2);
+            });
+        }).catch(err => console.log('Error loading events:', err));
+
         refreshDashboard();
+
+        // Check URL hash or query param for tab
+        if (window.location.hash === '#certificates' || window.location.search.includes('tab=cert')) {
+            switchTab('certs');
+        }
     };
+
+    function switchTab(tabKey) {
+        const tabStats = document.getElementById('tabStats');
+        const tabCerts = document.getElementById('tabCerts');
+        const pillStats = document.getElementById('pillStats');
+        const pillCerts = document.getElementById('pillCerts');
+
+        if (tabKey === 'certs') {
+            tabStats.style.display = 'none';
+            tabCerts.style.display = 'block';
+            pillStats.classList.remove('active');
+            pillCerts.classList.add('active');
+            filterCertificates();
+        } else {
+            tabStats.style.display = 'block';
+            tabCerts.style.display = 'none';
+            pillStats.classList.add('active');
+            pillCerts.classList.remove('active');
+        }
+    }
 
     function refreshDashboard() {
         fetch(`${scriptURL}?action=getMasterData`).then(res => res.json()).then(data => {
             masterData = data;
             calculateStats(data);
             updateView();
-        });
+            initCertificateEngine(data);
+        }).catch(err => console.error('Fetch error:', err));
     }
 
     function calculateStats(data) {
         let stats = { total: data.length, paid: 0, present: 0, winners: 0 };
         data.forEach(p => {
             if (p.payment === "COMPLETED") stats.paid++;
-            if (p.attendance && p.attendance !== "ABSENT") stats.present += p.attendance.split('|').length; // Multi-event split logic
-            if (p.winner) stats.winners += p.winner.split('|').length; // Multi-winner split logic
+            if (p.attendance && p.attendance !== "ABSENT") stats.present += p.attendance.split('|').length;
+            if (p.winner) stats.winners += p.winner.split('|').length;
         });
 
         document.getElementById('hud-total').innerText = stats.total;
@@ -201,7 +430,6 @@
         
         let rows = [], lastGroup = "";
         window.currentData.forEach((p, i) => {
-            // Inserting event headers into PDF rows for separation
             if (p.eventGroup !== lastGroup && scope === 'all') {
                 rows.push([{ content: p.eventGroup, colSpan: 7, styles: { fillColor: [31, 193, 209], textColor: [0,0,0], fontStyle: 'bold', halign: 'center' } }]);
                 lastGroup = p.eventGroup;
@@ -217,7 +445,131 @@
         });
         doc.save(`SYNAPSE_MASTER_${catName.replace(/\s+/g, '_')}.pdf`);
     }
+
+    // ==========================================
+    // CERTIFICATE ENGINE INTEGRATION
+    // ==========================================
+    function initCertificateEngine(data) {
+        if (!window.SynapseCertificates) {
+            console.error('Certificate engine not loaded');
+            return;
+        }
+
+        allCertificates = window.SynapseCertificates.extractAllCertificates(data);
+
+        // Stats
+        let meritCount = 0;
+        let partCount = 0;
+        const studentSet = new Set();
+
+        allCertificates.forEach(c => {
+            if (c.type === 'MERIT') meritCount++;
+            else partCount++;
+            if (c.mobile) studentSet.add(c.mobile);
+        });
+
+        document.getElementById('cert-count-merit').innerText = meritCount;
+        document.getElementById('cert-count-part').innerText = partCount;
+        document.getElementById('cert-count-total').innerText = allCertificates.length;
+        document.getElementById('cert-count-students').innerText = studentSet.size;
+
+        filterCertificates();
+    }
+
+    function filterCertificates() {
+        const searchVal = (document.getElementById('certSearchInput').value || "").toLowerCase().trim();
+        const typeVal = document.getElementById('certTypeFilter').value;
+        const eventVal = document.getElementById('certEventFilter').value;
+
+        filteredCertificates = allCertificates.filter(c => {
+            // Type filter
+            if (typeVal !== 'all' && c.type !== typeVal) return false;
+
+            // Event filter
+            if (eventVal !== 'all' && c.eventName.toLowerCase() !== eventVal.toLowerCase()) return false;
+
+            // Search filter
+            if (searchVal) {
+                const combined = `${c.name || ''} ${c.mobile || ''} ${c.college || ''} ${c.eventName || ''} ${c.rank || ''}`.toLowerCase();
+                if (!combined.includes(searchVal)) return false;
+            }
+            return true;
+        });
+
+        document.getElementById('batchCountBadge').innerText = filteredCertificates.length;
+        renderCertificatesTable(filteredCertificates);
+    }
+
+    function renderCertificatesTable(list) {
+        const tbody = document.getElementById('certGridBody');
+        if (!tbody) return;
+
+        if (list.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-white-50">No matching certificates found for the selected criteria.</td></tr>`;
+            return;
+        }
+
+        let html = '';
+        list.forEach((c, idx) => {
+            const isMerit = c.type === 'MERIT';
+            const badge = isMerit 
+                ? `<span class="badge-merit">🏆 ${c.rank || 'WINNER'}</span>`
+                : `<span class="badge-part">📜 PARTICIPATION</span>`;
+
+            html += `
+                <tr>
+                    <td class="text-white-50">${idx + 1}</td>
+                    <td>
+                        <strong style="color:#fff;">${c.name}</strong>
+                        <div style="font-size:0.75rem; color:#888;">${c.mobile} • ${c.college}</div>
+                    </td>
+                    <td>
+                        <span style="color:var(--neon-blue); font-weight:600;">${c.eventName}</span>
+                        <div style="font-size:0.75rem; color:#888;">${c.dept || ''} ${c.sem ? '(' + c.sem + ')' : ''}</div>
+                    </td>
+                    <td>${badge}</td>
+                    <td style="text-align: right;">
+                        <button class="btn ${isMerit ? 'btn-gold' : 'btn-cyber'} btn-tbl-action" onclick="downloadSingleCertFromTable(${idx})">
+                            📥 PDF
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+    }
+
+    function downloadSingleCertFromTable(index) {
+        const cert = filteredCertificates[index];
+        if (!cert) return;
+        try {
+            window.SynapseCertificates.downloadSingleCertificate(cert);
+        } catch (e) {
+            alert('Error generating certificate: ' + e.message);
+        }
+    }
+
+    function downloadBatchCertificates() {
+        if (!filteredCertificates || filteredCertificates.length === 0) {
+            alert('No certificates match the current filter!');
+            return;
+        }
+
+        if (filteredCertificates.length > 100) {
+            if (!confirm(`You are about to generate a multi-page PDF with ${filteredCertificates.length} certificates. This may take 5-10 seconds. Continue?`)) {
+                return;
+            }
+        }
+
+        try {
+            const typeVal = document.getElementById('certTypeFilter').value;
+            const eventVal = document.getElementById('certEventFilter').value;
+            let filename = `SYNAPSE_2026_${typeVal}_${eventVal.replace(/\s+/g, '_')}_Certificates.pdf`;
+            window.SynapseCertificates.downloadMultiPagePDF(filteredCertificates, filename);
+        } catch (e) {
+            alert('Error creating batch PDF: ' + e.message);
+        }
+    }
 </script>
 </body>
 </html>
-

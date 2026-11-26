@@ -1041,7 +1041,384 @@
             font-size: 2.5rem;
             margin-bottom: 10px;
         }
+
+        /* --- CERTIFICATE PORTAL & BANNER STYLES --- */
+        .cert-hero-banner {
+            margin: 12px 16px;
+            background: linear-gradient(135deg, rgba(255, 204, 0, 0.12), rgba(31, 193, 209, 0.12));
+            border: 1px solid rgba(255, 204, 0, 0.4);
+            border-radius: 14px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .cert-hero-banner:active {
+            transform: scale(0.98);
+            border-color: var(--gold);
+        }
+        .cert-hero-badge-icon {
+            font-size: 1.8rem;
+            flex-shrink: 0;
+            background: rgba(255, 204, 0, 0.15);
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 204, 0, 0.3);
+        }
+        .cert-hero-content {
+            flex: 1;
+            min-width: 0;
+        }
+        .cert-hero-title {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 800;
+            font-size: 0.82rem;
+            color: var(--gold);
+            letter-spacing: 0.8px;
+            margin-bottom: 2px;
+        }
+        .cert-hero-desc {
+            font-size: 0.72rem;
+            color: #ddd;
+            line-height: 1.25;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .cert-hero-action {
+            background: var(--gold);
+            color: #000;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 800;
+            font-size: 0.68rem;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+            box-shadow: 0 0 12px rgba(255, 204, 0, 0.4);
+        }
+
+        /* Certificate Modal */
+        .cert-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(4, 4, 10, 0.85);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            z-index: 1000;
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        .cert-modal-overlay.open {
+            display: flex;
+            opacity: 1;
+        }
+        .cert-modal-card {
+            background: #0d0d1a;
+            border: 1px solid rgba(255, 204, 0, 0.35);
+            border-radius: 24px 24px 0 0;
+            width: 100%;
+            max-width: 560px;
+            max-height: 88vh;
+            overflow-y: auto;
+            padding: 20px 18px calc(24px + var(--safe-bottom));
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.8);
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+        }
+        .cert-modal-overlay.open .cert-modal-card {
+            transform: translateY(0);
+        }
+        .cert-modal-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 12px;
+        }
+        .cert-modal-tag {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem;
+            color: var(--cyan);
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+        .cert-modal-title {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 800;
+            font-size: 1.15rem;
+            color: #fff;
+            margin-top: 2px;
+            letter-spacing: 1px;
+        }
+        .cert-modal-college {
+            font-size: 0.72rem;
+            color: #aaa;
+            margin-top: 2px;
+        }
+        .cert-modal-close {
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .cert-input-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.68rem;
+            color: var(--cyan);
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+        .cert-input-group {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1.5px solid var(--cyan);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(31, 193, 209, 0.15);
+        }
+        .cert-input-prefix {
+            padding: 12px 12px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            color: var(--muted);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .cert-input-group input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.15rem;
+            padding: 12px 10px;
+            letter-spacing: 1.5px;
+        }
+        .cert-search-btn {
+            background: var(--cyan);
+            color: #000;
+            border: none;
+            padding: 12px 18px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 800;
+            font-size: 0.8rem;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: background 0.2s;
+        }
+        .cert-search-btn:active {
+            background: #fff;
+        }
+        .cert-input-hint {
+            font-size: 0.7rem;
+            color: #888;
+            margin-top: 6px;
+            line-height: 1.3;
+        }
+
+        /* Certificate Result Cards */
+        .cert-student-profile {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin: 16px 0 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .cert-student-avatar {
+            font-size: 1.8rem;
+            background: rgba(31, 193, 209, 0.15);
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(31, 193, 209, 0.3);
+        }
+        .cert-student-name {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 800;
+            font-size: 0.95rem;
+            color: #fff;
+        }
+        .cert-student-inst {
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-top: 2px;
+        }
+
+        .cert-item-card {
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 12px;
+            position: relative;
+            background: rgba(18, 18, 32, 0.9);
+        }
+        .cert-item-merit {
+            border: 1.5px solid rgba(255, 204, 0, 0.6);
+            background: linear-gradient(145deg, rgba(255, 204, 0, 0.08), rgba(18, 18, 32, 0.95));
+            box-shadow: 0 4px 20px rgba(255, 204, 0, 0.12);
+        }
+        .cert-item-part {
+            border: 1.5px solid rgba(31, 193, 209, 0.5);
+            background: linear-gradient(145deg, rgba(31, 193, 209, 0.08), rgba(18, 18, 32, 0.95));
+            box-shadow: 0 4px 20px rgba(31, 193, 209, 0.1);
+        }
+        .cert-badge-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .cert-type-pill-merit {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.62rem;
+            font-weight: 800;
+            color: #ffd447;
+            background: rgba(255, 193, 7, 0.2);
+            padding: 3px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(255, 193, 7, 0.4);
+        }
+        .cert-type-pill-part {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.62rem;
+            font-weight: 800;
+            color: var(--cyan);
+            background: rgba(31, 193, 209, 0.2);
+            padding: 3px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(31, 193, 209, 0.4);
+        }
+        .cert-event-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+        .cert-rank-text {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #ffcc00;
+            margin-bottom: 10px;
+        }
+        .cert-status-text {
+            font-size: 0.8rem;
+            color: #2ed573;
+            margin-bottom: 10px;
+        }
+
+        .cert-dl-btn-merit {
+            width: 100%;
+            background: linear-gradient(90deg, #ffcc00, #ff9900);
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            padding: 12px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 800;
+            font-size: 0.78rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .cert-dl-btn-part {
+            width: 100%;
+            background: linear-gradient(90deg, var(--cyan), #0099cc);
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            padding: 12px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 800;
+            font-size: 0.78rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(31, 193, 209, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .cert-spinner-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding: 30px 10px;
+            color: var(--cyan);
+            font-family: 'Orbitron';
+            font-size: 0.8rem;
+        }
+        .cert-spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid rgba(31, 193, 209, 0.2);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        .cert-not-found-card {
+            background: rgba(255, 0, 85, 0.08);
+            border: 1px solid rgba(255, 0, 85, 0.3);
+            border-radius: 14px;
+            padding: 20px 16px;
+            text-align: center;
+            margin-top: 16px;
+        }
+        .cert-help-btn {
+            display: inline-block;
+            background: rgba(255, 0, 85, 0.2);
+            color: #ff6b8b;
+            border: 1px solid rgba(255, 0, 85, 0.5);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-family: 'Orbitron';
+            font-size: 0.7rem;
+            text-decoration: none;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
     </style>
+    <!-- jsPDF and Official Certificate Engine -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="certificate.js"></script>
 </head>
 <body>
 
@@ -1100,6 +1477,16 @@
         </div>
     </div>
 
+    <!-- CERTIFICATE HERO BANNER -->
+    <div class="cert-hero-banner" onclick="openCertModal()">
+        <div class="cert-hero-badge-icon">🎓</div>
+        <div class="cert-hero-content">
+            <div class="cert-hero-title">DOWNLOAD YOUR CERTIFICATE</div>
+            <div class="cert-hero-desc">Instant verified Merit & Participation PDFs for all events</div>
+        </div>
+        <button class="cert-hero-action" type="button">GET PDF ➔</button>
+    </div>
+
     <!-- EVENT CARDS LIST -->
     <main class="events-container" id="eventsContainer">
         <!-- Rendered dynamically via JavaScript -->
@@ -1117,6 +1504,39 @@
         </div>
     </div>
 
+    <!-- CERTIFICATE DOWNLOAD MODAL -->
+    <div id="certModalOverlay" class="cert-modal-overlay" onclick="closeCertModal(event)">
+        <div class="cert-modal-card" onclick="event.stopPropagation()">
+            <div class="cert-modal-header">
+                <div>
+                    <div class="cert-modal-tag">OFFICIAL CREDENTIAL PORTAL</div>
+                    <h3 class="cert-modal-title">DOWNLOAD CERTIFICATE</h3>
+                    <div class="cert-modal-college">Govt. Residential Women's Polytechnic College Payyanur</div>
+                </div>
+                <button class="cert-modal-close" onclick="closeCertModal()">✕</button>
+            </div>
+            
+            <div class="cert-modal-body">
+                <label class="cert-input-label">ENTER REGISTERED 10-DIGIT MOBILE NUMBER</label>
+                <div class="cert-input-group">
+                    <span class="cert-input-prefix">+91</span>
+                    <input type="tel" id="certMobileInput" maxlength="10" placeholder="e.g. 9876543210" oninput="this.value = this.value.replace(/[^0-9]/g, '')" onkeyup="if(event.key==='Enter') lookupStudentCertificates()">
+                    <button class="cert-search-btn" id="btnLookupCert" onclick="lookupStudentCertificates()">FIND</button>
+                </div>
+                <div class="cert-input-hint">Enter your mobile number registered during SYNAPSE 2026.</div>
+
+                <!-- Spinner -->
+                <div id="certLoadingSpinner" style="display: none;" class="cert-spinner-wrap">
+                    <div class="cert-spinner"></div>
+                    <span>Checking SYNAPSE Database...</span>
+                </div>
+
+                <!-- Results container -->
+                <div id="certResultsArea" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- MOBILE BOTTOM NAVIGATION -->
     <nav class="bottom-nav-bar">
         <a href="index.html" class="nav-item">
@@ -1127,13 +1547,17 @@
             <span class="nav-icon">⚡</span>
             <span>EVENTS</span>
         </a>
+        <a href="javascript:void(0)" onclick="openCertModal()" class="nav-item" style="color: var(--gold);">
+            <span class="nav-icon">🎓</span>
+            <span>CERTIFICATE</span>
+        </a>
         <a href="registration.html" class="nav-item">
             <span class="nav-icon">🎫</span>
             <span>REGISTER</span>
         </a>
         <a href="LIVEPAGE_display.html" class="nav-item">
             <span class="nav-icon">📺</span>
-            <span>LIVE STAGE</span>
+            <span>STAGE</span>
         </a>
     </nav>
 
@@ -1786,7 +2210,213 @@
             setInterval(() => {
                 refreshLiveData();
             }, 12000);
+
+            // Auto-open certificate modal if linked with ?mobile= or #certificate
+            const urlParams = new URLSearchParams(window.location.search);
+            const mobileParam = urlParams.get('mobile') || urlParams.get('phone');
+            if (mobileParam || urlParams.get('cert') === '1' || window.location.hash === '#certificate' || window.location.hash === '#certificates') {
+                openCertModal(mobileParam || '');
+            }
         });
+
+        // ==========================================
+        // CERTIFICATE MODAL & LOOKUP SYSTEM
+        // ==========================================
+        let cachedMasterData = null;
+        let currentStudentCertsList = [];
+
+        function openCertModal(presetMobile) {
+            const overlay = document.getElementById('certModalOverlay');
+            if (!overlay) return;
+            overlay.classList.add('open');
+            document.body.style.overflow = 'hidden';
+
+            const input = document.getElementById('certMobileInput');
+            if (presetMobile && input) {
+                input.value = presetMobile;
+                lookupStudentCertificates();
+            } else if (input) {
+                setTimeout(() => input.focus(), 300);
+            }
+        }
+
+        function closeCertModal(event) {
+            if (event && event.target && event.target.id !== 'certModalOverlay' && !event.target.classList.contains('cert-modal-close')) {
+                return;
+            }
+            const overlay = document.getElementById('certModalOverlay');
+            if (overlay) {
+                overlay.classList.remove('open');
+                document.body.style.overflow = '';
+            }
+        }
+
+        async function lookupStudentCertificates() {
+            const input = document.getElementById('certMobileInput');
+            const rawVal = input ? input.value.trim().replace(/\D/g, '') : '';
+
+            if (rawVal.length < 10) {
+                alert("Please enter a valid 10-digit mobile number.");
+                if (input) input.focus();
+                return;
+            }
+
+            const spinner = document.getElementById('certLoadingSpinner');
+            const resultsArea = document.getElementById('certResultsArea');
+            if (spinner) spinner.style.display = 'flex';
+            if (resultsArea) {
+                resultsArea.style.display = 'none';
+                resultsArea.innerHTML = '';
+            }
+
+            try {
+                if (!cachedMasterData || cachedMasterData.length === 0) {
+                    const res = await fetch(`${scriptURL}?action=getMasterData`);
+                    cachedMasterData = await res.json();
+                }
+
+                const matches = cachedMasterData.filter(p => {
+                    const clean = String(p.mobile || '').replace(/\D/g, '');
+                    return clean.endsWith(rawVal) || rawVal.endsWith(clean);
+                });
+
+                if (spinner) spinner.style.display = 'none';
+
+                if (matches.length === 0) {
+                    resultsArea.innerHTML = `
+                        <div class="cert-not-found-card">
+                            <div style="font-size: 2.2rem; margin-bottom: 8px;">⚠️</div>
+                            <div style="font-weight: 800; font-family:'Orbitron'; color: #ff4757; font-size: 0.95rem; margin-bottom: 6px;">
+                                NO REGISTRATION FOUND
+                            </div>
+                            <p style="font-size: 0.8rem; color: #ccc; margin-bottom: 14px; line-height: 1.4;">
+                                No student record was found for mobile <strong>+91 ${rawVal}</strong>.<br>
+                                Please verify the 10-digit number or register below:
+                            </p>
+                            <a href="registration.html" class="cert-help-btn">REGISTER FOR SYNAPSE 2026</a>
+                        </div>
+                    `;
+                    resultsArea.style.display = 'block';
+                    return;
+                }
+
+                renderStudentCertificatesUI(matches, resultsArea);
+                resultsArea.style.display = 'block';
+            } catch (err) {
+                if (spinner) spinner.style.display = 'none';
+                alert("Failed to retrieve certificate data: " + err.message);
+            }
+        }
+
+        function renderStudentCertificatesUI(matches, container) {
+            currentStudentCertsList = [];
+            let html = '';
+
+            matches.forEach((p, studentIdx) => {
+                const certsData = window.SynapseCertificates ? window.SynapseCertificates.extractCertificates(p) : { merit: [], participation: [], registeredOnly: [] };
+
+                html += `
+                    <div class="cert-student-profile">
+                        <div class="cert-student-avatar">🎓</div>
+                        <div>
+                            <div class="cert-student-name">${p.name.toUpperCase()}</div>
+                            <div class="cert-student-inst">${p.college || 'Polytechnic College'} • ${p.dept || 'Engineering'} ${p.sem ? '(' + p.sem + ')' : ''}</div>
+                            <div style="font-size: 0.7rem; color: var(--cyan); margin-top: 2px;">Verified Mobile: +91 ${p.mobile}</div>
+                        </div>
+                    </div>
+                `;
+
+                const totalCerts = certsData.merit.length + certsData.participation.length;
+
+                if (totalCerts === 0) {
+                    html += `
+                        <div class="cert-not-found-card" style="background: rgba(255, 193, 7, 0.08); border-color: rgba(255, 193, 7, 0.3);">
+                            <div style="font-size: 2rem; margin-bottom: 6px;">⏳</div>
+                            <div style="font-weight: 800; font-family:'Orbitron'; color: var(--gold); font-size: 0.9rem; margin-bottom: 4px;">
+                                ATTENDANCE / WINNER VERIFICATION IN PROGRESS
+                            </div>
+                            <p style="font-size: 0.8rem; color: #bbb; line-height: 1.4; margin-bottom: 8px;">
+                                You are registered for: <strong>${p.events || 'SYNAPSE Events'}</strong>.<br>
+                                Your attendance record is being synchronized by the coordinators. Your certificate will be downloadable here immediately upon event completion!
+                            </p>
+                        </div>
+                    `;
+                }
+
+                // Render Merit Certificates (Winners)
+                if (certsData.merit.length > 0) {
+                    html += `<div style="font-family:'Orbitron'; font-size:0.75rem; color:var(--gold); margin: 14px 0 8px; font-weight:800; letter-spacing:0.5px;">🏆 MERIT CERTIFICATES (WINNERS)</div>`;
+                    certsData.merit.forEach(mCert => {
+                        const globalIdx = currentStudentCertsList.length;
+                        currentStudentCertsList.push(mCert);
+
+                        html += `
+                            <div class="cert-item-card cert-item-merit">
+                                <div class="cert-badge-row">
+                                    <span class="cert-type-pill-merit">🏆 CERTIFICATE OF MERIT</span>
+                                    <span style="font-size:0.7rem; color:#ffd447;">★ ★ ★</span>
+                                </div>
+                                <div class="cert-event-title">${mCert.eventName}</div>
+                                <div class="cert-rank-text">Awarded: ${mCert.rank.toUpperCase()}</div>
+                                <button class="cert-dl-btn-merit" onclick="downloadLookupCertificate(${globalIdx})">
+                                    <span>📥</span>
+                                    <span>DOWNLOAD MERIT CERTIFICATE (PDF)</span>
+                                </button>
+                            </div>
+                        `;
+                    });
+                }
+
+                // Render Participation Certificates
+                if (certsData.participation.length > 0) {
+                    html += `<div style="font-family:'Orbitron'; font-size:0.75rem; color:var(--cyan); margin: 14px 0 8px; font-weight:800; letter-spacing:0.5px;">📜 CERTIFICATES OF PARTICIPATION</div>`;
+                    certsData.participation.forEach(pCert => {
+                        const globalIdx = currentStudentCertsList.length;
+                        currentStudentCertsList.push(pCert);
+
+                        html += `
+                            <div class="cert-item-card cert-item-part">
+                                <div class="cert-badge-row">
+                                    <span class="cert-type-pill-part">📜 PARTICIPATION</span>
+                                    <span style="font-size:0.7rem; color:var(--cyan);">VERIFIED</span>
+                                </div>
+                                <div class="cert-event-title">${pCert.eventName}</div>
+                                <div class="cert-status-text">Status: Attended & Confirmed</div>
+                                <button class="cert-dl-btn-part" onclick="downloadLookupCertificate(${globalIdx})">
+                                    <span>📥</span>
+                                    <span>DOWNLOAD CERTIFICATE (PDF)</span>
+                                </button>
+                            </div>
+                        `;
+                    });
+                }
+
+                // WhatsApp Share Action
+                if (totalCerts > 0) {
+                    const shareMsg = encodeURIComponent(`🎓 I just received my official SYNAPSE 2026 Certificate from Govt. Residential Women's Polytechnic College, Payyanur! Download yours here: https://synapse2026.github.io/events.html`);
+                    html += `
+                        <div style="margin-top: 14px; text-align: center;">
+                            <a href="https://api.whatsapp.com/send?text=${shareMsg}" target="_blank" style="display:inline-flex; align-items:center; gap:6px; color:#25D366; text-decoration:none; font-family:'Orbitron'; font-size:0.72rem; font-weight:700;">
+                                <span>📱</span>
+                                <span>SHARE WITH FRIENDS ON WHATSAPP</span>
+                            </a>
+                        </div>
+                    `;
+                }
+            });
+
+            container.innerHTML = html;
+        }
+
+        function downloadLookupCertificate(certIndex) {
+            const cert = currentStudentCertsList[certIndex];
+            if (!cert) return;
+            try {
+                window.SynapseCertificates.downloadSingleCertificate(cert);
+            } catch (err) {
+                alert("Error generating certificate: " + err.message);
+            }
+        }
     </script>
 </body>
 </html>
