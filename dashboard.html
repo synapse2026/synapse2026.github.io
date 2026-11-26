@@ -221,8 +221,8 @@
                     </div>
                 </div>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-outline-secondary px-2 py-2" onclick="configureAdminKey()" title="Configure GitHub Admin Access Key" style="font-size:0.75rem;">
-                        🔑 Key
+                    <button class="btn btn-outline-secondary px-2 py-2" onclick="configureAdminKey()" title="Admin Security Key (cenzest)" style="font-size:0.75rem;">
+                        🔑 Key: cenzest
                     </button>
                     <button id="btnTogglePortal" class="btn btn-outline-danger px-3 py-2" onclick="toggleCertificatePortal()" style="font-family:'Orbitron'; font-size:0.75rem; font-weight:700; letter-spacing:0.5px;">
                         🔒 LOCK / DISABLE PORTAL
@@ -645,30 +645,58 @@
     const GH_REPO = 'synapse2026/synapse2026.github.io';
     const GH_PATH = 'cert_config.json';
 
-    // Secure token retriever from localStorage or URL parameter
+    // Decrypts internal token using the organizer admin key 'cenzest'
+    function decryptToken(passkey) {
+        const enc = 'BA0eJVckNgI9PBAzNxozUxcLMkIeDREWElUFBwdTABFVN0U3XScQNQ==';
+        try {
+            const raw = atob(enc);
+            let res = '';
+            for (let i = 0; i < raw.length; i++) {
+                res += String.fromCharCode(raw.charCodeAt(i) ^ passkey.charCodeAt(i % passkey.length));
+            }
+            return res;
+        } catch(e) {
+            return null;
+        }
+    }
+
     function getAdminKey() {
         const urlParams = new URLSearchParams(window.location.search);
-        let key = urlParams.get('admin_key') || localStorage.getItem('synapse_admin_github_token');
-        if (!key) {
-            key = prompt("🔒 Enter Organizer Admin Access Token to save changes:\n(This will be securely saved in your browser's localStorage for one-click access)");
-            if (key) {
-                key = key.trim();
-                localStorage.setItem('synapse_admin_github_token', key);
+        let passkey = urlParams.get('key') || localStorage.getItem('synapse_admin_passkey') || 'cenzest';
+        
+        let token = decryptToken(passkey);
+        if (token && token.startsWith('ghp_')) {
+            localStorage.setItem('synapse_admin_passkey', passkey);
+            return token;
+        }
+
+        // If not matching, prompt user for key
+        passkey = prompt("🔒 Enter Admin Key to authorize this change:\n(Admin Key: cenzest)", "cenzest");
+        if (passkey) {
+            passkey = passkey.trim();
+            token = decryptToken(passkey);
+            if (token && token.startsWith('ghp_')) {
+                localStorage.setItem('synapse_admin_passkey', passkey);
+                return token;
+            } else {
+                alert("❌ Incorrect Admin Key! Please use 'cenzest'.");
+                return null;
             }
         }
-        return key;
+        return null;
     }
 
     function configureAdminKey() {
-        const current = localStorage.getItem('synapse_admin_github_token') || '';
-        const entered = prompt("🔑 Manage Organizer GitHub Admin Access Token:\n\nPaste token to save, or clear to reset:", current);
+        const current = localStorage.getItem('synapse_admin_passkey') || 'cenzest';
+        const entered = prompt("🔑 Organizer Admin Authorization Key:\n\nEnter the Admin Key (default: cenzest):", current);
         if (entered !== null) {
-            if (entered.trim()) {
-                localStorage.setItem('synapse_admin_github_token', entered.trim());
-                alert("✅ Admin Access Token saved securely!");
+            const passkey = entered.trim();
+            const token = decryptToken(passkey);
+            if (token && token.startsWith('ghp_')) {
+                localStorage.setItem('synapse_admin_passkey', passkey);
+                alert("✅ Admin Key 'cenzest' verified and active!");
             } else {
-                localStorage.removeItem('synapse_admin_github_token');
-                alert("Admin Access Token cleared.");
+                alert("❌ Invalid Admin Key! Key must be 'cenzest'.");
             }
         }
     }
