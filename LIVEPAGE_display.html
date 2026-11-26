@@ -16,9 +16,53 @@
 
     /* --- CORE ROOT & BASE STYLES --- */
 
-    :root { --poster-pink: #d11fb7; --poster-blue: #1fc1d1; --poster-purple: #741fd1; --bg: #07060f; --glass: rgba(15, 12, 41, 0.85); --gold: #ffea00; }
+    :root { 
+        --poster-pink: #d11fb7; 
+        --poster-blue: #1fc1d1; 
+        --poster-purple: #741fd1; 
+        --bg: #07060f; 
+        --glass: rgba(15, 12, 41, 0.85); 
+        --gold: #ffea00;
+        --app-scale: 1;
+    }
 
-    body, html { margin: 0; padding: 0; min-height: 100vh; background: var(--bg); color: #fff; font-family: 'Share Tech Mono', monospace; overflow: hidden; }
+    body, html { 
+        margin: 0; 
+        padding: 0; 
+        width: 100vw;
+        height: 100vh;
+        min-height: 100vh; 
+        background: var(--bg); 
+        color: #fff; 
+        font-family: 'Share Tech Mono', monospace; 
+        overflow: hidden; 
+    }
+
+    /* --- AUTO-FIT STAGE CANVAS WRAPPER (16:9 PROPORTIONAL ENGINE) --- */
+    .viewport-canvas-wrapper {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        background: var(--bg);
+        z-index: 1;
+    }
+
+    .viewport-scaled-content {
+        width: 1920px;
+        height: 1080px;
+        flex-shrink: 0;
+        transform-origin: center center;
+        transform: scale(var(--app-scale));
+        position: relative;
+        overflow: hidden;
+        box-sizing: border-box;
+    }
 
     #particles-js { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
 
@@ -1144,6 +1188,23 @@
        RESPONSIVE DESIGN: MOBILE PHONES (<= 768px)
        ========================================================================== */
     @media (max-width: 768px) {
+        .viewport-canvas-wrapper {
+            position: static !important;
+            display: block !important;
+            width: 100vw !important;
+            height: auto !important;
+            min-height: 100vh !important;
+            overflow: visible !important;
+        }
+
+        .viewport-scaled-content {
+            width: 100vw !important;
+            height: auto !important;
+            min-height: 100vh !important;
+            transform: none !important;
+            overflow: visible !important;
+        }
+
         body, html {
             overflow-x: hidden !important;
             overflow-y: auto !important;
@@ -2019,7 +2080,9 @@
 
 <body>
 
-
+<!-- AUTO-FIT CANOPY ENGINE WRAPPER -->
+<div class="viewport-canvas-wrapper" id="canvasWrapper">
+<div class="viewport-scaled-content" id="scalableStage">
 
 <audio id="fanfareAudio" src="winner_theme.mp3" preload="auto"></audio>
 
@@ -3694,6 +3757,35 @@ scheduleNextSlide(25000);
         }
     });
 
+    // 8. Auto-Fit Viewport Scaler Engine (for 4K TV, 1080p TV, 720p TV, Small Monitors & Tablets)
+    function applyAutoFitScaling() {
+        const stage = document.getElementById('scalableStage');
+        if (!stage) return;
+
+        // Skip auto-fit transform on mobile phones (<= 768px) so native fluid scrolling works
+        if (window.innerWidth <= 768) {
+            stage.style.transform = 'none';
+            document.documentElement.style.setProperty('--app-scale', '1');
+            return;
+        }
+
+        const designWidth = 1920;
+        const designHeight = 1080;
+
+        const scaleX = window.innerWidth / designWidth;
+        const scaleY = window.innerHeight / designHeight;
+
+        // Maintain strict proportional scale without stretching or clipping
+        const scale = Math.min(scaleX, scaleY);
+        document.documentElement.style.setProperty('--app-scale', scale.toFixed(4));
+        stage.style.transform = `scale(${scale.toFixed(4)})`;
+    }
+
+    window.addEventListener('resize', applyAutoFitScaling);
+    window.addEventListener('orientationchange', () => setTimeout(applyAutoFitScaling, 200));
+    document.addEventListener('DOMContentLoaded', applyAutoFitScaling);
+    setTimeout(applyAutoFitScaling, 50);
+
     // Boot up the Stage Enhancements
     initSmartQrRotator();
     initNextEventCountdown();
@@ -3772,6 +3864,9 @@ scheduleNextSlide(25000);
         </div>
     </div>
 </div>
+
+</div><!-- /viewport-scaled-content -->
+</div><!-- /viewport-canvas-wrapper -->
 
 </body>
 
